@@ -1,0 +1,12 @@
+language: node_js
+
+node_js:
+  - '14'
+
+script:
+  - npm run prettier:check
+  - npm run lint:check
+  - npm run test:coveralls
+
+notifications:
+  email: false

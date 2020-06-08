@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "Extension Activity Monitor",
+  "version": "1.0",
+
+  "description": "Extension Activity Monitor provides more transparency which could help to increase the reliability of abuse reporting and accountability on developers. It is an additional useful tool to aid investigating bugs in the extensions or in the Firefox WebExtensions internals.",
+
+  "author": "Mozilla Add-ons Team",
+  "homepage_url": "https://github.com/mozilla/extension-activity-monitor",
+
+  "permissions": ["activityLog", "management"],
+
+  "icons": {
+    "48": "icons/eam-48.png"
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "browser_action": {
+    "default_title": "EAM Popup",
+    "default_popup": "popup/popup.html"
+  }
+}

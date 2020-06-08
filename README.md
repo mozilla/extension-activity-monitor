@@ -1,3 +1,3 @@
-# Extension Activity Monitor 
+# Extension Activity Monitor
 
 TBD

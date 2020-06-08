@@ -1,0 +1,45 @@
+{
+  "name": "extension-activity-monitor",
+  "version": "1.0.0",
+  "description": "Extension Activity Monitor provides more transparency which could help to increase the reliability of abuse reporting and accountability on developers. It is an additional useful tool to aid investigating bugs in the extensions or in the Firefox WebExtensions internals.",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:coveralls": "jest --coverage && coveralls < coverage/lcov.info",
+    "prettier:fix": "prettier --ignore-path ./.gitignore --write \"./**/*.{html,js,css}\"",
+    "prettier:check": "prettier ./.gitignore --check \"./**/*.{html,js,css}\"",
+    "lint:fix": "eslint --ignore-path ./.gitignore --fix \"./**/*.js\"",
+    "lint:check": "eslint --ignore-path ./.gitignore --quiet \"./**/*.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mozilla/extension-activity-monitor.git"
+  },
+  "keywords": [
+    "activityLog",
+    "activity logs",
+    "extension activity logs",
+    "extension activity monitor",
+    "firefox",
+    "firefox extension activity monitor",
+    "firefox extension monitor",
+    "firefox extension logs",
+    "mozilla"
+  ],
+  "author": "Mozilla Add-ons Team",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/mozilla/extension-activity-monitor/issues"
+  },
+  "homepage": "https://github.com/mozilla/extension-activity-monitor#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.10.2",
+    "babel-jest": "^26.0.1",
+    "coveralls": "^3.1.0",
+    "eslint": "^7.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.21.1",
+    "jest": "^26.0.1",
+    "prettier": "2.0.5"
+  }
+}
