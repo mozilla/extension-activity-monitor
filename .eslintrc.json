@@ -1,6 +1,7 @@
 {
   "extends": ["eslint:recommended", "plugin:import/errors", "prettier"],
   "plugins": ["import"],
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 2019,
     "sourceType": "module"
