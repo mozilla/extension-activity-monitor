@@ -94,7 +94,7 @@ export const extensionMonitor = {
   // activitylog/popup may need it.
   // It will send the current monitoring status
   // of all extensions along with extension id.
-  extsCurrentMonitoringStatus() {
+  currentMonitorExtsWithStatus() {
     const extensions = new Map([]);
     this.extensionMapList.forEach((listener, extensionId) => {
       const status = extensions.set(extensionId, status);
