@@ -1,37 +1,12 @@
+import {
+  getAllExtensions,
+  areExtsBeingMonitored,
+  initMonitorAll,
+  stopMonitorAll,
+  viewActivityLogs,
+} from '../lib/extListen.js';
+
 async function init() {
-  async function getAllExtensions() {
-    const extensions = await browser.management.getAll();
-    return extensions.filter((extension) => extension.type !== 'theme');
-  }
-
-  async function areExtsBeingMonitored() {
-    const { status } = await browser.runtime.sendMessage({
-      getMonitoringStatus: true,
-    });
-    return status || false;
-  }
-
-  async function initializeMonitorAll(extensions) {
-    await browser.runtime.sendMessage({
-      extStartMonitorAll: extensions,
-    });
-    window.close();
-  }
-
-  async function stopMonitorAll() {
-    await browser.runtime.sendMessage({
-      extStopMonitorAll: true,
-    });
-    window.close();
-  }
-
-  async function viewActivityLogs() {
-    browser.tabs.create({
-      url: `${browser.runtime.getURL('../activitylog/activitylog.html')}`,
-    });
-    window.close();
-  }
-
   const extensions = await getAllExtensions();
   const startMonitorAllBtn = document.getElementById('startMonitorBtn');
   const stopMonitorAllBtn = document.getElementById('stopMonitorBtn');
@@ -39,11 +14,11 @@ async function init() {
   const monitorStatusText = document.getElementById('monitorStatus');
 
   startMonitorAllBtn.addEventListener('click', () => {
-    initializeMonitorAll(extensions);
+    initMonitorAll(extensions);
   });
 
   stopMonitorAllBtn.addEventListener('click', () => {
-    stopMonitorAll(extensions);
+    stopMonitorAll();
   });
 
   viewActivityLogBtn.addEventListener('click', () => {

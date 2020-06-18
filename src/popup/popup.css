@@ -1,4 +1,4 @@
-.container button {
+button {
   display: block;
   margin: 10px auto;
   height: 35px;
@@ -10,14 +10,14 @@
   cursor: pointer;
 }
 
-.container button.disabled,
-.container button.disabled:hover {
+button.disabled,
+button.disabled:hover {
   background-color: #dadada;
   color: #747474;
   cursor: default;
 }
 
-.container button:hover {
+button:hover {
   background-color: #000000;
   border: 2px solid #000000;
   color: #ffffff;

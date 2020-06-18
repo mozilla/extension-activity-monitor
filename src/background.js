@@ -1,10 +1,10 @@
-import extMonitor from './lib/extMonitor.js';
+import ExtensionMonitor from './lib/ext-monitor.js';
 
-const extensionMonitor = new extMonitor();
+const extensionMonitor = new ExtensionMonitor();
 
 function messageHandler(message, sender, sendResponse) {
   const {
-    extStartMonitorAll,
+    extStartMonitorAllExts,
     extStopMonitorAll,
     sendAllExistingLogs,
     getMonitoringStatus,
@@ -16,8 +16,8 @@ function messageHandler(message, sender, sendResponse) {
     });
   }
 
-  if (Array.isArray(extStartMonitorAll)) {
-    extensionMonitor.initMonitor(extStartMonitorAll);
+  if (Array.isArray(extStartMonitorAllExts)) {
+    extensionMonitor.initMonitor(extStartMonitorAllExts);
   }
 
   if (extStopMonitorAll) {

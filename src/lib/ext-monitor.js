@@ -1,4 +1,4 @@
-export default class extMonitor {
+export default class ExtensionMonitor {
   logs = [];
   extensionMapList = new Map([]);
 
@@ -25,7 +25,7 @@ export default class extMonitor {
     const listener = (details) => {
       // console.log(details);
       // Everytime a log is encountered,
-      // it is being pushed to activityLogs array.
+      // it is being pushed to logs array.
       this.logs.push(details);
       //it checks if the extension page is open so that it can send log
       this.sendLogs(details);
