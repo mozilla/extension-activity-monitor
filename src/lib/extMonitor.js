@@ -1,15 +1,14 @@
-export const extensionMonitor = {
-  logs: [],
-  extensionMapList: new Map([]),
-  isMonitorRunning: false,
+export default class extMonitor {
+  logs = [];
+  extensionMapList = new Map([]);
 
   async isExtensionPageOpen() {
     const tab = await browser.tabs.query({
-      url: ['moz-extension://*/activitylog/activitylog.html'],
+      url: browser.runtime.getURL('activitylog/activitylog.html'),
     });
     if (tab.length) return true;
     return false;
-  },
+  }
 
   // If the extension page is open, each logs will be send to
   // extension page (as soon as it is encountered), if it is open.
@@ -17,113 +16,69 @@ export const extensionMonitor = {
     const isExtPageOpen = await this.isExtensionPageOpen();
     if (isExtPageOpen) {
       browser.runtime.sendMessage({
-        eam_updateLogs: details,
+        updateLogs: details,
       });
     }
-  },
+  }
 
   logListener() {
-    const detailFunc = (details) => {
-      console.log(details);
+    const listener = (details) => {
+      // console.log(details);
       // Everytime a log is encountered,
       // it is being pushed to activityLogs array.
       this.logs.push(details);
       //it checks if the extension page is open so that it can send log
       this.sendLogs(details);
     };
-    return detailFunc;
-  },
+    return listener;
+  }
 
   setExtensions(extensionsArray) {
     extensionsArray.forEach((extension) => {
-      this.extensionMapList.set(extension.id, this.logListener());
+      this.startMonitor(extension.id);
     });
-    this.startMonitorAll();
-  },
+  }
 
-  startMonitorAll() {
-    this.isMonitorRunning = true;
-    this.extensionMapList.forEach((listener, extensionId) => {
-      browser.activityLog.onExtensionActivity.addListener(
-        listener,
-        extensionId
-      );
-    });
-  },
+  startMonitor(extensionId) {
+    const listener = this.logListener();
+    this.extensionMapList.set(extensionId, listener);
+    browser.activityLog.onExtensionActivity.addListener(listener, extensionId);
+  }
 
-  stopMonitorAll() {
-    this.extensionMapList.forEach((listener, extensionId) => {
-      browser.activityLog.onExtensionActivity.removeListener(
-        listener,
-        extensionId
-      );
-    });
-    this.isMonitorRunning = false;
-  },
-
-  startMonitor(extensionId, listener) {
-    const status = this.hasListener(extensionId, listener);
-    if (!status) {
-      browser.activityLog.onExtensionActivity.addListener(
-        listener,
-        extensionId
-      );
+  stopMonitor(extensionId, handler) {
+    let listener = handler;
+    if (!listener) {
+      listener = this.extensionMapList.get(extensionId);
     }
-  },
-
-  stopMonitor(extensionId, listener) {
-    const status = this.hasListener(extensionId, listener);
-    if (status) {
-      browser.activityLog.onExtensionActivity.removeListener(
-        listener,
-        extensionId
-      );
-    }
-  },
-
-  // On the go modifying an extension's monitoring status
-  modifyMonitor(extensionId, modify) {
-    const listener = this.extensionMapList.get(extensionId);
-    if (modify === 0) {
-      this.startMonitor(extensionId, listener);
-    } else if (modify === 1) {
-      this.stopMonitor(extensionId, listener);
-    }
-  },
-
-  // activitylog/popup may need it.
-  // It will send the current monitoring status
-  // of all extensions along with extension id.
-  currentMonitorExtsWithStatus() {
-    const extensions = new Map([]);
-    this.extensionMapList.forEach((listener, extensionId) => {
-      const status = extensions.set(extensionId, status);
-    });
-    return extensions;
-  },
-
-  initMonitor(extenssions) {
-    if (!this.isMonitorRunning) {
-      this.setExtensions(extenssions);
-    }
-  },
-
-  areExtsBeingMonitored() {
-    this.isMonitorRunning = false;
-    for (const [extensionId, listener] of this.extensionMapList) {
-      const status = this.hasListener(extensionId, listener);
-      if (status) {
-        this.isMonitorRunning = true;
-        break;
-      }
-    }
-    return this.isMonitorRunning;
-  },
-
-  hasListener(extensionId, listener) {
-    return browser.activityLog.onExtensionActivity.hasListener(
+    browser.activityLog.onExtensionActivity.removeListener(
       listener,
       extensionId
     );
-  },
-};
+    this.extensionMapList.delete(extensionId);
+  }
+
+  stopMonitorAll() {
+    this.extensionMapList.forEach((listener, extensionId) => {
+      this.stopMonitor(extensionId, listener);
+    });
+  }
+
+  // On the go modifying an extension's monitoring status
+  modifyMonitor(extensionId, isMonitor) {
+    isMonitor ? this.startMonitor(extensionId) : this.stopMonitor(extensionId);
+  }
+
+  getCurrentMonitoredExts() {
+    return this.extensionMapList;
+  }
+
+  areExtsBeingMonitored() {
+    return this.extensionMapList.size > 0 ? true : false;
+  }
+
+  initMonitor(extenssions) {
+    if (!this.areExtsBeingMonitored()) {
+      this.setExtensions(extenssions);
+    }
+  }
+}

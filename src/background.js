@@ -1,4 +1,6 @@
-import { extensionMonitor } from './lib/extMonitor.js';
+import extMonitor from './lib/extMonitor.js';
+
+const extensionMonitor = new extMonitor();
 
 function messageHandler(message, sender, sendResponse) {
   const {
