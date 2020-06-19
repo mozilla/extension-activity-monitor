@@ -4,11 +4,10 @@ describe('initialize extension monitoring', () => {
   test('while no extensions being monitoring', async () => {
     const extensions = [{ id: '1' }, { id: '2' }];
     const addListener = jest.fn();
-    const removeListener = jest.fn();
 
     window.browser = {
       activityLog: {
-        onExtensionActivity: { addListener, removeListener },
+        onExtensionActivity: { addListener },
       },
     };
 
@@ -66,13 +65,14 @@ test('stop monitoring all extensions', async () => {
     },
   };
 
+  const listeners = [];
+  addListener.mockImplementation((callback) => {
+    listeners.push(callback);
+  });
+
   const extMonitor = new ExtensionMonitor();
   const initMonitor = extMonitor.initMonitor(extensions);
   await expect(initMonitor).resolves.toBe('ext-monitor-started');
-
-  const listeners = [];
-  listeners.push(extMonitor.extensionMapList.get('1'));
-  listeners.push(extMonitor.extensionMapList.get('2'));
 
   const stopMonitor = extMonitor.stopMonitorAll();
   await expect(stopMonitor).resolves.toBe('ext-monitor-stopped');
@@ -154,6 +154,7 @@ describe('modify monitoring status of an extension on the go', () => {
 
     expect(startMonitorFn).toHaveBeenCalledTimes(2);
     expect(addListener).toHaveBeenCalledTimes(1);
+    expect(extMonitor.extensionMapList.size).toBe(1);
   });
 
   test('remove extension from monitoring', () => {
@@ -180,5 +181,6 @@ describe('modify monitoring status of an extension on the go', () => {
 
     expect(stopMonitorFn).toHaveBeenCalledTimes(2);
     expect(removeListener).toHaveBeenCalledTimes(1);
+    expect(extMonitor.extensionMapList.size).toBe(0);
   });
 });
