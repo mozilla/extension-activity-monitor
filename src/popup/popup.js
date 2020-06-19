@@ -4,7 +4,7 @@ import {
   initMonitorAll,
   stopMonitorAll,
   viewActivityLogs,
-} from '../lib/extListen.js';
+} from '../lib/ext-listen.js';
 
 async function init() {
   const extensions = await getAllExtensions();
