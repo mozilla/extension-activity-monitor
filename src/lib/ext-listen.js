@@ -7,7 +7,7 @@ export async function areExtsBeingMonitored() {
   const { status } = await browser.runtime.sendMessage({
     getMonitoringStatus: true,
   });
-  return status || false;
+  return status;
 }
 
 export async function initMonitorAll(extensions) {
