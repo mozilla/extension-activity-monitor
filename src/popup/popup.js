@@ -47,7 +47,7 @@ async function init() {
 
     stopMonitorAllBtn.removeAttribute('disabled');
   } else {
-    monitorStatusText.textContent = 'No extensions being monitored';
+    monitorStatusText.textContent = 'No extensions are being monitored';
     monitorStatusText.classList.add('red');
 
     stopMonitorAllBtn.classList.add('disabled');
