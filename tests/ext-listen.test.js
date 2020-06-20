@@ -39,11 +39,16 @@ test('if extensions are being monitored', async () => {
   });
 
   const areExtsBeingMntrPromise = ExtListen.areExtsBeingMonitored();
-  await expect(areExtsBeingMntrPromise).resolves.toBe(true);
+  await expect(areExtsBeingMntrPromise).resolves.toBeTruthy();
+
+  expect(sendMessage.mock.calls[0][0]).toMatchObject({
+    getMonitoringStatus: true,
+  });
   expect(sendMessage).toHaveBeenCalledTimes(1);
 });
 
 test('initialize monitoring and stop monitoring all extensions', async () => {
+  const extensions = [{ id: '1' }];
   const sendMessage = jest.fn();
 
   window.browser = {
@@ -56,11 +61,17 @@ test('initialize monitoring and stop monitoring all extensions', async () => {
     });
   });
 
-  await ExtListen.initMonitorAll();
+  await ExtListen.initMonitorAll(extensions);
   expect(sendMessage).toHaveBeenCalledTimes(1);
+  expect(sendMessage.mock.calls[0][0]).toMatchObject({
+    extStartMonitorAllExts: extensions,
+  });
 
   await ExtListen.stopMonitorAll();
   expect(sendMessage).toHaveBeenCalledTimes(2);
+  expect(sendMessage.mock.calls[1][0]).toMatchObject({
+    extStopMonitorAll: true,
+  });
 });
 
 test('intialize the extension page', async () => {
@@ -69,9 +80,7 @@ test('intialize the extension page', async () => {
 
   window.browser = {
     runtime: { getURL },
-    tabs: {
-      create,
-    },
+    tabs: { create },
   };
 
   ExtListen.viewActivityLogs();

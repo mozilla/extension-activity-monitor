@@ -11,6 +11,11 @@ describe('initialize extension monitoring', () => {
       },
     };
 
+    const listeners = [];
+    addListener.mockImplementation((callback) => {
+      listeners.push(callback);
+    });
+
     const extMonitor = new ExtensionMonitor();
     const startMonitorFn = jest.spyOn(extMonitor, 'startMonitor');
     const setExtensionsFn = jest.spyOn(extMonitor, 'setExtensions');
@@ -29,8 +34,8 @@ describe('initialize extension monitoring', () => {
 
     expect(addListener).toHaveBeenCalledTimes(extensions.length);
     expect(addListener.mock.calls).toMatchObject([
-      [extMonitor.extensionMapList.get('1'), '1'],
-      [extMonitor.extensionMapList.get('2'), '2'],
+      [listeners[0], '1'],
+      [listeners[1], '2'],
     ]);
   });
 
@@ -87,20 +92,15 @@ test('stop monitoring all extensions', async () => {
   expect(extMonitor.areExtsBeingMonitored()).toBeFalsy();
 });
 
-test('send logs to extension page if it is opened', async () => {
+test('send logs to extension page if it is opened and storing logs in background', async () => {
   const log = { log: '1' };
   const getURL = jest.fn();
   const sendMessage = jest.fn().mockResolvedValue();
   const query = jest.fn();
 
   window.browser = {
-    runtime: {
-      getURL,
-      sendMessage,
-    },
-    tabs: {
-      query,
-    },
+    runtime: { getURL, sendMessage },
+    tabs: { query },
   };
 
   const extMonitor = new ExtensionMonitor();
