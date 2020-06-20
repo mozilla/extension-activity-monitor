@@ -17,11 +17,13 @@ function messageHandler(message, sender, sendResponse) {
   }
 
   if (Array.isArray(extStartMonitorAllExts)) {
-    extensionMonitor.initMonitor(extStartMonitorAllExts);
+    return extensionMonitor
+      .initMonitor(extStartMonitorAllExts)
+      .then((monitorMsg) => monitorMsg);
   }
 
   if (extStopMonitorAll) {
-    extensionMonitor.stopMonitorAll();
+    return extensionMonitor.stopMonitorAll().then((monitorMsg) => monitorMsg);
   }
 
   // This is send all existing logs to activitylogs page

@@ -13,16 +13,27 @@ async function init() {
   const viewActivityLogBtn = document.getElementById('actLogPage');
   const monitorStatusText = document.getElementById('monitorStatus');
 
-  startMonitorAllBtn.addEventListener('click', () => {
-    initMonitorAll(extensions);
+  startMonitorAllBtn.addEventListener('click', async () => {
+    const monitorMsg = await initMonitorAll(extensions);
+    if (monitorMsg === 'ext-monitor-started') {
+      window.close();
+    } else {
+      alert("Extension monitoring couldn't be started");
+    }
   });
 
-  stopMonitorAllBtn.addEventListener('click', () => {
-    stopMonitorAll();
+  stopMonitorAllBtn.addEventListener('click', async () => {
+    const monitorMsg = await stopMonitorAll();
+    if (monitorMsg === 'ext-monitor-stopped') {
+      window.close();
+    } else {
+      alert("Extension monitoring couldn't be stopped");
+    }
   });
 
   viewActivityLogBtn.addEventListener('click', () => {
     viewActivityLogs();
+    window.close();
   });
 
   const status = await areExtsBeingMonitored();

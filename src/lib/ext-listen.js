@@ -11,22 +11,19 @@ export async function areExtsBeingMonitored() {
 }
 
 export async function initMonitorAll(extensions) {
-  await browser.runtime.sendMessage({
+  return await browser.runtime.sendMessage({
     extStartMonitorAllExts: extensions,
   });
-  window.close();
 }
 
 export async function stopMonitorAll() {
-  await browser.runtime.sendMessage({
+  return await browser.runtime.sendMessage({
     extStopMonitorAll: true,
   });
-  window.close();
 }
 
-export async function viewActivityLogs() {
+export function viewActivityLogs() {
   browser.tabs.create({
     url: `${browser.runtime.getURL('../activitylog/activitylog.html')}`,
   });
-  window.close();
 }
