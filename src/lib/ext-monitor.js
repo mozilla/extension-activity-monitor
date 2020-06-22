@@ -1,10 +1,13 @@
+import { extPageURL, getAllExtensions } from './ext-listen.js';
+
 export default class ExtensionMonitor {
   logs = [];
+  // Map<string, Function>
   extensionMapList = new Map([]);
 
   async isExtensionPageOpen() {
     const tab = await browser.tabs.query({
-      url: browser.runtime.getURL('activitylog/activitylog.html'),
+      url: extPageURL(),
     });
     if (tab.length) return true;
     return false;
@@ -38,18 +41,18 @@ export default class ExtensionMonitor {
     return Promise.resolve('ext-monitor-started');
   }
 
-  startMonitor(extensionId) {
+  async startMonitor(extensionId) {
     if (this.extensionMapList.has(extensionId)) {
-      return;
+      throw new Error('Extension is already being monitored');
     }
     const listener = this.logListener();
     this.extensionMapList.set(extensionId, listener);
     browser.activityLog.onExtensionActivity.addListener(listener, extensionId);
   }
 
-  stopMonitor(extensionId, handler) {
+  async stopMonitor(extensionId, handler) {
     if (!this.extensionMapList.has(extensionId)) {
-      return;
+      throw new Error('Extension is not being monitored');
     }
     let listener = handler;
     if (!listener) {
@@ -71,7 +74,9 @@ export default class ExtensionMonitor {
 
   // On the go modifying an extension's monitoring status
   modifyMonitor(extensionId, isMonitor) {
-    isMonitor ? this.startMonitor(extensionId) : this.stopMonitor(extensionId);
+    return isMonitor
+      ? this.startMonitor(extensionId)
+      : this.stopMonitor(extensionId);
   }
 
   getCurrentMonitoredExts() {
@@ -79,13 +84,43 @@ export default class ExtensionMonitor {
   }
 
   areExtsBeingMonitored() {
-    return this.extensionMapList.size > 0 ? true : false;
+    return this.extensionMapList.size > 0;
   }
 
-  initMonitor(extensions) {
+  async initMonitorAll() {
     if (!this.areExtsBeingMonitored()) {
+      const extensions = await getAllExtensions();
       return this.setExtensions(extensions);
     }
-    return Promise.reject(new Error('ext-monitor-init-failed'));
+    throw new Error('EAM is already running');
+  }
+
+  messageHandlers = {
+    getMonitorStatus: () => {
+      return Promise.resolve({
+        status: this.areExtsBeingMonitored(),
+      });
+    },
+    startMonitorAllExts: () => {
+      return this.initMonitorAll();
+    },
+    stopMonitorAllExts: async () => {
+      return this.stopMonitorAll();
+    },
+    sendAllExistingLogs: () => Promise.resolve({ existingLogs: this.logs }),
+    default: async () => {
+      throw new Error('unexpected message');
+    },
+  };
+
+  messageListener = (message) => {
+    const { requestType } = message;
+    return this.messageHandlers[
+      requestType in this.messageHandlers ? requestType : 'default'
+    ]();
+  };
+
+  async init() {
+    browser.runtime.onMessage.addListener(this.messageListener);
   }
 }

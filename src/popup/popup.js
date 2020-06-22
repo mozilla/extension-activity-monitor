@@ -1,60 +1,85 @@
 import {
-  getAllExtensions,
   areExtsBeingMonitored,
   initMonitorAll,
   stopMonitorAll,
   viewActivityLogs,
 } from '../lib/ext-listen.js';
 
+let monitorStatusText,
+  startMonitorAllBtn,
+  stopMonitorAllBtn,
+  viewActivityLogBtn,
+  errorMsgText;
+
+function renderErrorMsg(message) {
+  errorMsgText.textContent = message;
+  errorMsgText.style.display = 'block';
+}
+
+function renderMonitorStartedUI() {
+  startMonitorAllBtn.setAttribute('disabled', 'disabled');
+  startMonitorAllBtn.classList.add('disabled');
+  stopMonitorAllBtn.removeAttribute('disabled');
+  stopMonitorAllBtn.classList.remove('disabled');
+
+  monitorStatusText.textContent = 'Extensions are being monitored';
+  monitorStatusText.classList.add('green');
+  monitorStatusText.classList.remove('red');
+}
+
+function renderMonitorStoppedUI() {
+  stopMonitorAllBtn.setAttribute('disabled', 'disabled');
+  stopMonitorAllBtn.classList.add('disabled');
+  startMonitorAllBtn.removeAttribute('disabled');
+  startMonitorAllBtn.classList.remove('disabled');
+
+  monitorStatusText.textContent = 'No extensions are being monitored';
+  monitorStatusText.classList.add('red');
+  monitorStatusText.classList.remove('green');
+}
+
+async function renderPopup() {
+  const status = await areExtsBeingMonitored();
+  status ? renderMonitorStartedUI() : renderMonitorStoppedUI();
+}
+
 async function init() {
-  const extensions = await getAllExtensions();
-  const startMonitorAllBtn = document.getElementById('startMonitorBtn');
-  const stopMonitorAllBtn = document.getElementById('stopMonitorBtn');
-  const viewActivityLogBtn = document.getElementById('actLogPage');
-  const monitorStatusText = document.getElementById('monitorStatus');
+  startMonitorAllBtn = document.getElementById('startMonitorBtn');
+  stopMonitorAllBtn = document.getElementById('stopMonitorBtn');
+  viewActivityLogBtn = document.getElementById('actLogPage');
+  monitorStatusText = document.getElementById('monitorStatus');
+  errorMsgText = document.getElementById('errorText');
+
+  renderPopup();
 
   startMonitorAllBtn.addEventListener('click', async () => {
-    const monitorMsg = await initMonitorAll(extensions);
-    if (monitorMsg === 'ext-monitor-started') {
-      window.close();
-    } else {
-      alert("Extension monitoring couldn't be started");
-    }
+    initMonitorAll()
+      .then((monitorMsg) => {
+        if (monitorMsg === 'ext-monitor-started') {
+          renderPopup();
+        }
+      })
+      .catch((error) => {
+        renderErrorMsg(error?.message);
+      });
   });
 
   stopMonitorAllBtn.addEventListener('click', async () => {
-    const monitorMsg = await stopMonitorAll();
-    if (monitorMsg === 'ext-monitor-stopped') {
-      window.close();
-    } else {
-      alert("Extension monitoring couldn't be stopped");
-    }
+    stopMonitorAll()
+      .then((monitorMsg) => {
+        if (monitorMsg === 'ext-monitor-stopped') {
+          renderPopup();
+        }
+      })
+      .catch((error) => {
+        renderErrorMsg(error?.message);
+      });
   });
 
   viewActivityLogBtn.addEventListener('click', () => {
     viewActivityLogs();
     window.close();
   });
-
-  const status = await areExtsBeingMonitored();
-
-  if (status) {
-    monitorStatusText.textContent = 'Extensions are being monitored';
-    monitorStatusText.classList.add('green');
-
-    startMonitorAllBtn.classList.add('disabled');
-    startMonitorAllBtn.setAttribute('disabled', 'disabled');
-
-    stopMonitorAllBtn.removeAttribute('disabled');
-  } else {
-    monitorStatusText.textContent = 'No extensions are being monitored';
-    monitorStatusText.classList.add('red');
-
-    stopMonitorAllBtn.classList.add('disabled');
-    stopMonitorAllBtn.setAttribute('disabled', 'disabled');
-
-    startMonitorAllBtn.removeAttribute('disabled');
-  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
