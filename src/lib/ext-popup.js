@@ -2,7 +2,7 @@ import {
   areExtsBeingMonitored,
   startMonitorAll,
   stopMonitorAll,
-  viewActivityLogs,
+  viewExtPage,
 } from '../lib/ext-listen.js';
 
 export default class Popup {
@@ -43,13 +43,15 @@ export default class Popup {
 
   async render() {
     const isMonitorStarted = await areExtsBeingMonitored();
-    isMonitorStarted
-      ? this.renderMonitorStartedUI()
-      : this.renderMonitorStoppedUI();
+    if (isMonitorStarted) {
+      this.renderMonitorStartedUI();
+    } else {
+      this.renderMonitorStoppedUI();
+    }
   }
 
-  viewExtPage() {
-    viewActivityLogs();
+  viewExtPagePopup() {
+    viewExtPage();
     window.close();
   }
 
@@ -63,11 +65,13 @@ export default class Popup {
           await this.stopMonitor();
           break;
         case 'actLogPage':
-          this.viewExtPage();
+          this.viewExtPagePopup();
           break;
         default:
-          break;
+          throw new Error('wrong target id found');
       }
+    } else {
+      throw new Error('wrong event found');
     }
   }
 
@@ -75,7 +79,9 @@ export default class Popup {
     try {
       const monitorMsg = await startMonitorAll();
       if (monitorMsg === 'ext-monitor-started') {
-        this.render();
+        await this.render();
+      } else {
+        throw new Error("Monitoring couldn't be started");
       }
     } catch (error) {
       this.renderErrorMsg(error?.message);
@@ -86,7 +92,9 @@ export default class Popup {
     try {
       const monitorMsg = await stopMonitorAll();
       if (monitorMsg === 'ext-monitor-stopped') {
-        this.render();
+        await this.render();
+      } else {
+        throw new Error("Monitoring couldn't be stopped");
       }
     } catch (error) {
       this.renderErrorMsg(error?.message);

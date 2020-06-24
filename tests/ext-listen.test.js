@@ -94,7 +94,7 @@ test('intialize the extension page', async () => {
     tabs: { create },
   };
 
-  ExtListen.viewActivityLogs();
+  ExtListen.viewExtPage();
   expect(create).toHaveBeenCalledTimes(1);
   expect(getURL).toHaveBeenCalledTimes(1);
 });

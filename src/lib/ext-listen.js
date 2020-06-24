@@ -29,7 +29,7 @@ export async function stopMonitorAll() {
   });
 }
 
-export function viewActivityLogs() {
+export function viewExtPage() {
   browser.tabs.create({
     url: extPageURL(),
   });
