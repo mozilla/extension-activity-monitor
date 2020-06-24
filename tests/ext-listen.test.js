@@ -72,7 +72,7 @@ test('initialize monitoring and stop monitoring all extensions', async () => {
     });
   });
 
-  await ExtListen.initMonitorAll();
+  await ExtListen.startMonitorAll();
   expect(sendMessage).toHaveBeenCalledTimes(1);
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'startMonitorAllExts',

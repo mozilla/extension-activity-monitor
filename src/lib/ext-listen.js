@@ -17,7 +17,7 @@ export async function areExtsBeingMonitored() {
   return status;
 }
 
-export async function initMonitorAll() {
+export async function startMonitorAll() {
   return await browser.runtime.sendMessage({
     requestType: 'startMonitorAllExts',
   });
