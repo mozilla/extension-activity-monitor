@@ -1,24 +1,33 @@
-import { getActivityLogPageURL, getAllExtensions } from './ext-listen.js';
+import { getActivityLogPageURL } from './ext-listen.js';
 
 export default class ExtensionMonitor {
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
 
-  async isExtensionPageOpen() {
+  async getAllExtensions() {
+    const extensions = await browser.management.getAll();
+    const self = await browser.management.getSelf();
+    return extensions.filter((extension) => {
+      return extension.type === 'extension' && extension.id !== self.id;
+    });
+  }
+
+  async isActivityLogPageOpen() {
     const tab = await browser.tabs.query({
       url: getActivityLogPageURL(),
     });
     return tab.length > 0;
   }
-  // If the extension page is open, each logs will be send to
-  // extension page (as soon as it is encountered), if it is open.
+
+  // If the Activity Log page is open, each logs will be send to
+  // Activity Log page (as soon as it is encountered).
   async sendLogs(details) {
-    const isExtPageOpen = await this.isExtensionPageOpen();
+    const isExtPageOpen = await this.isActivityLogPageOpen();
     if (isExtPageOpen) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
-        logs: details,
+        log: details,
       });
     }
   }
@@ -26,7 +35,6 @@ export default class ExtensionMonitor {
   createLogListener() {
     return async (details) => {
       this.logs.push(details);
-      //it checks if the extension page is open so that it can send log
       await this.sendLogs(details);
     };
   }
@@ -37,7 +45,7 @@ export default class ExtensionMonitor {
 
   async startMonitor() {
     if (!this.hasActivityListeners()) {
-      const extensions = await getAllExtensions();
+      const extensions = await this.getAllExtensions();
       return new Promise((resolve) => {
         extensions.forEach((extension) => {
           const listener = this.createLogListener();
@@ -69,9 +77,9 @@ export default class ExtensionMonitor {
 
   messageHandlers = {
     getMonitorStatus: () => {
-      return Promise.resolve({
+      return {
         active: this.hasActivityListeners(),
-      });
+      };
     },
     startMonitor: () => {
       return this.startMonitor();
@@ -80,13 +88,13 @@ export default class ExtensionMonitor {
       return this.stopMonitor();
     },
     sendAllLogs: () => {
-      return Promise.resolve({
+      return {
         existingLogs: this.logs,
-      });
+      };
     },
   };
 
-  messageListener = (message) => {
+  messageListener = async (message) => {
     const { requestType } = message;
 
     if (requestType in this.messageHandlers) {

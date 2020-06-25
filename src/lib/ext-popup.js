@@ -9,7 +9,7 @@ export default class Popup {
   constructor() {
     this.startMonitorAllBtn = document.getElementById('startMonitorBtn');
     this.stopMonitorAllBtn = document.getElementById('stopMonitorBtn');
-    this.viewActivityLogBtn = document.getElementById('actLogPage');
+    this.openActivityLogBtn = document.getElementById('actLogPage');
     this.monitorStatusText = document.getElementById('monitorStatus');
     this.errorMsgText = document.getElementById('errorText');
   }
@@ -29,8 +29,8 @@ export default class Popup {
   }
 
   renderMonitorStoppedUI() {
-    this.stopMonitorAllBtn.setAttribute('disabled', 'disabled');
     this.startMonitorAllBtn.removeAttribute('disabled');
+    this.stopMonitorAllBtn.setAttribute('disabled', 'disabled');
 
     this.monitorStatusText.textContent = 'No extensions are being monitored';
     this.monitorStatusText.classList.add('failure');
@@ -39,14 +39,12 @@ export default class Popup {
 
   async render() {
     const isMonitorStarted = await getMonitorStatus();
-    if (isMonitorStarted) {
-      this.renderMonitorStartedUI();
-    } else {
-      this.renderMonitorStoppedUI();
-    }
+    isMonitorStarted
+      ? this.renderMonitorStartedUI()
+      : this.renderMonitorStoppedUI();
   }
 
-  viewExtPagePopup() {
+  handleViewActivityLog() {
     openActivityLogPage();
     window.close();
   }
@@ -55,13 +53,13 @@ export default class Popup {
     if (event.type === 'click') {
       switch (event.target) {
         case this.startMonitorAllBtn:
-          this.startMonitor();
+          await this.handleStartMonitor();
           break;
         case this.stopMonitorAllBtn:
-          await this.stopMonitor();
+          await this.handleStopMonitor();
           break;
-        case this.viewActivityLogBtn:
-          this.viewExtPagePopup();
+        case this.openActivityLogBtn:
+          this.handleViewActivityLog();
           break;
         default:
           throw new Error('wrong event target found ' + event.target);
@@ -71,7 +69,7 @@ export default class Popup {
     }
   }
 
-  async startMonitor() {
+  async handleStartMonitor() {
     try {
       const monitorMsg = await startMonitor();
       if (monitorMsg) {
@@ -84,7 +82,7 @@ export default class Popup {
     }
   }
 
-  async stopMonitor() {
+  async handleStopMonitor() {
     try {
       const monitorMsg = await stopMonitor();
       if (monitorMsg) {
@@ -102,6 +100,6 @@ export default class Popup {
 
     this.startMonitorAllBtn.addEventListener('click', this);
     this.stopMonitorAllBtn.addEventListener('click', this);
-    this.viewActivityLogBtn.addEventListener('click', this);
+    this.openActivityLogBtn.addEventListener('click', this);
   }
 }
