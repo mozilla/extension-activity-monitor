@@ -46,12 +46,12 @@ test('if extensions are being monitored', async () => {
 
   sendMessage.mockImplementation(() => {
     return new Promise((resolve) => {
-      resolve({ status: true });
+      resolve({ active: true });
     });
   });
 
-  const areExtsBeingMntrPromise = ExtListen.areExtsBeingMonitored();
-  await expect(areExtsBeingMntrPromise).resolves.toBeTruthy();
+  const getMonitorStatusFn = ExtListen.getMonitorStatus();
+  await expect(getMonitorStatusFn).resolves.toBeTruthy();
 
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'getMonitorStatus',
@@ -72,16 +72,16 @@ test('start monitoring and stop monitoring all extensions', async () => {
     });
   });
 
-  await ExtListen.startMonitorAll();
+  await ExtListen.startMonitor();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
-    requestType: 'startMonitorAllExts',
+    requestType: 'startMonitor',
   });
 
   sendMessage.mockClear();
 
-  await ExtListen.stopMonitorAll();
+  await ExtListen.stopMonitor();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
-    requestType: 'stopMonitorAllExts',
+    requestType: 'stopMonitor',
   });
 });
 
@@ -94,7 +94,7 @@ test('intialize the extension page', async () => {
     tabs: { create },
   };
 
-  ExtListen.viewExtPage();
+  ExtListen.openActivityLogPage();
   expect(create).toHaveBeenCalled();
   expect(getURL).toHaveBeenCalled();
 });

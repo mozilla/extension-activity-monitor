@@ -1,36 +1,36 @@
-export function extPageURL() {
+export function getActivityLogPageURL() {
   return browser.runtime.getURL('/activitylog/activitylog.html');
 }
 
 export async function getAllExtensions() {
   const extensions = await browser.management.getAll();
-  const eam = await browser.management.getSelf();
+  const self = await browser.management.getSelf();
   return extensions.filter((extension) => {
-    return extension.type === 'extension' && extension.id !== eam.id;
+    return extension.type === 'extension' && extension.id !== self.id;
   });
 }
 
-export async function areExtsBeingMonitored() {
-  const { status } = await browser.runtime.sendMessage({
+export async function getMonitorStatus() {
+  const { active } = await browser.runtime.sendMessage({
     requestType: 'getMonitorStatus',
   });
-  return status;
+  return active;
 }
 
-export async function startMonitorAll() {
+export async function startMonitor() {
   return await browser.runtime.sendMessage({
-    requestType: 'startMonitorAllExts',
+    requestType: 'startMonitor',
   });
 }
 
-export async function stopMonitorAll() {
+export async function stopMonitor() {
   return await browser.runtime.sendMessage({
-    requestType: 'stopMonitorAllExts',
+    requestType: 'stopMonitor',
   });
 }
 
-export function viewExtPage() {
+export function openActivityLogPage() {
   browser.tabs.create({
-    url: extPageURL(),
+    url: getActivityLogPageURL(),
   });
 }

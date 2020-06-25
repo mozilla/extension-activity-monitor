@@ -1,8 +1,8 @@
 import {
-  areExtsBeingMonitored,
-  startMonitorAll,
-  stopMonitorAll,
-  viewExtPage,
+  getMonitorStatus,
+  startMonitor,
+  stopMonitor,
+  openActivityLogPage,
 } from '../lib/ext-listen.js';
 
 export default class Popup {
@@ -21,28 +21,24 @@ export default class Popup {
 
   renderMonitorStartedUI() {
     this.startMonitorAllBtn.setAttribute('disabled', 'disabled');
-    this.startMonitorAllBtn.classList.add('disabled');
     this.stopMonitorAllBtn.removeAttribute('disabled');
-    this.stopMonitorAllBtn.classList.remove('disabled');
 
     this.monitorStatusText.textContent = 'Extensions are being monitored';
-    this.monitorStatusText.classList.add('green');
-    this.monitorStatusText.classList.remove('red');
+    this.monitorStatusText.classList.add('success');
+    this.monitorStatusText.classList.remove('failure');
   }
 
   renderMonitorStoppedUI() {
     this.stopMonitorAllBtn.setAttribute('disabled', 'disabled');
-    this.stopMonitorAllBtn.classList.add('disabled');
     this.startMonitorAllBtn.removeAttribute('disabled');
-    this.startMonitorAllBtn.classList.remove('disabled');
 
     this.monitorStatusText.textContent = 'No extensions are being monitored';
-    this.monitorStatusText.classList.add('red');
-    this.monitorStatusText.classList.remove('green');
+    this.monitorStatusText.classList.add('failure');
+    this.monitorStatusText.classList.remove('success');
   }
 
   async render() {
-    const isMonitorStarted = await areExtsBeingMonitored();
+    const isMonitorStarted = await getMonitorStatus();
     if (isMonitorStarted) {
       this.renderMonitorStartedUI();
     } else {
@@ -51,53 +47,53 @@ export default class Popup {
   }
 
   viewExtPagePopup() {
-    viewExtPage();
+    openActivityLogPage();
     window.close();
   }
 
   async handleEvent(event) {
     if (event.type === 'click') {
-      switch (event.target.id) {
-        case 'startMonitorBtn':
-          await this.startMonitor();
+      switch (event.target) {
+        case this.startMonitorAllBtn:
+          this.startMonitor();
           break;
-        case 'stopMonitorBtn':
+        case this.stopMonitorAllBtn:
           await this.stopMonitor();
           break;
-        case 'actLogPage':
+        case this.viewActivityLogBtn:
           this.viewExtPagePopup();
           break;
         default:
-          throw new Error('wrong target id found');
+          throw new Error('wrong event target found ' + event.target);
       }
     } else {
-      throw new Error('wrong event found');
+      throw new Error('wrong event type found ' + event.type);
     }
   }
 
   async startMonitor() {
     try {
-      const monitorMsg = await startMonitorAll();
-      if (monitorMsg === 'ext-monitor-started') {
-        await this.render();
+      const monitorMsg = await startMonitor();
+      if (monitorMsg) {
+        this.render();
       } else {
         throw new Error("Monitoring couldn't be started");
       }
     } catch (error) {
-      this.renderErrorMsg(error?.message);
+      this.renderErrorMsg(error.message);
     }
   }
 
   async stopMonitor() {
     try {
-      const monitorMsg = await stopMonitorAll();
-      if (monitorMsg === 'ext-monitor-stopped') {
-        await this.render();
+      const monitorMsg = await stopMonitor();
+      if (monitorMsg) {
+        this.render();
       } else {
         throw new Error("Monitoring couldn't be stopped");
       }
     } catch (error) {
-      this.renderErrorMsg(error?.message);
+      this.renderErrorMsg(error.message);
     }
   }
 

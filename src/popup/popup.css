@@ -15,8 +15,8 @@ button {
   cursor: pointer;
 }
 
-button.disabled,
-button.disabled:hover {
+button:disabled,
+button:disabled:hover {
   background-color: #dadada;
   color: #747474;
   cursor: default;
@@ -39,12 +39,12 @@ button:hover {
   display: none;
 }
 
-p.green {
+.success {
   background-color: #35a83b;
   color: #ffffff;
 }
 
-p.red,
+.failure,
 #errorText {
   background-color: #a52c2c;
   color: #ffffff;
