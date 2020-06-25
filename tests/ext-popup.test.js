@@ -29,7 +29,6 @@ test('start monitoring all extensions from the popup', async () => {
     ExtListen,
     'areExtsBeingMonitored'
   );
-
   const startMonitorAllFn = jest.spyOn(ExtListen, 'startMonitorAll');
 
   const popup = new Popup();
@@ -47,11 +46,11 @@ test('start monitoring all extensions from the popup', async () => {
   await popup.init();
 
   // popup at initial - no extensions being watched
-  expect(stopBtn.classList.contains('disabled')).toBeTruthy();
-  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
-
   expect(startBtn.classList.contains('disabled')).toBeFalsy();
   expect(startBtn.getAttribute('disabled')).toBeNull();
+
+  expect(stopBtn.classList.contains('disabled')).toBeTruthy();
+  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
 
   expect(monitorStatus.textContent).toBe('No extensions are being monitored');
   expect(monitorStatus.classList.contains('red')).toBeTruthy();
@@ -59,9 +58,7 @@ test('start monitoring all extensions from the popup', async () => {
   expect(errorText.textContent).toBe('');
 
   const promiseElementChanged = observeChange(monitorStatus);
-
   startBtn.click();
-
   await promiseElementChanged;
 
   expect(startBtn.classList.contains('disabled')).toBeTruthy();
@@ -87,7 +84,6 @@ test('stop monitoring all the extensions from popup', async () => {
     ExtListen,
     'areExtsBeingMonitored'
   );
-
   const stopMonitorAllBtnFn = jest.spyOn(ExtListen, 'stopMonitorAll');
 
   const popup = new Popup();
@@ -117,9 +113,7 @@ test('stop monitoring all the extensions from popup', async () => {
   expect(errorText.textContent).toBe('');
 
   const promiseElementChanged = observeChange(monitorStatus);
-
   stopBtn.click();
-
   await promiseElementChanged;
 
   expect(stopBtn.classList.contains('disabled')).toBeTruthy();
@@ -132,6 +126,8 @@ test('stop monitoring all the extensions from popup', async () => {
   expect(monitorStatus.classList.contains('red')).toBeTruthy();
   expect(monitorStatus.classList.contains('green')).toBeFalsy();
   expect(errorText.textContent).toBe('');
+
+  areExtsBeingMonitoredFn.mockClear();
 });
 
 test('errors on start/stopping monitoring should be shown in the popup UI', async () => {
@@ -141,7 +137,6 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
     ExtListen,
     'areExtsBeingMonitored'
   );
-
   const startMonitorAllFn = jest.spyOn(ExtListen, 'startMonitorAll');
   const stopMonitorAllFn = jest.spyOn(ExtListen, 'stopMonitorAll');
 
@@ -156,43 +151,13 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
 
   areExtsBeingMonitoredFn.mockResolvedValueOnce(false);
   areExtsBeingMonitoredFn.mockResolvedValueOnce(true);
-
-  startMonitorAllFn.mockImplementationOnce(() => {
-    throw new Error('start-monitor-error');
-  });
-
-  await popup.init();
-
-  expect(stopBtn.classList.contains('disabled')).toBeTruthy();
-  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
-
-  expect(startBtn.classList.contains('disabled')).toBeFalsy();
-  expect(startBtn.getAttribute('disabled')).toBeNull();
-
-  expect(monitorStatus.textContent).toBe('No extensions are being monitored');
-  expect(monitorStatus.classList.contains('red')).toBeTruthy();
-  expect(monitorStatus.classList.contains('green')).toBeFalsy();
-  expect(errorText.textContent).toBe('');
-
-  const promiseErrorChanged1 = observeChange(errorText);
-
-  startBtn.click();
-
-  await promiseErrorChanged1;
-
-  expect(errorText.textContent).toBe('start-monitor-error');
-
-  areExtsBeingMonitoredFn.mockReset();
-
-  // TEST: Error handling for worng monitorMsg at start monitor
-
   startMonitorAllFn.mockResolvedValueOnce('wrong-message');
 
   await popup.init();
 
-  const promiseErrorChanged2 = observeChange(errorText);
+  const promiseErrorChanged1 = observeChange(errorText);
   startBtn.click();
-  await promiseErrorChanged2;
+  await promiseErrorChanged1;
 
   expect(errorText.textContent).toBe("Monitoring couldn't be started");
 
@@ -210,28 +175,13 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
   // TEST: Error handling at stop monitor
 
   areExtsBeingMonitoredFn.mockResolvedValue(true);
-  stopMonitorAllFn.mockImplementationOnce(() => {
-    throw new Error('stop-monitor-error');
-  });
-
-  // initialize again for testing error after clicking stop monitor button
-  await popup.init();
-
-  const promiseErrorChanged3 = observeChange(errorText);
-  stopBtn.click();
-  await promiseErrorChanged3;
-
-  expect(errorText.textContent).toBe('stop-monitor-error');
-
-  // TEST: error handling for worng monitorMsg at stopMonitor
-
   stopMonitorAllFn.mockResolvedValueOnce('wrong-message');
 
   await popup.init();
 
-  const promiseErrorChanged4 = observeChange(errorText);
+  const promiseErrorChanged2 = observeChange(errorText);
   stopBtn.click();
-  await promiseErrorChanged4;
+  await promiseErrorChanged2;
 
   expect(errorText.textContent).toBe("Monitoring couldn't be stopped");
 
@@ -246,7 +196,7 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
   expect(monitorStatus.classList.contains('green')).toBeTruthy();
 });
 
-test('handleEvent is passed wrong parameter', async () => {
+test('wrong parameter is passed to handleEvent', async () => {
   document.body.innerHTML = popupBody;
 
   const areExtsBeingMonitoredFn = jest.spyOn(
@@ -260,7 +210,7 @@ test('handleEvent is passed wrong parameter', async () => {
 
   await popup.init();
 
-  const thrownError = popup.handleEvent({
+  let thrownError = popup.handleEvent({
     type: 'click',
     target: { id: 'invalid' },
   });
@@ -268,11 +218,11 @@ test('handleEvent is passed wrong parameter', async () => {
 
   await popup.init();
 
-  const thrownError1 = popup.handleEvent({
+  thrownError = popup.handleEvent({
     type: 'invalid',
     target: { id: 'invalid' },
   });
-  await expect(thrownError1).rejects.toThrowError('wrong event found');
+  await expect(thrownError).rejects.toThrowError('wrong event found');
 });
 
 test('clicking "view activity logs page" should open the activitylog extension page', async () => {
@@ -282,7 +232,6 @@ test('clicking "view activity logs page" should open the activitylog extension p
     ExtListen,
     'areExtsBeingMonitored'
   );
-
   const viewExtPageFn = jest.spyOn(ExtListen, 'viewExtPage');
 
   viewExtPageFn.mockResolvedValue();
@@ -315,11 +264,12 @@ test('clicking "view activity logs page" should open the activitylog extension p
 
   expect(viewExtPageFn).toHaveBeenCalled();
 
-  expect(stopBtn.classList.contains('disabled')).toBeTruthy();
-  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
-
+  // nothing changes from previous check
   expect(startBtn.classList.contains('disabled')).toBeFalsy();
   expect(startBtn.getAttribute('disabled')).toBeNull();
+
+  expect(stopBtn.classList.contains('disabled')).toBeTruthy();
+  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
 
   expect(monitorStatus.textContent).toBe('No extensions are being monitored');
   expect(monitorStatus.classList.contains('red')).toBeTruthy();

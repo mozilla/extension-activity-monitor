@@ -107,7 +107,8 @@ export default class ExtensionMonitor {
     stopMonitorAllExts: async () => {
       return this.stopMonitorAll();
     },
-    sendAllExistingLogs: () => Promise.resolve({ existingLogs: this.logs }),
+    sendAllExistingLogs: async () =>
+      Promise.resolve({ existingLogs: this.logs }),
     default: async () => {
       throw new Error('unexpected message');
     },
@@ -120,7 +121,7 @@ export default class ExtensionMonitor {
     ]();
   };
 
-  async init() {
+  init() {
     browser.runtime.onMessage.addListener(this.messageListener);
   }
 }

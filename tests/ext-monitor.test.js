@@ -44,7 +44,10 @@ describe('initialize extension monitoring', () => {
     const extMonitor = new ExtensionMonitor();
     const startMonitorFn = jest.spyOn(extMonitor, 'startMonitor');
     const setExtensionsFn = jest.spyOn(extMonitor, 'setExtensions');
-    const initMonitor = extMonitor.messageHandlers.startMonitorAllExts();
+
+    const initMonitor = extMonitor.messageListener({
+      requestType: 'startMonitorAllExts',
+    });
     await expect(initMonitor).resolves.toBe('ext-monitor-started');
 
     expect(startMonitorFn.mock.calls[0]).toEqual(['1'], ['2']);
@@ -75,11 +78,13 @@ describe('initialize extension monitoring', () => {
 
     // Initialize monitoring extensions
     // while extensions are already being monitored
-    const initMonitorFail = extMonitor.initMonitorAll();
+    const initMonitorFail = extMonitor.messageListener({
+      requestType: 'startMonitorAllExts',
+    });
     await expect(initMonitorFail).rejects.toThrow('EAM is already running');
 
-    expect(setExtensionsFn).not.toHaveBeenCalled();
     expect(extMonitor.areExtsBeingMonitored()).toBeTruthy();
+    expect(setExtensionsFn).not.toHaveBeenCalled();
   });
 });
 
@@ -102,7 +107,9 @@ test('stop monitoring all extensions', async () => {
   extMonitor.extensionMapList.set(extensions[0].id, extMonitor.logListener());
   extMonitor.extensionMapList.set(extensions[1].id, extMonitor.logListener());
 
-  const stopMonitor = extMonitor.messageHandlers.stopMonitorAllExts();
+  const stopMonitor = extMonitor.messageListener({
+    requestType: 'stopMonitorAllExts',
+  });
   await expect(stopMonitor).resolves.toBe('ext-monitor-stopped');
 
   expect(removeListener).toHaveBeenCalledTimes(extensions.length);
@@ -147,7 +154,7 @@ test('send logs to extension page if it is opened and storing logs in background
   expect(extMonitor.logs).toMatchObject([log, log]);
   expect(sendLogsFn.mock.calls[1][0]).toBe(log);
 
-  expect(sendMessage).toHaveBeenCalledTimes(1);
+  expect(sendMessage).toHaveBeenCalled();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({ updateLogs: log });
 });
 
@@ -173,6 +180,8 @@ describe('modify monitoring status of an extension on the go', () => {
       'Extension is already being monitored'
     );
     expect(addListener).not.toHaveBeenCalled();
+
+    // removing extension from being monitored
     extMonitor.extensionMapList.delete(extensionsId);
 
     // calling modifyMonitor without having the extension being monitored
@@ -180,7 +189,6 @@ describe('modify monitoring status of an extension on the go', () => {
 
     expect(startMonitorFn).toHaveBeenCalledTimes(2);
     expect(addListener).toHaveBeenCalledTimes(1);
-    expect(extMonitor.extensionMapList.size).toBe(1);
   });
 
   test('remove extension from monitoring', async () => {
@@ -197,7 +205,7 @@ describe('modify monitoring status of an extension on the go', () => {
 
     const extensionsId = '1';
 
-    // calling modifyMonitor without having that extension monitoring
+    // calling modifyMonitor without having that extension monitored
     const monitorError = extMonitor.modifyMonitor(extensionsId, false);
     await expect(monitorError).rejects.toThrow(
       'Extension is not being monitored'
@@ -205,26 +213,39 @@ describe('modify monitoring status of an extension on the go', () => {
     expect(removeListener).not.toHaveBeenCalled();
 
     extMonitor.extensionMapList.set(extensionsId, extMonitor.logListener());
-    // calling modifyMonitor after having extension monitoring
+    // calling modifyMonitor after having extension monitored
     extMonitor.modifyMonitor(extensionsId, false);
 
     expect(stopMonitorFn).toHaveBeenCalledTimes(2);
     expect(removeListener).toHaveBeenCalledTimes(1);
-    expect(extMonitor.extensionMapList.size).toBe(0);
   });
 });
 
 describe('message handlers and listener', () => {
-  test('getMonitorStatus return promise having monitoring status', async () => {
+  test('extensions monitoring status', async () => {
     const extMonitor = new ExtensionMonitor();
     const areExtsBeingMntrFn = jest.spyOn(extMonitor, 'areExtsBeingMonitored');
 
-    const statusPromise = extMonitor.messageHandlers.getMonitorStatus();
-    await expect(statusPromise).resolves.toMatchObject({ status: false });
-    expect(areExtsBeingMntrFn).toHaveBeenCalledTimes(1);
+    // while no extensions being monitored
+    const statusPromiseNeg = extMonitor.messageListener({
+      requestType: 'getMonitorStatus',
+    });
+    await expect(statusPromiseNeg).resolves.toMatchObject({ status: false });
+    expect(areExtsBeingMntrFn).toHaveBeenCalled();
+
+    areExtsBeingMntrFn.mockClear();
+
+    extMonitor.extensionMapList.set(1, extMonitor.logListener());
+
+    // while extensions are being monitored
+    const statusPromisePos = extMonitor.messageListener({
+      requestType: 'getMonitorStatus',
+    });
+    await expect(statusPromisePos).resolves.toMatchObject({ status: true });
+    expect(areExtsBeingMntrFn).toHaveBeenCalled();
   });
 
-  test('messageListener calls messageHandlers on receiving event', async () => {
+  test('send existing logs from background', async () => {
     const extMonitor = new ExtensionMonitor();
     extMonitor.logs = { log: '1' };
     const sendAllExistingLogsFn = jest.spyOn(
@@ -238,10 +259,10 @@ describe('message handlers and listener', () => {
     await expect(existingLogsPromise).resolves.toMatchObject({
       existingLogs: extMonitor.logs,
     });
-    expect(sendAllExistingLogsFn).toHaveBeenCalledTimes(1);
+    expect(sendAllExistingLogsFn).toHaveBeenCalled();
   });
 
-  test('default method from messageHandlers is called upon passing worng requestType', async () => {
+  test('wrong requestType is passed to messageHanlers', async () => {
     const extMonitor = new ExtensionMonitor();
     const defaultFn = jest.spyOn(extMonitor.messageHandlers, 'default');
 
@@ -250,7 +271,7 @@ describe('message handlers and listener', () => {
     });
     await expect(rejectedPromise).rejects.toThrow('unexpected message');
 
-    expect(defaultFn).toHaveBeenCalledTimes(1);
+    expect(defaultFn).toHaveBeenCalled();
   });
 });
 
@@ -269,5 +290,5 @@ test('initialize listener for activitylogs', () => {
   const extMonitor = new ExtensionMonitor();
   extMonitor.init();
 
-  expect(addListener).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalled();
 });
