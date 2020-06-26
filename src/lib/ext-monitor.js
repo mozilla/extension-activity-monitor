@@ -46,61 +46,52 @@ export default class ExtensionMonitor {
   async startMonitor() {
     if (!this.hasActivityListeners()) {
       const extensions = await this.getAllExtensions();
-      return new Promise((resolve) => {
-        extensions.forEach((extension) => {
-          const listener = this.createLogListener();
-          this.extensionMapList.set(extension.id, listener);
-          browser.activityLog.onExtensionActivity.addListener(
-            listener,
-            extension.id
-          );
-        });
-        resolve(true);
+      extensions.forEach((extension) => {
+        const listener = this.createLogListener();
+        this.extensionMapList.set(extension.id, listener);
+        browser.activityLog.onExtensionActivity.addListener(
+          listener,
+          extension.id
+        );
       });
     } else {
       throw new Error('EAM is already running');
     }
   }
 
-  async stopMonitor() {
-    return new Promise((resolve) => {
-      this.extensionMapList.forEach((listener, extensionId) => {
-        browser.activityLog.onExtensionActivity.removeListener(
-          listener,
-          extensionId
-        );
-        this.extensionMapList.delete(extensionId);
-      });
-      resolve(true);
+  stopMonitor() {
+    this.extensionMapList.forEach((listener, extensionId) => {
+      browser.activityLog.onExtensionActivity.removeListener(
+        listener,
+        extensionId
+      );
+      this.extensionMapList.delete(extensionId);
     });
   }
 
   messageHandlers = {
-    getMonitorStatus: () => {
-      return {
-        active: this.hasActivityListeners(),
-      };
-    },
-    startMonitor: () => {
-      return this.startMonitor();
-    },
-    stopMonitor: () => {
-      return this.stopMonitor();
-    },
-    sendAllLogs: () => {
-      return {
-        existingLogs: this.logs,
-      };
-    },
+    getMonitorStatus: () => ({ active: this.hasActivityListeners() }),
+    startMonitor: () => this.startMonitor(),
+    stopMonitor: () => this.stopMonitor(),
+    sendAllLogs: () => ({ existingLogs: this.logs }),
   };
 
-  messageListener = async (message) => {
-    const { requestType } = message;
+  messageListener = (message) => {
+    const { requestType, requestTo } = message;
+    if (requestTo !== 'ext-monitor') {
+      return;
+    }
 
     if (requestType in this.messageHandlers) {
-      return this.messageHandlers[requestType]();
+      try {
+        return Promise.resolve(this.messageHandlers[requestType]());
+      } catch (error) {
+        return Promise.reject(error);
+      }
     } else {
-      throw new Error('requestType ' + requestType + ' is not found');
+      return Promise.reject(
+        new Error('requestType ' + requestType + ' is not found')
+      );
     }
   };
 

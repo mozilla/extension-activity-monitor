@@ -42,8 +42,8 @@ test('start monitoring all extensions from the popup', async () => {
   await popup.init();
 
   // popup at initial - no extensions being watched
-  expect(startBtn.getAttribute('disabled')).toBeNull();
-  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
+  expect(startBtn.hasAttribute('disabled')).toBeFalsy();
+  expect(stopBtn.hasAttribute('disabled')).toBeTruthy();
 
   expect(monitorStatus.textContent).toBe('No extensions are being monitored');
   expect(monitorStatus.classList.contains('failure')).toBeTruthy();
@@ -56,8 +56,8 @@ test('start monitoring all extensions from the popup', async () => {
 
   // popup after clicking "Start Monitor" button
   // all extensions are being watched
-  expect(startBtn.getAttribute('disabled')).toEqual('disabled');
-  expect(stopBtn.getAttribute('disabled')).toBeNull();
+  expect(startBtn.hasAttribute('disabled')).toBeTruthy();
+  expect(stopBtn.hasAttribute('disabled')).toBeFalsy();
 
   expect(monitorStatus.textContent).toBe('Extensions are being monitored');
   expect(monitorStatus.classList.contains('failure')).toBeFalsy();
@@ -88,8 +88,8 @@ test('stop monitoring all the extensions from popup', async () => {
 
   await popup.init();
 
-  expect(startBtn.getAttribute('disabled')).toEqual('disabled');
-  expect(stopBtn.getAttribute('disabled')).toBeNull();
+  expect(startBtn.hasAttribute('disabled')).toBeTruthy();
+  expect(stopBtn.hasAttribute('disabled')).toBeFalsy();
 
   expect(monitorStatus.textContent).toBe('Extensions are being monitored');
   expect(monitorStatus.classList.contains('failure')).toBeFalsy();
@@ -101,8 +101,8 @@ test('stop monitoring all the extensions from popup', async () => {
   stopBtn.click();
   await promiseElementChanged;
 
-  expect(stopBtn.getAttribute('disabled')).toEqual('disabled');
-  expect(startBtn.getAttribute('disabled')).toBeNull();
+  expect(startBtn.hasAttribute('disabled')).toBeFalsy();
+  expect(stopBtn.hasAttribute('disabled')).toBeTruthy();
 
   expect(monitorStatus.textContent).toBe('No extensions are being monitored');
   expect(monitorStatus.classList.contains('failure')).toBeTruthy();
@@ -128,7 +128,7 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
   //Error handling at start monitor
   getMonitorStatusFn.mockResolvedValueOnce(false);
   getMonitorStatusFn.mockResolvedValueOnce(true);
-  startMonitorFn.mockResolvedValueOnce(false);
+  startMonitorFn.mockRejectedValueOnce(new Error('start-monitor-error'));
 
   await popup.init();
 
@@ -136,11 +136,11 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
   startBtn.click();
   await promiseErrorChanged1;
 
-  expect(errorText.textContent).toBe("Monitoring couldn't be started");
+  expect(errorText.textContent).toBe('start-monitor-error');
 
-  // Error handling at stop monitor
+  //Error handling at stop monitor
   getMonitorStatusFn.mockResolvedValue(true);
-  stopMonitorFn.mockResolvedValueOnce(false);
+  stopMonitorFn.mockRejectedValueOnce(new Error('stop-monitor-error'));
 
   await popup.init();
 
@@ -148,10 +148,10 @@ test('errors on start/stopping monitoring should be shown in the popup UI', asyn
   stopBtn.click();
   await promiseErrorChanged2;
 
-  expect(errorText.textContent).toBe("Monitoring couldn't be stopped");
+  expect(errorText.textContent).toBe('stop-monitor-error');
 });
 
-test('Error is thrown while wrong parameter is passed to handleEvent', async () => {
+test('Error is shown in popup UI while wrong parameter is passed to handleEvent', async () => {
   document.body.innerHTML = popupBody;
 
   const getMonitorStatusFn = jest.spyOn(ExtListen, 'getMonitorStatus');
@@ -163,24 +163,26 @@ test('Error is thrown while wrong parameter is passed to handleEvent', async () 
   await popup.init();
 
   const target = { id: 'invalid' };
-  const invalidType = 'invalid';
+  const invalidType = 'invalid-type';
 
-  let thrownError = popup.handleEvent({
+  await popup.handleEvent({
     type: 'click',
     target,
   });
-  await expect(thrownError).rejects.toThrowError(
-    'wrong event target found ' + target
+
+  expect(popup.errorMsgText.textContent).toBe(
+    'wrong event target id found: ' + JSON.stringify(target.id)
   );
 
   await popup.init();
 
-  thrownError = popup.handleEvent({
+  await popup.handleEvent({
     type: invalidType,
     target: { id: 'invalid' },
   });
-  await expect(thrownError).rejects.toThrowError(
-    'wrong event type found ' + invalidType
+
+  expect(popup.errorMsgText.textContent).toBe(
+    'wrong event type found: ' + JSON.stringify(invalidType)
   );
 });
 

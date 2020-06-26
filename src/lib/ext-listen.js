@@ -5,6 +5,7 @@ export function getActivityLogPageURL() {
 export async function getMonitorStatus() {
   const { active } = await browser.runtime.sendMessage({
     requestType: 'getMonitorStatus',
+    requestTo: 'ext-monitor',
   });
   return active;
 }
@@ -12,12 +13,14 @@ export async function getMonitorStatus() {
 export function startMonitor() {
   return browser.runtime.sendMessage({
     requestType: 'startMonitor',
+    requestTo: 'ext-monitor',
   });
 }
 
 export function stopMonitor() {
   return browser.runtime.sendMessage({
     requestType: 'stopMonitor',
+    requestTo: 'ext-monitor',
   });
 }
 

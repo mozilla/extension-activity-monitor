@@ -47,8 +47,9 @@ describe('start extension monitoring', () => {
 
     const startMonitor = extMonitor.messageListener({
       requestType: 'startMonitor',
+      requestTo: 'ext-monitor',
     });
-    await expect(startMonitor).resolves.toBeTruthy();
+    await expect(startMonitor).resolves.toBeUndefined();
 
     expect(extMonitor.extensionMapList.size).toBe(2);
     expect(addListener.mock.calls).toMatchObject([
@@ -71,6 +72,7 @@ describe('start extension monitoring', () => {
 
     const initMonitorFail = extMonitor.messageListener({
       requestType: 'startMonitor',
+      requestTo: 'ext-monitor',
     });
     await expect(initMonitorFail).rejects.toThrowError(
       'EAM is already running'
@@ -106,8 +108,10 @@ test('stop monitoring all extensions should make extensionMapList empty', async 
 
   const stopMonitor = extMonitor.messageListener({
     requestType: 'stopMonitor',
+    requestTo: 'ext-monitor',
   });
-  await expect(stopMonitor).resolves.toBeTruthy();
+
+  await expect(stopMonitor).resolves.toBeUndefined();
 
   expect(removeListener.mock.calls).toMatchObject([
     [listeners[0], 'ext1'],
@@ -160,6 +164,7 @@ describe('messageListeners functionalities test', () => {
     // while no extensions being monitored
     const statusPromiseNeg = extMonitor.messageListener({
       requestType: 'getMonitorStatus',
+      requestTo: 'ext-monitor',
     });
     await expect(statusPromiseNeg).resolves.toMatchObject({ active: false });
 
@@ -168,6 +173,7 @@ describe('messageListeners functionalities test', () => {
     // while extensions are being monitored
     const statusPromisePos = extMonitor.messageListener({
       requestType: 'getMonitorStatus',
+      requestTo: 'ext-monitor',
     });
     await expect(statusPromisePos).resolves.toMatchObject({ active: true });
   });
@@ -178,6 +184,7 @@ describe('messageListeners functionalities test', () => {
 
     const existingLogsPromise = extMonitor.messageListener({
       requestType: 'sendAllLogs',
+      requestTo: 'ext-monitor',
     });
     await expect(existingLogsPromise).resolves.toMatchObject({
       existingLogs: extMonitor.logs,
@@ -190,11 +197,40 @@ describe('messageListeners functionalities test', () => {
 
     const error = extMonitor.messageListener({
       requestType,
+      requestTo: 'ext-monitor',
     });
 
     await expect(error).rejects.toThrowError(
       'requestType ' + requestType + ' is not found'
     );
+  });
+
+  test('throws error when promise rejects at startMonitor method', async () => {
+    const extMonitor = new ExtensionMonitor();
+    const startMonitorRejectsFn = jest.spyOn(extMonitor, 'startMonitor');
+
+    startMonitorRejectsFn.mockImplementation(() => {
+      throw new Error('start-monitor-error');
+    });
+
+    const error = extMonitor.messageListener({
+      requestType: 'startMonitor',
+      requestTo: 'ext-monitor',
+    });
+
+    await expect(error).rejects.toThrowError('start-monitor-error');
+  });
+
+  test('messageListener return void if requestTo is not "ext-monitor"', () => {
+    const extMonitor = new ExtensionMonitor();
+    const messageListenerFn = jest.spyOn(extMonitor, 'messageListener');
+
+    extMonitor.messageListener({
+      requestType: 'startMonitor',
+      requestTo: 'invalid-request',
+    });
+
+    expect(messageListenerFn).toHaveReturnedWith(undefined);
   });
 });
 

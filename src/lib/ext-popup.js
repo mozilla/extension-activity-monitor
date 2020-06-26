@@ -20,7 +20,7 @@ export default class Popup {
   }
 
   renderMonitorStartedUI() {
-    this.startMonitorAllBtn.setAttribute('disabled', 'disabled');
+    this.startMonitorAllBtn.setAttribute('disabled', true);
     this.stopMonitorAllBtn.removeAttribute('disabled');
 
     this.monitorStatusText.textContent = 'Extensions are being monitored';
@@ -30,7 +30,7 @@ export default class Popup {
 
   renderMonitorStoppedUI() {
     this.startMonitorAllBtn.removeAttribute('disabled');
-    this.stopMonitorAllBtn.setAttribute('disabled', 'disabled');
+    this.stopMonitorAllBtn.setAttribute('disabled', true);
 
     this.monitorStatusText.textContent = 'No extensions are being monitored';
     this.monitorStatusText.classList.add('failure');
@@ -50,46 +50,37 @@ export default class Popup {
   }
 
   async handleEvent(event) {
-    if (event.type === 'click') {
-      switch (event.target) {
-        case this.startMonitorAllBtn:
-          await this.handleStartMonitor();
-          break;
-        case this.stopMonitorAllBtn:
-          await this.handleStopMonitor();
-          break;
-        case this.openActivityLogBtn:
-          this.handleViewActivityLog();
-          break;
-        default:
-          throw new Error('wrong event target found ' + event.target);
-      }
-    } else {
-      throw new Error('wrong event type found ' + event.type);
-    }
-  }
-
-  async handleStartMonitor() {
     try {
-      const monitorMsg = await startMonitor();
-      if (monitorMsg) {
-        this.render();
+      if (event.type === 'click') {
+        switch (event.target) {
+          case this.startMonitorAllBtn:
+            await this.handleMonitor(startMonitor);
+            break;
+          case this.stopMonitorAllBtn:
+            await this.handleMonitor(stopMonitor);
+            break;
+          case this.openActivityLogBtn:
+            this.handleViewActivityLog();
+            break;
+          default:
+            throw new Error(
+              'wrong event target id found: ' + JSON.stringify(event.target.id)
+            );
+        }
       } else {
-        throw new Error("Monitoring couldn't be started");
+        throw new Error(
+          'wrong event type found: ' + JSON.stringify(event.type)
+        );
       }
     } catch (error) {
       this.renderErrorMsg(error.message);
     }
   }
 
-  async handleStopMonitor() {
+  async handleMonitor(monitorFunc) {
     try {
-      const monitorMsg = await stopMonitor();
-      if (monitorMsg) {
-        this.render();
-      } else {
-        throw new Error("Monitoring couldn't be stopped");
-      }
+      await monitorFunc();
+      this.render();
     } catch (error) {
       this.renderErrorMsg(error.message);
     }
@@ -97,7 +88,6 @@ export default class Popup {
 
   async init() {
     await this.render();
-
     this.startMonitorAllBtn.addEventListener('click', this);
     this.stopMonitorAllBtn.addEventListener('click', this);
     this.openActivityLogBtn.addEventListener('click', this);
