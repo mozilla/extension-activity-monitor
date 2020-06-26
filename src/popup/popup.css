@@ -1,1 +1,51 @@
-/* popup.css */
+body {
+  width: 250px;
+  height: auto;
+}
+
+button {
+  display: block;
+  margin: 10px auto;
+  height: 35px;
+  width: 100%;
+  font-size: 14px;
+  color: #000000;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  cursor: pointer;
+}
+
+button:disabled,
+button:disabled:hover {
+  background-color: #dadada;
+  color: #747474;
+  cursor: default;
+}
+
+button:hover {
+  background-color: #000000;
+  border: 2px solid #000000;
+  color: #ffffff;
+}
+
+#monitorStatus,
+#errorText {
+  font-size: 15px;
+  padding: 10px 15px;
+  text-align: center;
+}
+
+#errorText {
+  display: none;
+}
+
+.success {
+  background-color: #35a83b;
+  color: #ffffff;
+}
+
+.failure,
+#errorText {
+  background-color: #a52c2c;
+  color: #ffffff;
+}
