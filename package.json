@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Extension Activity Monitor provides more transparency which could help to increase the reliability of abuse reporting and accountability on developers. It is an additional useful tool to aid investigating bugs in the extensions or in the Firefox WebExtensions internals.",
   "scripts": {
+    "start": "web-ext run",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -43,6 +44,16 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.21.2",
     "jest": "^26.0.1",
-    "prettier": "2.0.5"
+    "prettier": "2.0.5",
+    "web-ext": "^4.3.0"
+  },
+  "webExt": {
+    "sourceDir": "src",
+    "run": {
+      "pref": [
+        "extensions.experiments.enabled=true"
+      ],
+      "firefox": "nightly"
+    }
   }
 }
