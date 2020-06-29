@@ -8,7 +8,7 @@
     "test:coverage": "jest --coverage",
     "test:coveralls": "jest --coverage && coveralls < coverage/lcov.info",
     "prettier:fix": "prettier --ignore-path ./.gitignore --write \"./**/*.{html,js,css}\"",
-    "prettier:check": "prettier ./.gitignore --check \"./**/*.{html,js,css}\"",
+    "prettier:check": "prettier --ignore-path ./.gitignore --check \"./**/*.{html,js,css}\"",
     "lint:fix": "eslint --ignore-path ./.gitignore --fix \"./**/*.js\"",
     "lint:check": "eslint --ignore-path ./.gitignore --quiet \"./**/*.js\""
   },
