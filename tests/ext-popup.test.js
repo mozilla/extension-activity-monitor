@@ -1,3 +1,4 @@
+/* eslint no-unsanitized/property: "off" */
 import fs from 'fs';
 import path from 'path';
 import Popup from '../src/lib/ext-popup';

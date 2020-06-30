@@ -1,5 +1,10 @@
 {
-  "extends": ["eslint:recommended", "plugin:import/errors", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/errors",
+    "plugin:no-unsanitized/DOM",
+    "prettier"
+  ],
   "rules": {
     "no-console": 2
   },
