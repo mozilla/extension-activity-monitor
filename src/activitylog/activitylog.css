@@ -11,9 +11,8 @@
 }
 
 #showActivityLog,
-#showLoadedLog,
 #saveLogBtn {
-  margin-top: 20px;
+  margin: 20px 0;
 }
 
 .activity-log-wrapper {
@@ -38,10 +37,6 @@
 
 .log-table table {
   width: 100%;
-}
-
-.log-table table tbody tr {
-  text-align: center;
 }
 
 table {
@@ -90,7 +85,7 @@ table td {
   height: auto;
 }
 
-table tr:first-child {
+table thead {
   position: sticky;
   top: 0;
 }

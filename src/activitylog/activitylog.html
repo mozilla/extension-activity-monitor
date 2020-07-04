@@ -10,10 +10,6 @@
   <body>
     <div class="container">
       <h1>Extension Activity Monitor</h1>
-      <div class="load-file-wrapper">
-        <input id="logInputFile" type="file" accept="application/json" />
-        <button id="loadLogBtn" disabled>Load logs</button>
-      </div>
       <button id="saveLogBtn">Save logs</button>
       <div class="notice"></div>
       <div class="activity-log-wrapper">
@@ -21,13 +17,15 @@
         <div class="activity-log-container">
           <div class="log-table">
             <table>
-              <tr>
-                <th>Extension Id</th>
-                <th>Timestamp</th>
-                <th>API Type</th>
-                <th>API Name</th>
-                <th>View Type</th>
-              </tr>
+              <thead>
+                <tr>
+                  <th>Extension Id</th>
+                  <th>Timestamp</th>
+                  <th>API Type</th>
+                  <th>API Name</th>
+                  <th>View Type</th>
+                </tr>
+              </thead>
               <tbody></tbody>
             </table>
           </div>
@@ -36,10 +34,6 @@
             <div class="close"></div>
           </div>
         </div>
-      </div>
-      <div class="load-log-wrapper">
-        <h2>Loaded Logs</h2>
-        <div id="showLoadedLog"></div>
       </div>
     </div>
   </body>
