@@ -91,23 +91,23 @@ export default class ActivityLog {
           break;
         default:
           throw new Error(
-            `unexpected click event on ${JSON.stringify(event.target)}`
+            `unexpected click event on ${JSON.stringify(event.target.tagName)}`
           );
       }
     } else {
-      throw new Error(`wrong event type found ${JSON.stringify(event.type)}`);
+      throw new Error(`wrong event type found ${event.type}`);
     }
   }
 
   openDetailSidebar(logDetails) {
     const logString = JSON.stringify(logDetails);
     this.showLogDetails.textContent = logString;
-    this.showLogDetailWrapper.style.display = 'block';
+    this.showLogDetailWrapper.removeAttribute('hidden');
     this.logTableWrapper.classList.add('width-60');
   }
 
   closeDetailSidebar() {
-    this.showLogDetailWrapper.style.display = 'none';
+    this.showLogDetailWrapper.setAttribute('hidden', true);
     this.logTableWrapper.classList.remove('width-60');
   }
 
