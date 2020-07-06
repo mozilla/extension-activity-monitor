@@ -90,9 +90,7 @@ export default class ActivityLog {
           this.closeDetailSidebar();
           break;
         default:
-          throw new Error(
-            `unexpected click event on ${JSON.stringify(event.target.tagName)}`
-          );
+          throw new Error(`unexpected click event on ${event.target.tagName}`);
       }
     } else {
       throw new Error(`wrong event type found ${event.type}`);
@@ -114,7 +112,7 @@ export default class ActivityLog {
   async saveLogs() {
     try {
       await save.saveAsJSON(this.logs);
-      this.setError(false);
+      this.setError(null);
     } catch (error) {
       this.setError(error.message);
     }
