@@ -27,6 +27,7 @@ export default class ExtensionMonitor {
     if (isExtPageOpen) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
+        requestTo: 'activity-log',
         log: details,
       });
     }
