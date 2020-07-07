@@ -6,20 +6,36 @@
   box-sizing: border-box;
 }
 
-.container {
-  width: 100%;
-}
-
-#showActivityLog,
-#saveLogBtn {
-  margin: 20px 0;
-}
-
+.activity-log-container,
 .activity-log-wrapper {
   position: relative;
 }
 
-.show-log-detail-wrapper {
+.log-table-wrapper {
+  overflow-y: scroll;
+  max-height: 500px;
+  height: auto;
+}
+
+.container {
+  width: 100%;
+}
+
+.close {
+  background: url(/icons/close.svg) no-repeat center center / cover;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+#logDetails {
+  margin: 50px 15px 10px;
+}
+
+.log-detail-wrapper {
   position: absolute;
   top: 0;
   height: 500px;
@@ -30,17 +46,17 @@
   border: 2px solid #000000;
 }
 
-#showLogDetails {
-  margin: 50px 15px 10px;
-}
-
-.log-table table {
-  width: 100%;
-}
-
 table {
   width: 100%;
   border: 1px solid #eeeeee;
+  border-collapse: collapse;
+  width: 100%;
+  cursor: pointer;
+}
+
+table thead {
+  position: sticky;
+  top: 0;
 }
 
 th {
@@ -72,43 +88,17 @@ table td {
   padding: 3px;
 }
 
-.failure {
-  background-color: #961616;
-  padding: 10px;
-  color: #ffffff;
-}
-
-.log-table {
-  overflow-y: scroll;
-  max-height: 500px;
-  height: auto;
-}
-
-table thead {
-  position: sticky;
-  top: 0;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  cursor: pointer;
-}
-
 .width-60 {
   width: 60%;
 }
 
-.close {
-  background: url(/icons/close.svg) no-repeat center center / cover;
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
+#showActivityLog,
+#saveLogBtn {
+  margin: 20px 0;
 }
 
-.activity-log-container {
-  position: relative;
+.failure {
+  background-color: #961616;
+  padding: 10px;
+  color: #ffffff;
 }

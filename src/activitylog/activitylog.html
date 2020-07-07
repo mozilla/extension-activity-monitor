@@ -6,6 +6,10 @@
     <title>Extension Activity Monitor</title>
     <link rel="stylesheet" href="activitylog.css" />
     <script src="activitylog.js" type="module"></script>
+    <script
+      type="module"
+      src="/lib/web-component/log-view/log-view-element.js"
+    ></script>
   </head>
   <body>
     <div class="container">
@@ -15,26 +19,28 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="activity-log-container">
-          <div class="log-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Extension Id</th>
-                  <th>Timestamp</th>
-                  <th>API Type</th>
-                  <th>API Name</th>
-                  <th>View Type</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+          <div class="log-table-wrapper">
+            <log-view></log-view>
           </div>
-          <div class="show-log-detail-wrapper" hidden>
-            <div id="showLogDetails"></div>
+          <div class="log-detail-wrapper" hidden>
+            <div id="logDetails"></div>
             <div class="close"></div>
           </div>
         </div>
       </div>
     </div>
+    <template class="log-table-template">
+      <link rel="stylesheet" href="/lib/web-component/log-view/log-view.css" />
+      <table>
+        <thead>
+          <th>Extension Id</th>
+          <th>Timestamp</th>
+          <th>API Type</th>
+          <th>API Name</th>
+          <th>View Type</th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </template>
   </body>
 </html>
