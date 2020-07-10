@@ -1,3 +1,42 @@
+.activity-log-container {
+  position: relative;
+}
+
+.log-table-wrapper {
+  overflow-y: scroll;
+  max-height: 500px;
+  height: auto;
+}
+
+.close {
+  background: url(/icons/close.svg) no-repeat center center / cover;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+#logDetails {
+  margin: 50px 15px 10px;
+}
+
+.width-60 {
+  width: 60%;
+}
+
+.log-detail-wrapper {
+  position: absolute;
+  top: 0;
+  height: 500px;
+  right: 0;
+  width: 40%;
+  word-wrap: anywhere;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+}
+
 table {
   width: 100%;
   border: 1px solid #eeeeee;
@@ -28,6 +67,6 @@ thead tr {
   width: 100%;
 }
 
-tbody log-item-view:nth-of-type(odd) {
+tbody div:nth-of-type(odd) {
   background: #eeeeee;
 }

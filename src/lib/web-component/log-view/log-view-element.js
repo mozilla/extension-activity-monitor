@@ -3,21 +3,23 @@ import LogItemView from '../log-item-view/log-item-view-element.js';
 class LogView extends HTMLElement {
   constructor() {
     super();
+
     const shadow = this.attachShadow({ mode: 'open' });
 
-    this.logDetailWrapper = document.querySelector('.log-detail-wrapper');
-    this.logDetails = document.querySelector('#logDetails');
-    this.closeBtn = document.querySelector('.close');
-
     this.logTableTemplate = document.querySelector('.log-table-template');
-    this.logTableWrapper = document.querySelector('.log-table-wrapper');
-
     const logTableInstance = document.importNode(
       this.logTableTemplate.content,
       true
     );
 
+    this.logDetailWrapper = logTableInstance.querySelector(
+      '.log-detail-wrapper'
+    );
+    this.logDetails = logTableInstance.querySelector('#logDetails');
+    this.closeBtn = logTableInstance.querySelector('.close');
+    this.logTableWrapper = logTableInstance.querySelector('.log-table-wrapper');
     this.tableBody = logTableInstance.querySelector('tbody');
+
     shadow.appendChild(logTableInstance);
   }
 
@@ -42,7 +44,7 @@ class LogView extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click') {
-      const logDetails = event.target.closest('log-item-view')?._log;
+      const logDetails = event.target.closest('div')?._log;
 
       if (logDetails) {
         this.openDetailSidebar(logDetails);
