@@ -21,7 +21,8 @@
         <log-view></log-view>
       </div>
     </div>
-    <template class="log-table-template">
+
+    <template id="log-table-template">
       <link rel="stylesheet" href="/lib/web-component/log-view/log-view.css" />
       <div class="activity-log-container">
         <div class="log-table-wrapper">
@@ -37,11 +38,12 @@
           </table>
         </div>
         <div class="log-detail-wrapper" hidden>
-          <div id="logDetails"></div>
+          <div class="log-details"></div>
           <div class="close"></div>
         </div>
       </div>
     </template>
+
     <template class="log-table-row-template">
       <tr>
         <td id="id"></td>

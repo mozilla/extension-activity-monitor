@@ -4,20 +4,16 @@ class LogView extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
 
-    this.logTableTemplate = document.querySelector('.log-table-template');
+    this.logTableTemplate = document.querySelector('#log-table-template');
     this.logTableRowTemplate = document.querySelector(
       '.log-table-row-template'
     );
 
-    const logTableInstance = document.importNode(
-      this.logTableTemplate.content,
-      true
-    );
-
+    const logTableInstance = this.logTableTemplate.content.cloneNode(true);
     this.logDetailWrapper = logTableInstance.querySelector(
       '.log-detail-wrapper'
     );
-    this.logDetails = logTableInstance.querySelector('#logDetails');
+    this.logDetails = logTableInstance.querySelector('.log-details');
     this.closeBtn = logTableInstance.querySelector('.close');
     this.logTableWrapper = logTableInstance.querySelector('.log-table-wrapper');
     this.tableBody = logTableInstance.querySelector('tbody');
@@ -26,12 +22,13 @@ class LogView extends HTMLElement {
   }
 
   addNewRows(logs) {
+    const rowsFragment = document.createDocumentFragment();
+
     for (const log of logs) {
-      const logTableRowInstance = document.importNode(
-        this.logTableRowTemplate.content,
+      const logTableRowInstance = this.logTableRowTemplate.content.cloneNode(
         true
       );
-      logTableRowInstance.querySelector('tr')._log = log;
+      logTableRowInstance.firstElementChild._log = log;
 
       logTableRowInstance.querySelector('#id').textContent = log.id;
       logTableRowInstance.querySelector('#timestamp').textContent =
@@ -41,19 +38,21 @@ class LogView extends HTMLElement {
       logTableRowInstance.querySelector('#viewType').textContent =
         log.viewType || 'undefined';
 
-      this.tableBody.appendChild(logTableRowInstance);
+      rowsFragment.appendChild(logTableRowInstance);
     }
+
+    this.tableBody.appendChild(rowsFragment);
   }
 
   openDetailSidebar(logDetails) {
     const logString = JSON.stringify(logDetails);
     this.logDetails.textContent = logString;
     this.logTableWrapper.classList.add('width-60');
-    this.logDetailWrapper.removeAttribute('hidden');
+    this.logDetailWrapper.hidden = false;
   }
 
   closeDetailSidebar() {
-    this.logDetailWrapper.setAttribute('hidden', true);
+    this.logDetailWrapper.hidden = true;
     this.logTableWrapper.classList.remove('width-60');
   }
 
@@ -67,7 +66,6 @@ class LogView extends HTMLElement {
       }
 
       if (event.target === this.closeBtn) {
-        this.logTableWrapper.classList.remove('width-60');
         this.closeDetailSidebar();
       }
     }

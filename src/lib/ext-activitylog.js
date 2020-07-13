@@ -15,6 +15,10 @@ class View {
     this.logTable = document.querySelector('log-view');
     this.saveLogBtn = document.getElementById('saveLogBtn');
     this.notice = document.querySelector('.notice');
+
+    this.saveLogBtn.addEventListener('click', function () {
+      this.dispatchEvent(new CustomEvent('savelog'));
+    });
   }
 
   addTableRows(logs) {
@@ -41,7 +45,7 @@ class Controller {
   }
 
   async init() {
-    this.view.saveLogBtn.addEventListener('click', this);
+    this.view.saveLogBtn.addEventListener('savelog', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -54,7 +58,7 @@ class Controller {
         this.model.addNewLogs([message.log]);
         this.view.addTableRows([message.log]);
       } else {
-        throw new Error(`wrong request type found ${requestType}`);
+        throw new Error(`wrong request type found - ${requestType}`);
       }
     });
 
@@ -75,16 +79,10 @@ class Controller {
   }
 
   handleEvent(event) {
-    if (event.type === 'click') {
-      switch (event.target) {
-        case this.view.saveLogBtn:
-          this.saveLogs();
-          break;
-        default:
-          throw new Error(`unexpected click event on ${event.target.tagName}`);
-      }
+    if (event.type === 'savelog') {
+      this.saveLogs();
     } else {
-      throw new Error(`wrong event type found ${event.type}`);
+      throw new Error(`wrong event type found - ${event.type}`);
     }
   }
 
