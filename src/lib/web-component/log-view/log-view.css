@@ -67,6 +67,19 @@ thead tr {
   width: 100%;
 }
 
-tbody div:nth-of-type(odd) {
+tbody tr:nth-of-type(odd) {
   background: #eeeeee;
+}
+
+tbody tr {
+  display: flex;
+  width: 100%;
+}
+
+tbody tr td {
+  flex: 1 1 20%;
+  text-align: center;
+  word-wrap: anywhere;
+  align-self: center;
+  padding: 3px;
 }

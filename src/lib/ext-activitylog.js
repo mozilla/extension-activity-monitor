@@ -18,7 +18,7 @@ class View {
   }
 
   addTableRows(logs) {
-    this.logTable.addRows(logs);
+    this.logTable.addNewRows(logs);
   }
 
   setError(errorMessage) {

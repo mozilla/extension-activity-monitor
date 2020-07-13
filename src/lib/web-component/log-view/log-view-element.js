@@ -1,5 +1,3 @@
-import LogItemView from '../log-item-view/log-item-view-element.js';
-
 class LogView extends HTMLElement {
   constructor() {
     super();
@@ -7,6 +5,10 @@ class LogView extends HTMLElement {
     const shadow = this.attachShadow({ mode: 'open' });
 
     this.logTableTemplate = document.querySelector('.log-table-template');
+    this.logTableRowTemplate = document.querySelector(
+      '.log-table-row-template'
+    );
+
     const logTableInstance = document.importNode(
       this.logTableTemplate.content,
       true
@@ -23,10 +25,23 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  addRows(logs) {
+  addNewRows(logs) {
     for (const log of logs) {
-      const logItemView = new LogItemView(log);
-      this.tableBody.appendChild(logItemView);
+      const logTableRowInstance = document.importNode(
+        this.logTableRowTemplate.content,
+        true
+      );
+      logTableRowInstance.querySelector('tr')._log = log;
+
+      logTableRowInstance.querySelector('#id').textContent = log.id;
+      logTableRowInstance.querySelector('#timestamp').textContent =
+        log.timeStamp;
+      logTableRowInstance.querySelector('#apiType').textContent = log.type;
+      logTableRowInstance.querySelector('#name').textContent = log.name;
+      logTableRowInstance.querySelector('#viewType').textContent =
+        log.viewType || 'undefined';
+
+      this.tableBody.appendChild(logTableRowInstance);
     }
   }
 
@@ -44,7 +59,7 @@ class LogView extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click') {
-      const logDetails = event.target.closest('div')?._log;
+      const logDetails = event.target.closest('tr')?._log;
 
       if (logDetails) {
         this.openDetailSidebar(logDetails);
