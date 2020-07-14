@@ -4,9 +4,9 @@ class LogView extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
 
-    this.logTableRow = document
-      .querySelector('#logTableRowTemplate')
-      .content.firstElementChild.cloneNode(true);
+    this.logTableRow = document.querySelector(
+      '#logTableRowTemplate'
+    ).content.firstElementChild;
 
     this.logTableTemplate = document.querySelector('#logTableTemplate');
 
