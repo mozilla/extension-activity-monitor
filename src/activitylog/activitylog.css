@@ -24,3 +24,106 @@
   padding: 10px;
   color: #ffffff;
 }
+
+/* extension filter checkbox */
+
+.filter-ext-container {
+  position: relative;
+  box-shadow: 0 1px 1px #0000001a;
+  background-color: #66c8e0;
+  text-align: left;
+  width: 250px;
+  height: auto;
+  margin: 10px 0;
+}
+.filter-option {
+  display: block;
+  position: relative;
+  padding-left: 30px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.filter-option input {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+.select-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background: #e6e6e6;
+}
+
+.filter-option:hover input ~ .select-indicator,
+.filter-option input:focus ~ .select-indicator {
+  background: #ccc;
+}
+.filter-option input:checked ~ .select-indicator {
+  background: #2aa1c0;
+}
+.filter-option:hover input:not([disabled]):checked ~ .select-indicator,
+.filter-option input:checked:focus ~ .select-indicator {
+  background: #0e647d;
+}
+.filter-option input:disabled ~ .select-indicator {
+  background: #e6e6e6;
+  opacity: 0.6;
+  pointer-events: none;
+}
+.select-indicator:after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+.filter-option input:checked ~ .select-indicator:after {
+  display: block;
+}
+.filter-checkbox .select-indicator:after {
+  left: 8px;
+  top: 5px;
+  width: 5px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.filter-checkbox input:disabled ~ .select-indicator:after {
+  border-color: #7b7b7b;
+}
+
+.extension-selector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.arrow-right {
+  background: url(/icons/chevron-right.svg) no-repeat center center / cover;
+  width: 20px;
+  height: 20px;
+}
+
+.arrow-down {
+  background: url(/icons/chevron-down.svg) no-repeat center center / cover;
+  width: 20px;
+  height: 20px;
+}
+
+.extension-list {
+  position: absolute;
+  margin-top: 5px;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  width: auto;
+  min-width: 100%;
+  padding: 15px;
+  z-index: 1001;
+}

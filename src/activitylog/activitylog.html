@@ -18,6 +18,15 @@
       <div class="notice"></div>
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
+        <div class="filter-wrapper">
+          <div class="filter-ext-container">
+            <div class="extension-selector">
+              <p>Select extensions to filter logs</p>
+              <div class="arrow-right"></div>
+            </div>
+            <div class="extension-list" hidden></div>
+          </div>
+        </div>
         <log-view></log-view>
       </div>
     </div>
@@ -52,6 +61,14 @@
         <td class="name"></td>
         <td class="view-type"></td>
       </tr>
+    </template>
+
+    <template id="filterExtCheckbox">
+      <label class="filter-option filter-checkbox">
+        <p class="ext-id"></p>
+        <input type="checkbox" />
+        <div class="select-indicator"></div>
+      </label>
     </template>
   </body>
 </html>

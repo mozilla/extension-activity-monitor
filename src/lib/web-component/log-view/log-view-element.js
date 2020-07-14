@@ -22,25 +22,20 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  addNewRows(logs) {
-    const rowsFragment = document.createDocumentFragment();
+  addNewRows({ log, isHidden }) {
+    const logTableRowInstance = this.logTableRow.cloneNode(true);
+    logTableRowInstance._log = log;
 
-    for (const log of logs) {
-      const logTableRowInstance = this.logTableRow.cloneNode(true);
-      logTableRowInstance._log = log;
+    logTableRowInstance.querySelector('.id').textContent = log.id;
+    logTableRowInstance.querySelector('.timestamp').textContent = log.timeStamp;
+    logTableRowInstance.querySelector('.api-type').textContent = log.type;
+    logTableRowInstance.querySelector('.name').textContent = log.name;
+    logTableRowInstance.querySelector('.view-type').textContent =
+      log.viewType || 'undefined';
 
-      logTableRowInstance.querySelector('.id').textContent = log.id;
-      logTableRowInstance.querySelector('.timestamp').textContent =
-        log.timeStamp;
-      logTableRowInstance.querySelector('.api-type').textContent = log.type;
-      logTableRowInstance.querySelector('.name').textContent = log.name;
-      logTableRowInstance.querySelector('.view-type').textContent =
-        log.viewType || 'undefined';
+    logTableRowInstance.hidden = isHidden;
 
-      rowsFragment.appendChild(logTableRowInstance);
-    }
-
-    this.tableBody.appendChild(rowsFragment);
+    this.tableBody.appendChild(logTableRowInstance);
   }
 
   openDetailSidebar(logDetails) {
