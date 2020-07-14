@@ -6,109 +6,21 @@
   box-sizing: border-box;
 }
 
-.container {
-  width: 100%;
-}
-
-#showActivityLog,
-#saveLogBtn {
-  margin: 20px 0;
-}
-
 .activity-log-wrapper {
   position: relative;
 }
 
-.show-log-detail-wrapper {
-  position: absolute;
-  top: 0;
-  height: 500px;
-  right: 0;
-  width: 40%;
-  word-wrap: anywhere;
-  background-color: #ffffff;
-  border: 2px solid #000000;
-}
-
-#showLogDetails {
-  margin: 50px 15px 10px;
-}
-
-.log-table table {
+.container {
   width: 100%;
+  padding: 0 10px;
 }
 
-table {
-  width: 100%;
-  border: 1px solid #eeeeee;
-}
-
-th {
-  width: 100%;
-  background: #000;
-  padding: 5px;
-  text-transform: uppercase;
-  color: #ffffff;
-}
-
-tr {
-  display: flex;
-  width: 100%;
-}
-
-tr:nth-of-type(odd) {
-  background: #eeeeee;
-}
-
-td,
-th {
-  flex: 1 1 20%;
-  text-align: center;
-  word-wrap: anywhere;
-  align-self: center;
-}
-
-table td {
-  padding: 3px;
+#saveLogBtn {
+  margin: 20px 0;
 }
 
 .failure {
   background-color: #961616;
   padding: 10px;
   color: #ffffff;
-}
-
-.log-table {
-  overflow-y: scroll;
-  max-height: 500px;
-  height: auto;
-}
-
-table thead {
-  position: sticky;
-  top: 0;
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-  cursor: pointer;
-}
-
-.width-60 {
-  width: 60%;
-}
-
-.close {
-  background: url(/icons/close.svg) no-repeat center center / cover;
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-}
-
-.activity-log-container {
-  position: relative;
 }

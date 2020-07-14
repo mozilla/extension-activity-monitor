@@ -1,66 +1,28 @@
-import { save } from '../lib/save-load.js';
+import { save } from './save-load.js';
 
-export default class ActivityLog {
+class Model {
   constructor() {
     this.logs = [];
-
-    this.saveLogBtn = document.getElementById('saveLogBtn');
-    this.showLogDetailWrapper = document.querySelector(
-      '.show-log-detail-wrapper'
-    );
-    this.showLogDetails = document.getElementById('showLogDetails');
-    this.logTableWrapper = document.querySelector('.log-table');
-    this.tableBody = document.querySelector('table tbody');
-    this.notice = document.querySelector('.notice');
-    this.closeBtn = document.querySelector('.close');
-  }
-
-  async init() {
-    const existingLogs = await this.getExistingLogs();
-
-    if (existingLogs.length) {
-      this.addNewLogs(existingLogs);
-    }
-
-    this.saveLogBtn.addEventListener('click', this);
-    this.closeBtn.addEventListener('click', this);
-    this.tableBody.addEventListener('click', this);
-
-    browser.runtime.onMessage.addListener((message) => {
-      const { requestTo, requestType } = message;
-
-      if (requestTo !== 'activity-log') {
-        return;
-      }
-
-      if (requestType === 'appendLogs') {
-        this.addNewLogs([message.log]);
-      } else {
-        throw new Error(`wrong request type found ${requestType}`);
-      }
-    });
-  }
-
-  async getExistingLogs() {
-    const { existingLogs } = await browser.runtime.sendMessage({
-      requestType: 'sendAllLogs',
-      requestTo: 'ext-monitor',
-    });
-    return existingLogs;
   }
 
   addNewLogs(logs) {
-    for (const log of logs) {
-      const newRow = this.tableBody.insertRow(-1);
-      newRow.insertCell(0).textContent = log.id;
-      newRow.insertCell(1).textContent = log.timeStamp;
-      newRow.insertCell(2).textContent = log.type;
-      newRow.insertCell(3).textContent = log.name;
-      newRow.insertCell(4).textContent = log.viewType || 'undefined';
-      newRow._log = log;
+    this.logs.push(...logs);
+  }
+}
 
-      this.logs.push(log);
-    }
+class View {
+  constructor() {
+    this.logTable = document.querySelector('log-view');
+    this.saveLogBtn = document.getElementById('saveLogBtn');
+    this.notice = document.querySelector('.notice');
+
+    this.saveLogBtn.addEventListener('click', function () {
+      this.dispatchEvent(new CustomEvent('savelog'));
+    });
+  }
+
+  addTableRows(logs) {
+    this.logTable.addNewRows(logs);
   }
 
   setError(errorMessage) {
@@ -72,49 +34,70 @@ export default class ActivityLog {
       this.notice.classList.remove('failure');
     }
   }
+}
 
-  handleEvent(event) {
-    if (event.type === 'click') {
-      const logDetails = event.target.closest('tr')?._log;
+class Controller {
+  constructor(model, view) {
+    this.model = model;
+    this.view = view;
 
-      if (logDetails) {
-        this.openDetailSidebar(logDetails);
+    this.init();
+  }
+
+  async init() {
+    this.view.saveLogBtn.addEventListener('savelog', this);
+
+    browser.runtime.onMessage.addListener((message) => {
+      const { requestTo, requestType } = message;
+
+      if (requestTo !== 'activity-log') {
         return;
       }
 
-      switch (event.target) {
-        case this.saveLogBtn:
-          this.saveLogs();
-          break;
-        case this.closeBtn:
-          this.closeDetailSidebar();
-          break;
-        default:
-          throw new Error(`unexpected click event on ${event.target.tagName}`);
+      if (requestType === 'appendLogs') {
+        this.model.addNewLogs([message.log]);
+        this.view.addTableRows([message.log]);
+      } else {
+        throw new Error(`wrong request type found - ${requestType}`);
       }
-    } else {
-      throw new Error(`wrong event type found ${event.type}`);
+    });
+
+    const existingLogs = await this.getExistingLogs();
+
+    if (existingLogs.length) {
+      this.model.addNewLogs(existingLogs);
+      this.view.addTableRows(this.model.logs);
     }
   }
 
-  openDetailSidebar(logDetails) {
-    const logString = JSON.stringify(logDetails);
-    this.showLogDetails.textContent = logString;
-    this.showLogDetailWrapper.removeAttribute('hidden');
-    this.logTableWrapper.classList.add('width-60');
+  async getExistingLogs() {
+    const { existingLogs } = await browser.runtime.sendMessage({
+      requestType: 'sendAllLogs',
+      requestTo: 'ext-monitor',
+    });
+    return existingLogs;
   }
 
-  closeDetailSidebar() {
-    this.showLogDetailWrapper.setAttribute('hidden', true);
-    this.logTableWrapper.classList.remove('width-60');
+  handleEvent(event) {
+    if (event.type === 'savelog') {
+      this.saveLogs();
+    } else {
+      throw new Error(`wrong event type found - ${event.type}`);
+    }
   }
 
   async saveLogs() {
     try {
-      await save.saveAsJSON(this.logs);
-      this.setError(null);
+      await save.saveAsJSON(this.model.logs);
+      this.view.setError(null);
     } catch (error) {
-      this.setError(error.message);
+      this.view.setError(error.message);
     }
+  }
+}
+
+export default class ActivityLog {
+  constructor() {
+    new Controller(new Model(), new View());
   }
 }

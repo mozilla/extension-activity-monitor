@@ -6,6 +6,10 @@
     <title>Extension Activity Monitor</title>
     <link rel="stylesheet" href="activitylog.css" />
     <script src="activitylog.js" type="module"></script>
+    <script
+      type="module"
+      src="/lib/web-component/log-view/log-view-element.js"
+    ></script>
   </head>
   <body>
     <div class="container">
@@ -14,27 +18,40 @@
       <div class="notice"></div>
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
-        <div class="activity-log-container">
-          <div class="log-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Extension Id</th>
-                  <th>Timestamp</th>
-                  <th>API Type</th>
-                  <th>API Name</th>
-                  <th>View Type</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-          <div class="show-log-detail-wrapper" hidden>
-            <div id="showLogDetails"></div>
-            <div class="close"></div>
-          </div>
-        </div>
+        <log-view></log-view>
       </div>
     </div>
+
+    <template id="logTableTemplate">
+      <link rel="stylesheet" href="/lib/web-component/log-view/log-view.css" />
+      <div class="activity-log-container">
+        <div class="log-table-wrapper">
+          <table>
+            <thead>
+              <th>Extension Id</th>
+              <th>Timestamp</th>
+              <th>API Type</th>
+              <th>API Name</th>
+              <th>View Type</th>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="log-detail-wrapper" hidden>
+          <div class="log-details"></div>
+          <div class="close"></div>
+        </div>
+      </div>
+    </template>
+
+    <template id="logTableRowTemplate">
+      <tr>
+        <td class="id"></td>
+        <td class="timestamp"></td>
+        <td class="api-type"></td>
+        <td class="name"></td>
+        <td class="view-type"></td>
+      </tr>
+    </template>
   </body>
 </html>

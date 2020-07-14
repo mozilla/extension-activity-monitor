@@ -1,0 +1,71 @@
+.activity-log-container {
+  position: relative;
+}
+
+.log-table-wrapper {
+  overflow-y: scroll;
+  max-height: 500px;
+  height: auto;
+}
+
+.close {
+  background: url(/icons/close.svg) no-repeat center center / cover;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+}
+
+.log-details {
+  margin: 50px 15px 10px;
+}
+
+.width-60 {
+  width: 60%;
+}
+
+.log-detail-wrapper {
+  position: absolute;
+  top: 0;
+  height: 500px;
+  right: 0;
+  width: 40%;
+  word-wrap: anywhere;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+}
+
+table {
+  border: 1px solid #000000;
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+table thead {
+  position: sticky;
+  top: 0;
+  background: #000000;
+  color: #ffffff;
+}
+
+table thead th {
+  padding: 10px;
+  font-size: 18px;
+}
+
+table tbody tr:nth-of-type(odd) {
+  background: #eeeeee;
+}
+
+table tbody tr {
+  cursor: pointer;
+}
+
+table td {
+  word-wrap: anywhere;
+  text-align: center;
+  padding: 5px;
+}
