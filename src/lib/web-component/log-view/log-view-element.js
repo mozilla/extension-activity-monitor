@@ -4,10 +4,11 @@ class LogView extends HTMLElement {
 
     const shadow = this.attachShadow({ mode: 'open' });
 
-    this.logTableTemplate = document.querySelector('#log-table-template');
-    this.logTableRowTemplate = document.querySelector(
-      '.log-table-row-template'
-    );
+    this.logTableRow = document
+      .querySelector('#logTableRowTemplate')
+      .content.firstElementChild.cloneNode(true);
+
+    this.logTableTemplate = document.querySelector('#logTableTemplate');
 
     const logTableInstance = this.logTableTemplate.content.cloneNode(true);
     this.logDetailWrapper = logTableInstance.querySelector(
@@ -25,17 +26,15 @@ class LogView extends HTMLElement {
     const rowsFragment = document.createDocumentFragment();
 
     for (const log of logs) {
-      const logTableRowInstance = this.logTableRowTemplate.content.cloneNode(
-        true
-      );
-      logTableRowInstance.firstElementChild._log = log;
+      const logTableRowInstance = this.logTableRow.cloneNode(true);
+      logTableRowInstance._log = log;
 
-      logTableRowInstance.querySelector('#id').textContent = log.id;
-      logTableRowInstance.querySelector('#timestamp').textContent =
+      logTableRowInstance.querySelector('.id').textContent = log.id;
+      logTableRowInstance.querySelector('.timestamp').textContent =
         log.timeStamp;
-      logTableRowInstance.querySelector('#apiType').textContent = log.type;
-      logTableRowInstance.querySelector('#name').textContent = log.name;
-      logTableRowInstance.querySelector('#viewType').textContent =
+      logTableRowInstance.querySelector('.api-type').textContent = log.type;
+      logTableRowInstance.querySelector('.name').textContent = log.name;
+      logTableRowInstance.querySelector('.view-type').textContent =
         log.viewType || 'undefined';
 
       rowsFragment.appendChild(logTableRowInstance);
