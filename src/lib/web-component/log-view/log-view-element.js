@@ -22,7 +22,7 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  addNewRows({ log, isHidden }) {
+  addNewRow({ log, isHidden }) {
     const logTableRowInstance = this.logTableRow.cloneNode(true);
     logTableRowInstance._log = log;
 
@@ -30,8 +30,7 @@ class LogView extends HTMLElement {
     logTableRowInstance.querySelector('.timestamp').textContent = log.timeStamp;
     logTableRowInstance.querySelector('.api-type').textContent = log.type;
     logTableRowInstance.querySelector('.name').textContent = log.name;
-    logTableRowInstance.querySelector('.view-type').textContent =
-      log.viewType || 'undefined';
+    logTableRowInstance.querySelector('.view-type').textContent = log.viewType;
 
     logTableRowInstance.hidden = isHidden;
 

@@ -19,12 +19,19 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">
-          <div class="filter-ext-container">
-            <div class="extension-selector">
-              <p>Select extensions to filter logs</p>
+          <div class="filter-container">
+            <div class="toggle-list extension">
+              Select extensions to filter logs
               <div class="arrow-right"></div>
             </div>
-            <div class="extension-list" hidden></div>
+            <div class="checkbox-list extension" hidden></div>
+          </div>
+          <div class="filter-container">
+            <div class="toggle-list viewtype">
+              Select view type to filter logs
+              <div class="arrow-right"></div>
+            </div>
+            <div class="checkbox-list viewtype" hidden></div>
           </div>
         </div>
         <log-view></log-view>
@@ -63,9 +70,9 @@
       </tr>
     </template>
 
-    <template id="filterExtCheckbox">
+    <template id="filterCheckbox">
       <label class="filter-option filter-checkbox">
-        <p class="ext-id"></p>
+        <p class="ext-prop"></p>
         <input type="checkbox" />
         <div class="select-indicator"></div>
       </label>

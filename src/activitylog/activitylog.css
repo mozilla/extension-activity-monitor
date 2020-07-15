@@ -27,7 +27,7 @@
 
 /* extension filter checkbox */
 
-.filter-ext-container {
+.filter-container {
   position: relative;
   box-shadow: 0 1px 1px #0000001a;
   background-color: #66c8e0;
@@ -95,7 +95,7 @@
   border-color: #7b7b7b;
 }
 
-.extension-selector {
+.toggle-list {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -117,7 +117,7 @@
   height: 20px;
 }
 
-.extension-list {
+.checkbox-list {
   position: absolute;
   margin-top: 5px;
   background-color: #ffffff;
@@ -126,4 +126,12 @@
   min-width: 100%;
   padding: 15px;
   z-index: 1001;
+}
+
+.filter-wrapper {
+  display: flex;
+}
+
+.filter-wrapper .filter-container:not(:last-child) {
+  margin-right: 20px;
 }

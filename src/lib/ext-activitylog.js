@@ -4,11 +4,25 @@ class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      ids: [],
+      id: [],
+      viewType: [],
     };
   }
 
-  addNewLogs(log) {
+  handleFilter(filterObj) {
+    const { type, detail } = filterObj;
+
+    if (type === 'addFilter') {
+      this.filter[detail.target].push(detail.value);
+    } else if (type === 'removeFilter') {
+      this.filter[detail.target].splice(
+        this.filter[detail.target].indexOf(detail.value),
+        1
+      );
+    }
+  }
+
+  addNewLog(log) {
     this.logs.push(log);
   }
 }
@@ -16,50 +30,169 @@ class Model {
 class View {
   constructor() {
     this.logView = document.querySelector('log-view');
-    this.saveLogBtn = document.getElementById('saveLogBtn');
+    this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.notice = document.querySelector('.notice');
+    this.checkboxTemplate = document.querySelector('#filterCheckbox').content;
 
-    this.extCheckboxTemplate = document.querySelector(
-      '#filterExtCheckbox'
-    ).content;
+    this.extCheckboxList = document.querySelector('.checkbox-list.extension');
+    this.toggleExtList = document.querySelector('.toggle-list.extension');
 
-    this.extList = document.querySelector('.extension-list');
+    this.viewTypeCheckboxList = document.querySelector(
+      '.checkbox-list.viewtype'
+    );
+    this.toggleViewTypeList = document.querySelector('.toggle-list.viewtype');
 
-    this.saveLogBtn.addEventListener('click', function () {
-      this.dispatchEvent(new CustomEvent('savelog'));
-    });
+    this.toggleExtList.addEventListener('click', this);
+    this.extCheckboxList.addEventListener('change', this);
 
-    this.extFilterBtn = document.querySelector('.extension-selector');
+    this.toggleViewTypeList.addEventListener('click', this);
+    this.viewTypeCheckboxList.addEventListener('change', this);
 
-    this.extFilterBtn.addEventListener('click', () => {
-      if (this.extList.hidden) {
-        this.extList.hidden = false;
-        document
-          .querySelector('.arrow-right')
-          .classList.replace('arrow-right', 'arrow-down');
-      } else {
-        this.extList.hidden = true;
-        document
-          .querySelector('.arrow-down')
-          .classList.replace('arrow-down', 'arrow-right');
-      }
-    });
-
-    this.extList.addEventListener('change', function (event) {
-      const filterObj = {
-        id: event.target.closest('input').value,
-        checked: event.target.closest('input').checked,
-      };
-
-      const filterRowEvent = new CustomEvent('filter-rows', {
-        detail: { filterObj },
-      });
-      this.dispatchEvent(filterRowEvent);
-    });
+    this.saveLogBtn.addEventListener('click', this);
   }
 
-  addTableRows(log) {
-    this.logView.addNewRows(log);
+  handleEvent(event) {
+    if (event.type === 'click') {
+      switch (event.currentTarget) {
+        case this.saveLogBtn:
+          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
+
+        case this.toggleExtList:
+          this.extCheckboxList.hidden = !this.extCheckboxList.hidden;
+          this.toggleFilterBtnIcon(
+            this.toggleExtList,
+            this.extCheckboxList.hidden
+          );
+          break;
+
+        case this.toggleViewTypeList:
+          this.viewTypeCheckboxList.hidden = !this.viewTypeCheckboxList.hidden;
+          this.toggleFilterBtnIcon(
+            this.toggleViewTypeList,
+            this.viewTypeCheckboxList.hidden
+          );
+          break;
+
+        default:
+          throw new Error(`wrong event target - ${event.target.tagName}`);
+      }
+    } else if (event.type === 'change') {
+      let target = null;
+      switch (event.currentTarget) {
+        case this.extCheckboxList:
+          target = 'id';
+          break;
+        case this.viewTypeCheckboxList:
+          target = 'viewType';
+          break;
+        default:
+          break;
+      }
+
+      if (target) {
+        const filterObj = {
+          filterParam: { value: event.target.closest('input').value, target },
+          checked: event.target.closest('input').checked,
+        };
+        const filterEvent = new CustomEvent('filter', { detail: filterObj });
+
+        event.currentTarget.dispatchEvent(filterEvent);
+      }
+    } else {
+      throw new Error(`wrong event type - ${event.type}`);
+    }
+  }
+
+  toggleFilterBtnIcon(element, isListHidden) {
+    isListHidden
+      ? element
+          .querySelector('.arrow-down')
+          .classList.replace('arrow-down', 'arrow-right')
+      : element
+          .querySelector('.arrow-right')
+          .classList.replace('arrow-right', 'arrow-down');
+  }
+
+  handleNewLog(logObj) {
+    this.addTableRow(logObj);
+    this.updateFilerOptions(logObj.log);
+  }
+
+  addTableRow(logObj) {
+    this.logView.addNewRow(logObj);
+  }
+
+  updateFilerOptions(log) {
+    function isCheckboxExist(checkboxWrapperElement, property) {
+      const checkboxLabels = checkboxWrapperElement.querySelectorAll('label p');
+      for (const label of checkboxLabels) {
+        if (label.textContent === property) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    for (const key of Object.keys(log)) {
+      switch (key) {
+        case 'id':
+          if (!isCheckboxExist(this.extCheckboxList, log.id)) {
+            this.addNewCheckbox(this.extCheckboxList, log.id);
+          }
+          break;
+        case 'viewType':
+          if (!isCheckboxExist(this.viewTypeCheckboxList, log.viewType)) {
+            this.addNewCheckbox(
+              this.viewTypeCheckboxList,
+              String(log.viewType)
+            );
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  addNewCheckbox(selector, labelText) {
+    const checkboxInstance = this.checkboxTemplate.cloneNode(true);
+    checkboxInstance.querySelector('label p').textContent = labelText;
+    checkboxInstance.querySelector('input').value = labelText;
+    checkboxInstance.querySelector('input').checked = true;
+
+    selector.appendChild(checkboxInstance);
+  }
+
+  handleTableFilter(filterOption, filterModelObject, isFilterMatching) {
+    const { display, detail } = filterOption;
+
+    if (display === 'show') {
+      const hiddenRows = this.logView.logTableWrapper.querySelectorAll(
+        'tbody tr[hidden]'
+      );
+
+      for (const row of hiddenRows) {
+        if (
+          row._log[detail.target] === detail.value &&
+          !isFilterMatching(filterModelObject, row._log)
+        ) {
+          row.hidden = false;
+        }
+      }
+    } else if (display === 'hide') {
+      const visibleRows = this.logView.logTableWrapper.querySelectorAll(
+        'tbody tr:not([hidden])'
+      );
+
+      for (const row of visibleRows) {
+        if (row._log[detail.target] === detail.value) {
+          row.hidden = true;
+        }
+      }
+    } else {
+      throw new Error(`wrong display option - ${display}`);
+    }
   }
 
   setError(errorMessage) {
@@ -83,7 +216,8 @@ class Controller {
 
   async init() {
     this.view.saveLogBtn.addEventListener('savelog', this);
-    this.view.extList.addEventListener('filter-rows', this);
+    this.view.extCheckboxList.addEventListener('filter', this);
+    this.view.viewTypeCheckboxList.addEventListener('filter', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -94,7 +228,6 @@ class Controller {
 
       if (requestType === 'appendLogs') {
         this.handleNewLogs([message.log]);
-        this.updateFilterOption([message.log]);
       } else {
         throw new Error(`wrong request type found - ${requestType}`);
       }
@@ -104,74 +237,30 @@ class Controller {
 
     if (existingLogs.length) {
       this.handleNewLogs(existingLogs);
-      this.updateFilterOption(this.model.logs);
     }
   }
 
   handleNewLogs(logs) {
     for (const log of logs) {
-      this.model.addNewLogs(log);
-      if (this.model.filter.ids.includes(log.id)) {
-        this.view.addTableRows({ log, isHidden: true });
-      } else {
-        this.view.addTableRows({ log, isHidden: false });
+      if (log.viewType === undefined) {
+        log.viewType = 'undefined';
       }
+      this.model.addNewLog(log);
+      this.isFilterMatching(this.model.filter, log)
+        ? this.view.handleNewLog({ log, isHidden: true })
+        : this.view.handleNewLog({ log, isHidden: false });
     }
   }
 
-  updateFilterOption(logs) {
-    for (const log of logs) {
-      if (!this.existInFilterIds(log.id)) {
-        const checkboxInstance = this.view.extCheckboxTemplate.cloneNode(true);
-        checkboxInstance.querySelector('p.ext-id').textContent = log.id;
-        checkboxInstance.querySelector('input').value = log.id;
-        checkboxInstance.querySelector('input').checked = true;
-
-        this.view.extList.appendChild(checkboxInstance);
-      }
-    }
-  }
-
-  existInFilterIds(id) {
-    const allExtIdElement = this.view.extList.querySelectorAll(
-      'label p.ext-id'
-    );
-    for (const eachElement of allExtIdElement) {
-      if (eachElement.textContent === id) {
-        return true;
+  isFilterMatching(filter, log) {
+    for (const key of Object.keys(filter)) {
+      if (Object.keys(log).includes(key)) {
+        if (filter[key].includes(log[key])) {
+          return true;
+        }
       }
     }
     return false;
-  }
-
-  filterTableRows(filterOptions) {
-    const { id, checked } = filterOptions;
-
-    if (checked) {
-      const hiddenRows = this.view.logView.logTableWrapper.querySelectorAll(
-        'tbody tr[hidden]'
-      );
-
-      for (const row of hiddenRows) {
-        if (row._log.id === id) {
-          row.hidden = false;
-        }
-      }
-
-      this.model.filter.ids.splice(this.model.filter.ids.indexOf(id), 1);
-    } else {
-      const visibleRows = this.view.logView.logTableWrapper.querySelectorAll(
-        'tbody tr:not([hidden])'
-      );
-
-      for (const row of visibleRows) {
-        if (row._log.id === id) {
-          row.hidden = true;
-        }
-      }
-
-      this.model.filter.ids.push(id);
-    }
   }
 
   async getExistingLogs() {
@@ -185,8 +274,8 @@ class Controller {
   handleEvent(event) {
     if (event.type === 'savelog') {
       this.saveLogs();
-    } else if (event.type === 'filter-rows') {
-      this.filterTableRows(event.detail.filterObj);
+    } else if (event.type === 'filter') {
+      this.filterTableRows(event.detail);
     } else {
       throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -199,6 +288,20 @@ class Controller {
     } catch (error) {
       this.view.setError(error.message);
     }
+  }
+
+  filterTableRows(filterOptions) {
+    const { filterParam, checked } = filterOptions;
+
+    const type = checked ? 'removeFilter' : 'addFilter';
+    const display = checked ? 'show' : 'hide';
+
+    this.model.handleFilter({ type, detail: filterParam });
+    this.view.handleTableFilter(
+      { display, detail: filterParam },
+      this.model.filter,
+      this.isFilterMatching
+    );
   }
 }
 
