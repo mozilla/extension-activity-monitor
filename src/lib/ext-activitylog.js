@@ -6,6 +6,7 @@ class Model {
     this.filter = {
       id: [],
       viewType: [],
+      type: [],
     };
   }
 
@@ -37,10 +38,15 @@ class View {
     );
     this.viewTypeFilterBtn = document.querySelector('.toggle-btn.viewtype');
 
+    this.apiTypeCheckboxList = document.querySelector('.checkbox-list.apitype');
+    this.apiTypeFilterBtn = document.querySelector('.toggle-btn.apitype');
+
     this.extFilterBtn.addEventListener('click', this);
     this.extCheckboxList.addEventListener('change', this);
     this.viewTypeFilterBtn.addEventListener('click', this);
     this.viewTypeCheckboxList.addEventListener('change', this);
+    this.apiTypeFilterBtn.addEventListener('click', this);
+    this.apiTypeCheckboxList.addEventListener('change', this);
     this.saveLogBtn.addEventListener('click', this);
   }
 
@@ -59,8 +65,16 @@ class View {
             this.viewTypeCheckboxList
           );
           break;
+        case this.apiTypeFilterBtn:
+          this.toggleFilterListDisplay(
+            this.apiTypeFilterBtn,
+            this.apiTypeCheckboxList
+          );
+          break;
         default:
-          throw new Error(`wrong event target - ${event.target.tagName}`);
+          throw new Error(
+            `wrong event target - ${event.currentTarget.tagName}`
+          );
       }
     } else if (event.type === 'change') {
       this.handleChangeOnCheckbox(event);
@@ -93,6 +107,9 @@ class View {
       case this.viewTypeCheckboxList:
         target = 'viewType';
         break;
+      case this.apiTypeCheckboxList:
+        target = 'type';
+        break;
       default:
         break;
     }
@@ -124,6 +141,11 @@ class View {
         case 'viewType':
           if (!this.isCheckboxExist(this.viewTypeCheckboxList, log.viewType)) {
             this.addNewCheckbox(this.viewTypeCheckboxList, log.viewType);
+          }
+          break;
+        case 'type':
+          if (!this.isCheckboxExist(this.apiTypeCheckboxList, log.type)) {
+            this.addNewCheckbox(this.apiTypeCheckboxList, log.type);
           }
           break;
         default:
@@ -204,6 +226,7 @@ class Controller {
     this.view.saveLogBtn.addEventListener('savelog', this);
     this.view.extCheckboxList.addEventListener('filter', this);
     this.view.viewTypeCheckboxList.addEventListener('filter', this);
+    this.view.apiTypeCheckboxList.addEventListener('filter', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -231,6 +254,7 @@ class Controller {
       if (log.viewType === undefined) {
         log.viewType = 'undefined';
       }
+
       this.model.addNewLog(log);
       this.isFilterMatching(this.model.filter, log)
         ? this.view.handleNewLog({ log, isHidden: true })
@@ -279,21 +303,8 @@ class Controller {
   filter(filterOption) {
     const { filterParam, checked } = filterOption;
 
-    const requestType = checked ? 'removeFilter' : 'addFilter';
-    const display = checked ? 'showRows' : 'hideRows';
-
-    this.handleFilterOnModel({ requestType, filterParam });
-    this.handleFilterOnView({ display, filterParam });
-  }
-
-  handleFilterOnModel(filterOption) {
-    const { requestType, filterParam } = filterOption;
-    this.model[requestType](filterParam);
-  }
-
-  handleFilterOnView(filterOption) {
-    const { display, filterParam } = filterOption;
-    this.view[display]({
+    this.model[checked ? 'removeFilter' : 'addFilter'](filterParam);
+    this.view[checked ? 'showRows' : 'hideRows']({
       filterParam,
       filterObject: this.model.filter,
       isFilterMatchingFn: this.isFilterMatching,
