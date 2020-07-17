@@ -8,6 +8,10 @@
     <script src="activitylog.js" type="module"></script>
     <script
       type="module"
+      src="/lib/web-component/filter-container/filter-container-element.js"
+    ></script>
+    <script
+      type="module"
       src="/lib/web-component/log-view/log-view-element.js"
     ></script>
   </head>
@@ -19,27 +23,15 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">
-          <div class="filter-container">
-            <div class="toggle-btn extension">
-              Select extensions to filter logs
-              <div class="arrow-right"></div>
-            </div>
-            <div class="checkbox-list extension" hidden></div>
-          </div>
-          <div class="filter-container">
-            <div class="toggle-btn viewtype">
-              Select view type to filter logs
-              <div class="arrow-right"></div>
-            </div>
-            <div class="checkbox-list viewtype" hidden></div>
-          </div>
-          <div class="filter-container">
-            <div class="toggle-btn apitype">
-              Select API type to filter logs
-              <div class="arrow-right"></div>
-            </div>
-            <div class="checkbox-list apitype" hidden></div>
-          </div>
+          <filter-container filter-key="id">
+            Select extensions to filter logs
+          </filter-container>
+          <filter-container filter-key="viewType">
+            Select view type to filter logs
+          </filter-container>
+          <filter-container filter-key="type">
+            Select api type to filter logs
+          </filter-container>
         </div>
         <log-view></log-view>
       </div>
@@ -77,12 +69,23 @@
       </tr>
     </template>
 
-    <template id="filterCheckbox">
+    <template id="filterCheckboxTemplate">
       <label class="filter-option filter-checkbox">
-        <p class="ext-prop"></p>
+        <span></span>
         <input type="checkbox" />
         <div class="select-indicator"></div>
       </label>
+    </template>
+
+    <template id="filterContainerTemplate">
+      <link
+        rel="stylesheet"
+        href="/lib/web-component/filter-container/filter-container.css"
+      />
+      <div class="filter-container">
+        <div class="toggle-btn"></div>
+        <div class="checkbox-list" hidden></div>
+      </div>
     </template>
   </body>
 </html>

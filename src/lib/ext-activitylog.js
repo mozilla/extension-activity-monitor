@@ -14,12 +14,15 @@ class Model {
     this.logs.push(log);
   }
 
-  addFilter({ target, value }) {
-    this.filter[target].push(value);
+  addFilter({ logKey, valueEquals }) {
+    this.filter[logKey].push(valueEquals);
   }
 
-  removeFilter({ target, value }) {
-    this.filter[target].splice(this.filter[target].indexOf(value), 1);
+  removeFilter({ logKey, valueEquals }) {
+    const logKeyIndex = this.filter[logKey].indexOf(valueEquals);
+    if (logKeyIndex > -1) {
+      this.filter[logKey].splice(logKeyIndex, 1);
+    }
   }
 }
 
@@ -28,174 +31,43 @@ class View {
     this.logView = document.querySelector('log-view');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.notice = document.querySelector('.notice');
-    this.checkboxTemplate = document.querySelector('#filterCheckbox').content;
 
-    this.extCheckboxList = document.querySelector('.checkbox-list.extension');
-    this.extFilterBtn = document.querySelector('.toggle-btn.extension');
-
-    this.viewTypeCheckboxList = document.querySelector(
-      '.checkbox-list.viewtype'
+    this.extFilter = document.querySelector(
+      'filter-container[filter-key="id"]'
     );
-    this.viewTypeFilterBtn = document.querySelector('.toggle-btn.viewtype');
+    this.viewTypeFilter = document.querySelector(
+      'filter-container[filter-key="viewType"]'
+    );
+    this.apiTypeFilter = document.querySelector(
+      'filter-container[filter-key="type"]'
+    );
 
-    this.apiTypeCheckboxList = document.querySelector('.checkbox-list.apitype');
-    this.apiTypeFilterBtn = document.querySelector('.toggle-btn.apitype');
-
-    this.extFilterBtn.addEventListener('click', this);
-    this.extCheckboxList.addEventListener('change', this);
-    this.viewTypeFilterBtn.addEventListener('click', this);
-    this.viewTypeCheckboxList.addEventListener('change', this);
-    this.apiTypeFilterBtn.addEventListener('click', this);
-    this.apiTypeCheckboxList.addEventListener('change', this);
     this.saveLogBtn.addEventListener('click', this);
   }
 
   handleEvent(event) {
     if (event.type === 'click') {
-      switch (event.currentTarget) {
+      switch (event.target) {
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
           break;
-        case this.extFilterBtn:
-          this.toggleFilterListDisplay(this.extFilterBtn, this.extCheckboxList);
-          break;
-        case this.viewTypeFilterBtn:
-          this.toggleFilterListDisplay(
-            this.viewTypeFilterBtn,
-            this.viewTypeCheckboxList
-          );
-          break;
-        case this.apiTypeFilterBtn:
-          this.toggleFilterListDisplay(
-            this.apiTypeFilterBtn,
-            this.apiTypeCheckboxList
-          );
-          break;
         default:
-          throw new Error(
-            `wrong event target - ${event.currentTarget.tagName}`
-          );
+          throw new Error(`wrong event target - ${event.target.tagName}`);
       }
-    } else if (event.type === 'change') {
-      this.handleChangeOnCheckbox(event);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
   }
 
-  toggleFilterListDisplay(toggleBtn, checkboxList) {
-    checkboxList.hidden = !checkboxList.hidden;
-    this.toggleFilterBtnIcon(toggleBtn, checkboxList.hidden);
-  }
-
-  toggleFilterBtnIcon(element, isListHidden) {
-    isListHidden
-      ? element
-          .querySelector('.arrow-down')
-          .classList.replace('arrow-down', 'arrow-right')
-      : element
-          .querySelector('.arrow-right')
-          .classList.replace('arrow-right', 'arrow-down');
-  }
-
-  handleChangeOnCheckbox(event) {
-    let target = null;
-    switch (event.currentTarget) {
-      case this.extCheckboxList:
-        target = 'id';
-        break;
-      case this.viewTypeCheckboxList:
-        target = 'viewType';
-        break;
-      case this.apiTypeCheckboxList:
-        target = 'type';
-        break;
-      default:
-        break;
-    }
-
-    if (target) {
-      const filterObj = {
-        filterParam: { value: event.target.closest('input').value, target },
-        checked: event.target.closest('input').checked,
-      };
-
-      const filterEvent = new CustomEvent('filter', { detail: filterObj });
-      event.currentTarget.dispatchEvent(filterEvent);
-    }
-  }
-
   handleNewLog(object) {
     this.logView.addNewRow(object);
-    this.updateFilterCheckboxes(object.log);
+    this.updateFilterOptions(object.log);
   }
 
-  updateFilterCheckboxes(log) {
-    for (const key of Object.keys(log)) {
-      switch (key) {
-        case 'id':
-          this.addNewCheckbox(this.extCheckboxList, log.id);
-          break;
-        case 'viewType':
-          this.addNewCheckbox(this.viewTypeCheckboxList, log.viewType);
-          break;
-        case 'type':
-          this.addNewCheckbox(this.apiTypeCheckboxList, log.type);
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  addNewCheckbox(checkboxList, labelText) {
-    if (!this.isCheckboxExist(checkboxList, labelText)) {
-      const newCheckbox = this.checkboxTemplate.cloneNode(true);
-      newCheckbox.querySelector('label p').textContent = labelText;
-      newCheckbox.querySelector('input').value = labelText;
-      newCheckbox.querySelector('input').checked = true;
-      checkboxList.appendChild(newCheckbox);
-    }
-  }
-
-  isCheckboxExist(checkboxList, labelText) {
-    const checkboxLabels = checkboxList.querySelectorAll('label p');
-    for (const label of checkboxLabels) {
-      if (label.textContent === labelText) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  showRows({ filterParam, filterObject, isFilterMatchingFn }) {
-    const { target, value } = filterParam;
-
-    const hiddenRows = this.logView.logTableWrapper.querySelectorAll(
-      'tbody tr[hidden]'
-    );
-
-    for (const row of hiddenRows) {
-      const log = row._log;
-      if (log[target] === value && !isFilterMatchingFn(filterObject, log)) {
-        row.hidden = false;
-      }
-    }
-  }
-
-  hideRows({ filterParam }) {
-    const { target, value } = filterParam;
-
-    const visibleRows = this.logView.logTableWrapper.querySelectorAll(
-      'tbody tr:not([hidden])'
-    );
-
-    for (const row of visibleRows) {
-      const log = row._log;
-      if (log[target] === value) {
-        row.hidden = true;
-      }
-    }
+  updateFilterOptions(log) {
+    this.extFilter.updateFilterCheckboxes(log);
+    this.viewTypeFilter.updateFilterCheckboxes(log);
+    this.apiTypeFilter.updateFilterCheckboxes(log);
   }
 
   setError(errorMessage) {
@@ -219,9 +91,9 @@ class Controller {
 
   async init() {
     this.view.saveLogBtn.addEventListener('savelog', this);
-    this.view.extCheckboxList.addEventListener('filter', this);
-    this.view.viewTypeCheckboxList.addEventListener('filter', this);
-    this.view.apiTypeCheckboxList.addEventListener('filter', this);
+    this.view.extFilter.addEventListener('filter', this);
+    this.view.viewTypeFilter.addEventListener('filter', this);
+    this.view.apiTypeFilter.addEventListener('filter', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -246,18 +118,14 @@ class Controller {
 
   handleNewLogs(logs) {
     for (const log of logs) {
-      if (log.viewType === undefined) {
-        log.viewType = 'undefined';
-      }
-
       this.model.addNewLog(log);
-      this.isFilterMatching(this.model.filter, log)
+      this.isFilterMatched(this.model.filter, log)
         ? this.view.handleNewLog({ log, isHidden: true })
         : this.view.handleNewLog({ log, isHidden: false });
     }
   }
 
-  isFilterMatching(filter, log) {
+  isFilterMatched(filter, log) {
     for (const key of Object.keys(filter)) {
       if (Object.keys(log).includes(key)) {
         if (filter[key].includes(log[key])) {
@@ -295,14 +163,14 @@ class Controller {
     }
   }
 
-  filter(filterOption) {
-    const { filterParam, checked } = filterOption;
+  filter(filterObject) {
+    const { filterDetail, isFilterRemoved } = filterObject;
 
-    this.model[checked ? 'removeFilter' : 'addFilter'](filterParam);
-    this.view[checked ? 'showRows' : 'hideRows']({
-      filterParam,
-      filterObject: this.model.filter,
-      isFilterMatchingFn: this.isFilterMatching,
+    this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
+    this.view.logView.filterLogViewItems({
+      isFilterRemoved,
+      existingFilters: this.model.filter,
+      isFilterMatchedFn: this.isFilterMatched,
     });
   }
 }

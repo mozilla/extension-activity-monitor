@@ -24,14 +24,15 @@ class LogView extends HTMLElement {
 
   addNewRow({ log, isHidden }) {
     const logTableRowInstance = this.logTableRow.cloneNode(true);
-    logTableRowInstance._log = log;
 
     logTableRowInstance.querySelector('.id').textContent = log.id;
     logTableRowInstance.querySelector('.timestamp').textContent = log.timeStamp;
     logTableRowInstance.querySelector('.api-type').textContent = log.type;
     logTableRowInstance.querySelector('.name').textContent = log.name;
-    logTableRowInstance.querySelector('.view-type').textContent = log.viewType;
+    logTableRowInstance.querySelector('.view-type').textContent =
+      log.viewType || 'undefined';
 
+    logTableRowInstance._log = log;
     logTableRowInstance.hidden = isHidden;
 
     this.tableBody.appendChild(logTableRowInstance);
@@ -60,6 +61,20 @@ class LogView extends HTMLElement {
 
       if (event.target === this.closeBtn) {
         this.closeDetailSidebar();
+      }
+    }
+  }
+
+  filterLogViewItems({ isFilterRemoved, existingFilters, isFilterMatchedFn }) {
+    const tableRows = this.logTableWrapper.querySelectorAll('tbody tr');
+
+    for (const row of tableRows) {
+      const log = row._log;
+
+      if (isFilterRemoved) {
+        !isFilterMatchedFn(existingFilters, log) ? (row.hidden = false) : null;
+      } else {
+        isFilterMatchedFn(existingFilters, log) ? (row.hidden = true) : null;
       }
     }
   }
