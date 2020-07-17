@@ -134,19 +134,13 @@ class View {
     for (const key of Object.keys(log)) {
       switch (key) {
         case 'id':
-          if (!this.isCheckboxExist(this.extCheckboxList, log.id)) {
-            this.addNewCheckbox(this.extCheckboxList, log.id);
-          }
+          this.addNewCheckbox(this.extCheckboxList, log.id);
           break;
         case 'viewType':
-          if (!this.isCheckboxExist(this.viewTypeCheckboxList, log.viewType)) {
-            this.addNewCheckbox(this.viewTypeCheckboxList, log.viewType);
-          }
+          this.addNewCheckbox(this.viewTypeCheckboxList, log.viewType);
           break;
         case 'type':
-          if (!this.isCheckboxExist(this.apiTypeCheckboxList, log.type)) {
-            this.addNewCheckbox(this.apiTypeCheckboxList, log.type);
-          }
+          this.addNewCheckbox(this.apiTypeCheckboxList, log.type);
           break;
         default:
           break;
@@ -154,23 +148,24 @@ class View {
     }
   }
 
-  isCheckboxExist(checkboxWrapperElement, property) {
-    const checkboxLabels = checkboxWrapperElement.querySelectorAll('label p');
+  addNewCheckbox(checkboxList, labelText) {
+    if (!this.isCheckboxExist(checkboxList, labelText)) {
+      const newCheckbox = this.checkboxTemplate.cloneNode(true);
+      newCheckbox.querySelector('label p').textContent = labelText;
+      newCheckbox.querySelector('input').value = labelText;
+      newCheckbox.querySelector('input').checked = true;
+      checkboxList.appendChild(newCheckbox);
+    }
+  }
+
+  isCheckboxExist(checkboxList, labelText) {
+    const checkboxLabels = checkboxList.querySelectorAll('label p');
     for (const label of checkboxLabels) {
-      if (label.textContent === property) {
+      if (label.textContent === labelText) {
         return true;
       }
     }
     return false;
-  }
-
-  addNewCheckbox(selector, labelText) {
-    const checkboxInstance = this.checkboxTemplate.cloneNode(true);
-    checkboxInstance.querySelector('label p').textContent = labelText;
-    checkboxInstance.querySelector('input').value = labelText;
-    checkboxInstance.querySelector('input').checked = true;
-
-    selector.appendChild(checkboxInstance);
   }
 
   showRows({ filterParam, filterObject, isFilterMatchingFn }) {
