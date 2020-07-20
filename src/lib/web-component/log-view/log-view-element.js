@@ -22,20 +22,24 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  addNewRow({ log, isHidden }) {
-    const logTableRowInstance = this.logTableRow.cloneNode(true);
+  addNewRows(logs) {
+    const rowsFragment = document.createDocumentFragment();
 
-    logTableRowInstance.querySelector('.id').textContent = log.id;
-    logTableRowInstance.querySelector('.timestamp').textContent = log.timeStamp;
-    logTableRowInstance.querySelector('.api-type').textContent = log.type;
-    logTableRowInstance.querySelector('.name').textContent = log.name;
-    logTableRowInstance.querySelector('.view-type').textContent =
-      log.viewType || 'undefined';
+    for (const log of logs) {
+      const logTableRowInstance = this.logTableRow.cloneNode(true);
+      logTableRowInstance._log = log;
 
-    logTableRowInstance._log = log;
-    logTableRowInstance.hidden = isHidden;
+      logTableRowInstance.querySelector('.id').textContent = log.id;
+      logTableRowInstance.querySelector('.timestamp').textContent =
+        log.timeStamp;
+      logTableRowInstance.querySelector('.api-type').textContent = log.type;
+      logTableRowInstance.querySelector('.name').textContent = log.name;
+      logTableRowInstance.querySelector('.view-type').textContent =
+        log.viewType || 'undefined';
 
-    this.tableBody.appendChild(logTableRowInstance);
+      rowsFragment.appendChild(logTableRowInstance);
+    }
+    this.tableBody.appendChild(rowsFragment);
   }
 
   openDetailSidebar(logDetails) {
@@ -65,18 +69,19 @@ class LogView extends HTMLElement {
     }
   }
 
-  filterLogViewItems({ isFilterRemoved, existingFilters, isFilterMatchedFn }) {
-    const tableRows = this.logTableWrapper.querySelectorAll('tbody tr');
+  filterLogViewItems(modelFilterObject) {
+    for (const row of this.tableBody.rows) {
+      row.hidden = this.isFilterMatched(row._log, modelFilterObject);
+    }
+  }
 
-    for (const row of tableRows) {
-      const log = row._log;
-
-      if (isFilterRemoved) {
-        !isFilterMatchedFn(existingFilters, log) ? (row.hidden = false) : null;
-      } else {
-        isFilterMatchedFn(existingFilters, log) ? (row.hidden = true) : null;
+  isFilterMatched(log, filterObject) {
+    for (const key of Object.keys(filterObject)) {
+      if (filterObject[key].includes(log[key])) {
+        return true;
       }
     }
+    return false;
   }
 
   connectedCallback() {

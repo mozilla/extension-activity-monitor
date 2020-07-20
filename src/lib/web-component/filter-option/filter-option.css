@@ -11,15 +11,17 @@
   height: auto;
   margin: 10px 0;
 }
-.filter-option {
+.filter-checkbox {
   display: block;
   position: relative;
   padding-left: 30px;
   cursor: pointer;
   font-size: 18px;
   margin: 10px 0;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
-.filter-option input {
+.filter-checkbox input {
   position: absolute;
   z-index: -1;
   opacity: 0;
@@ -33,18 +35,18 @@
   background: #e6e6e6;
 }
 
-.filter-option:hover input ~ .select-indicator,
-.filter-option input:focus ~ .select-indicator {
+.filter-checkbox:hover input ~ .select-indicator,
+.filter-checkbox input:focus ~ .select-indicator {
   background: #ccc;
 }
-.filter-option input:checked ~ .select-indicator {
+.filter-checkbox input:checked ~ .select-indicator {
   background: #2aa1c0;
 }
-.filter-option:hover input:not([disabled]):checked ~ .select-indicator,
-.filter-option input:checked:focus ~ .select-indicator {
+.filter-checkbox:hover input:not([disabled]):checked ~ .select-indicator,
+.filter-checkbox input:checked:focus ~ .select-indicator {
   background: #0e647d;
 }
-.filter-option input:disabled ~ .select-indicator {
+.filter-checkbox input:disabled ~ .select-indicator {
   background: #e6e6e6;
   opacity: 0.6;
   pointer-events: none;
@@ -54,7 +56,7 @@
   position: absolute;
   display: none;
 }
-.filter-option input:checked ~ .select-indicator:after {
+.filter-checkbox input:checked ~ .select-indicator:after {
   display: block;
 }
 .filter-checkbox .select-indicator:after {

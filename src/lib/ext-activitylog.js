@@ -10,8 +10,8 @@ class Model {
     };
   }
 
-  addNewLog(log) {
-    this.logs.push(log);
+  addNewLogs(logs) {
+    this.logs.push(...logs);
   }
 
   addFilter({ logKey, valueEquals }) {
@@ -32,14 +32,12 @@ class View {
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.notice = document.querySelector('.notice');
 
-    this.extFilter = document.querySelector(
-      'filter-container[filter-key="id"]'
-    );
+    this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
-      'filter-container[filter-key="viewType"]'
+      'filter-option[filter-key="viewType"]'
     );
     this.apiTypeFilter = document.querySelector(
-      'filter-container[filter-key="type"]'
+      'filter-option[filter-key="type"]'
     );
 
     this.saveLogBtn.addEventListener('click', this);
@@ -59,15 +57,18 @@ class View {
     }
   }
 
-  handleNewLog(object) {
-    this.logView.addNewRow(object);
-    this.updateFilterOptions(object.log);
+  updateFilterOptions(logs) {
+    this.extFilter.updateFilterCheckboxes(logs);
+    this.viewTypeFilter.updateFilterCheckboxes(logs);
+    this.apiTypeFilter.updateFilterCheckboxes(logs);
   }
 
-  updateFilterOptions(log) {
-    this.extFilter.updateFilterCheckboxes(log);
-    this.viewTypeFilter.updateFilterCheckboxes(log);
-    this.apiTypeFilter.updateFilterCheckboxes(log);
+  handleTableRows({ newLogs, filterObj }) {
+    if (newLogs) {
+      this.logView.addNewRows(newLogs);
+      this.updateFilterOptions(newLogs);
+    }
+    this.logView.filterLogViewItems(filterObj);
   }
 
   setError(errorMessage) {
@@ -91,9 +92,9 @@ class Controller {
 
   async init() {
     this.view.saveLogBtn.addEventListener('savelog', this);
-    this.view.extFilter.addEventListener('filter', this);
-    this.view.viewTypeFilter.addEventListener('filter', this);
-    this.view.apiTypeFilter.addEventListener('filter', this);
+    this.view.extFilter.addEventListener('filterchange', this);
+    this.view.viewTypeFilter.addEventListener('filterchange', this);
+    this.view.apiTypeFilter.addEventListener('filterchange', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -117,23 +118,8 @@ class Controller {
   }
 
   handleNewLogs(logs) {
-    for (const log of logs) {
-      this.model.addNewLog(log);
-      this.isFilterMatched(this.model.filter, log)
-        ? this.view.handleNewLog({ log, isHidden: true })
-        : this.view.handleNewLog({ log, isHidden: false });
-    }
-  }
-
-  isFilterMatched(filter, log) {
-    for (const key of Object.keys(filter)) {
-      if (Object.keys(log).includes(key)) {
-        if (filter[key].includes(log[key])) {
-          return true;
-        }
-      }
-    }
-    return false;
+    this.model.addNewLogs(logs);
+    this.view.handleTableRows({ newLogs: logs, filterObj: this.model.filter });
   }
 
   async getExistingLogs() {
@@ -147,8 +133,8 @@ class Controller {
   handleEvent(event) {
     if (event.type === 'savelog') {
       this.saveLogs();
-    } else if (event.type === 'filter') {
-      this.filter(event.detail);
+    } else if (event.type === 'filterchange') {
+      this.onFilterChange(event.detail);
     } else {
       throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -163,15 +149,11 @@ class Controller {
     }
   }
 
-  filter(filterObject) {
+  onFilterChange(filterObject) {
     const { filterDetail, isFilterRemoved } = filterObject;
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.logView.filterLogViewItems({
-      isFilterRemoved,
-      existingFilters: this.model.filter,
-      isFilterMatchedFn: this.isFilterMatched,
-    });
+    this.view.handleTableRows({ newLogs: null, filterObj: this.model.filter });
   }
 }
 

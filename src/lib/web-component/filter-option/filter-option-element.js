@@ -1,8 +1,8 @@
-class FilterContainer extends HTMLElement {
+class FilterOption extends HTMLElement {
   constructor() {
     super();
 
-    this.checkboxes = new Set([]);
+    this.checkboxeLabels = new Set([]);
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -10,25 +10,27 @@ class FilterContainer extends HTMLElement {
       '#filterCheckboxTemplate'
     ).content;
 
-    const filterTemplate = document
+    const filterContainer = document
       .querySelector('#filterContainerTemplate')
       .content.cloneNode(true);
 
-    this.toggleBtn = filterTemplate.querySelector('.toggle-btn');
+    this.toggleBtn = filterContainer.querySelector('.toggle-btn');
     this.toggleBtn.classList.add(this.filterKey);
     this.toggleBtn.textContent = this.textContent;
 
-    this.checkboxList = filterTemplate.querySelector('.checkbox-list');
+    this.checkboxList = filterContainer.querySelector('.checkbox-list');
     this.checkboxList.classList.add(this.filterKey);
 
-    shadow.appendChild(filterTemplate);
+    shadow.appendChild(filterContainer);
   }
 
-  updateFilterCheckboxes(log) {
-    const checkboxLabel = log[this.filterKey];
-    if (!this.checkboxes.has(checkboxLabel)) {
-      this.checkboxes.add(checkboxLabel);
-      this.addNewCheckbox(checkboxLabel);
+  updateFilterCheckboxes(logs) {
+    for (const log of logs) {
+      const checkboxLabel = log[this.filterKey];
+      if (!this.checkboxeLabels.has(checkboxLabel)) {
+        this.checkboxeLabels.add(checkboxLabel);
+        this.addNewCheckbox(checkboxLabel);
+      }
     }
   }
 
@@ -69,7 +71,9 @@ class FilterContainer extends HTMLElement {
         isFilterRemoved: event.target.checked,
       };
 
-      const filterEvent = new CustomEvent('filter', { detail: filterObject });
+      const filterEvent = new CustomEvent('filterchange', {
+        detail: filterObject,
+      });
       this.dispatchEvent(filterEvent);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
@@ -87,4 +91,4 @@ class FilterContainer extends HTMLElement {
   }
 }
 
-window.customElements.define('filter-container', FilterContainer);
+window.customElements.define('filter-option', FilterOption);

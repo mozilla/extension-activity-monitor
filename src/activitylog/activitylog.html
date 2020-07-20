@@ -8,7 +8,7 @@
     <script src="activitylog.js" type="module"></script>
     <script
       type="module"
-      src="/lib/web-component/filter-container/filter-container-element.js"
+      src="/lib/web-component/filter-option/filter-option-element.js"
     ></script>
     <script
       type="module"
@@ -23,15 +23,15 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">
-          <filter-container filter-key="id">
+          <filter-option filter-key="id">
             Select extensions to filter logs
-          </filter-container>
-          <filter-container filter-key="viewType">
+          </filter-option>
+          <filter-option filter-key="viewType">
             Select view type to filter logs
-          </filter-container>
-          <filter-container filter-key="type">
+          </filter-option>
+          <filter-option filter-key="type">
             Select api type to filter logs
-          </filter-container>
+          </filter-option>
         </div>
         <log-view></log-view>
       </div>
@@ -70,7 +70,7 @@
     </template>
 
     <template id="filterCheckboxTemplate">
-      <label class="filter-option filter-checkbox">
+      <label class="filter-checkbox">
         <span></span>
         <input type="checkbox" />
         <div class="select-indicator"></div>
@@ -80,7 +80,7 @@
     <template id="filterContainerTemplate">
       <link
         rel="stylesheet"
-        href="/lib/web-component/filter-container/filter-container.css"
+        href="/lib/web-component/filter-option/filter-option.css"
       />
       <div class="filter-container">
         <div class="toggle-btn"></div>

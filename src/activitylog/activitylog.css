@@ -29,6 +29,6 @@
   display: flex;
 }
 
-.filter-wrapper filter-container:not(:last-child) {
+.filter-wrapper filter-option:not(:last-child) {
   margin-right: 20px;
 }
