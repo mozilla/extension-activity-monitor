@@ -247,7 +247,7 @@ test('onMessage listener is registered at initialization', () => {
   expect(addListener).toHaveBeenCalled();
 });
 
-test('empty log array is found with clearing logs', async () => {
+test('empty log array is found after clearing logs', async () => {
   const extMonitor = new ExtensionMonitor();
 
   extMonitor.logs = [{ log: 'test' }];
