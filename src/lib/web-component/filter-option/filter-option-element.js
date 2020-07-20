@@ -2,7 +2,7 @@ class FilterOption extends HTMLElement {
   constructor() {
     super();
 
-    this.checkboxeLabels = new Set([]);
+    this.checkboxLabels = new Set([]);
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -27,8 +27,8 @@ class FilterOption extends HTMLElement {
   updateFilterCheckboxes(logs) {
     for (const log of logs) {
       const checkboxLabel = log[this.filterKey];
-      if (!this.checkboxeLabels.has(checkboxLabel)) {
-        this.checkboxeLabels.add(checkboxLabel);
+      if (!this.checkboxLabels.has(checkboxLabel)) {
+        this.checkboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
       }
     }
