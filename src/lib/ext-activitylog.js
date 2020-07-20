@@ -44,7 +44,7 @@ class View {
   }
 
   setModelFilter(filterFunc) {
-    this.isFilterMatched = filterFunc;
+    this.isModelFilterMatched = filterFunc;
   }
 
   handleEvent(event) {
@@ -64,7 +64,7 @@ class View {
   addTableRows(logs) {
     this.logView.addNewRows({
       logs,
-      isHidden: (log) => this.isFilterMatched(log),
+      isHidden: (log) => this.isModelFilterMatched(log),
     });
     this.updateFilterOptions(logs);
   }
@@ -77,7 +77,7 @@ class View {
 
   filterTableRows() {
     this.logView.filterLogViewItems({
-      isHidden: (log) => this.isFilterMatched(log),
+      isHidden: (log) => this.isModelFilterMatched(log),
     });
   }
 
