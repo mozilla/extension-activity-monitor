@@ -43,10 +43,6 @@ class View {
     this.saveLogBtn.addEventListener('click', this);
   }
 
-  setModelFilter(filterFunc) {
-    this.isModelFilterMatched = filterFunc;
-  }
-
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
@@ -62,10 +58,7 @@ class View {
   }
 
   addTableRows(logs) {
-    this.logView.addNewRows({
-      logs,
-      isHidden: (log) => this.isModelFilterMatched(log),
-    });
+    this.logView.addNewRows(logs);
     this.updateFilterOptions(logs);
   }
 
@@ -73,12 +66,6 @@ class View {
     this.extFilter.updateFilterCheckboxes(logs);
     this.viewTypeFilter.updateFilterCheckboxes(logs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
-  }
-
-  filterTableRows() {
-    this.logView.filterLogViewItems({
-      isHidden: (log) => this.isModelFilterMatched(log),
-    });
   }
 
   setError(errorMessage) {
@@ -105,7 +92,7 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
-    this.view.setModelFilter((log) => this.isFilterMatched(log));
+    this.view.logView.modelFilter = (log) => this.isFilterMatched(log);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -173,7 +160,7 @@ class Controller {
     const { filterDetail, isFilterRemoved } = filterObject;
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.filterTableRows();
+    this.view.logView.filterLogViewItems();
   }
 }
 
