@@ -24,3 +24,11 @@
   padding: 10px;
   color: #ffffff;
 }
+
+.filter-wrapper {
+  display: flex;
+}
+
+.filter-wrapper filter-option:not(:last-child) {
+  margin-right: 20px;
+}
