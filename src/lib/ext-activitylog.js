@@ -43,6 +43,10 @@ class View {
     this.saveLogBtn.addEventListener('click', this);
   }
 
+  setModelFilter(filterFunc) {
+    this.isFilterMatched = filterFunc;
+  }
+
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
@@ -57,10 +61,24 @@ class View {
     }
   }
 
+  addTableRows(logs) {
+    this.logView.addNewRows({
+      logs,
+      isHidden: (log) => this.isFilterMatched(log),
+    });
+    this.updateFilterOptions(logs);
+  }
+
   updateFilterOptions(logs) {
     this.extFilter.updateFilterCheckboxes(logs);
     this.viewTypeFilter.updateFilterCheckboxes(logs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
+  }
+
+  filterTableRows() {
+    this.logView.filterLogViewItems({
+      isHidden: (log) => this.isFilterMatched(log),
+    });
   }
 
   setError(errorMessage) {
@@ -87,6 +105,7 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
+    this.view.setModelFilter((log) => this.isFilterMatched(log));
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -109,13 +128,13 @@ class Controller {
     }
   }
 
-  handleNewLogs(logs) {
-    this.model.addNewLogs(logs);
-    this.view.logView.addNewRows({
-      logs,
-      isFilterMatchedFn: (log) => this.isFilterMatched(log),
-    });
-    this.view.updateFilterOptions(logs);
+  isFilterMatched(log) {
+    for (const key of Object.keys(this.model.filter)) {
+      if (this.model.filter[key].includes(log[key])) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async getExistingLogs() {
@@ -124,6 +143,11 @@ class Controller {
       requestTo: 'ext-monitor',
     });
     return existingLogs;
+  }
+
+  handleNewLogs(logs) {
+    this.model.addNewLogs(logs);
+    this.view.addTableRows(logs);
   }
 
   handleEvent(event) {
@@ -149,18 +173,7 @@ class Controller {
     const { filterDetail, isFilterRemoved } = filterObject;
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.logView.filterLogViewItems({
-      isFilterMatchedFn: (log) => this.isFilterMatched(log),
-    });
-  }
-
-  isFilterMatched(log) {
-    for (const key of Object.keys(this.model.filter)) {
-      if (this.model.filter[key].includes(log[key])) {
-        return true;
-      }
-    }
-    return false;
+    this.view.filterTableRows();
   }
 }
 

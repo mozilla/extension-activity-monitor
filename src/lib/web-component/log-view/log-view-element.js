@@ -22,12 +22,12 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  addNewRows({ logs, isFilterMatchedFn }) {
+  addNewRows({ logs, isHidden }) {
     const rowsFragment = document.createDocumentFragment();
     for (const log of logs) {
       const logTableRowInstance = this.logTableRow.cloneNode(true);
       logTableRowInstance._log = log;
-      logTableRowInstance.hidden = isFilterMatchedFn(log);
+      logTableRowInstance.hidden = isHidden(log);
 
       logTableRowInstance.querySelector('.id').textContent = log.id;
       logTableRowInstance.querySelector('.timestamp').textContent =
@@ -69,9 +69,9 @@ class LogView extends HTMLElement {
     }
   }
 
-  filterLogViewItems({ isFilterMatchedFn }) {
+  filterLogViewItems({ isHidden }) {
     for (const row of this.tableBody.rows) {
-      row.hidden = isFilterMatchedFn(row._log);
+      row.hidden = isHidden(row._log);
     }
   }
 
