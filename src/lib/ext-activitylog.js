@@ -63,14 +63,6 @@ class View {
     this.apiTypeFilter.updateFilterCheckboxes(logs);
   }
 
-  handleTableRows({ newLogs, filterObj }) {
-    if (newLogs) {
-      this.logView.addNewRows(newLogs);
-      this.updateFilterOptions(newLogs);
-    }
-    this.logView.filterLogViewItems(filterObj);
-  }
-
   setError(errorMessage) {
     if (errorMessage) {
       this.notice.textContent = errorMessage;
@@ -119,7 +111,11 @@ class Controller {
 
   handleNewLogs(logs) {
     this.model.addNewLogs(logs);
-    this.view.handleTableRows({ newLogs: logs, filterObj: this.model.filter });
+    this.view.logView.addNewRows({
+      logs,
+      isFilterMatchedFn: (log) => this.isFilterMatched(log),
+    });
+    this.view.updateFilterOptions(logs);
   }
 
   async getExistingLogs() {
@@ -153,7 +149,18 @@ class Controller {
     const { filterDetail, isFilterRemoved } = filterObject;
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.handleTableRows({ newLogs: null, filterObj: this.model.filter });
+    this.view.logView.filterLogViewItems({
+      isFilterMatchedFn: (log) => this.isFilterMatched(log),
+    });
+  }
+
+  isFilterMatched(log) {
+    for (const key of Object.keys(this.model.filter)) {
+      if (this.model.filter[key].includes(log[key])) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
