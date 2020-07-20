@@ -78,6 +78,10 @@ class LogView extends HTMLElement {
     }
   }
 
+  clearTable() {
+    this.tableBody.textContent = '';
+  }
+
   connectedCallback() {
     this.tableBody.addEventListener('click', this);
     this.closeBtn.addEventListener('click', this);

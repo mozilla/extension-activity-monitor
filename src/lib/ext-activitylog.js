@@ -2,6 +2,10 @@ import { save } from './save-load.js';
 
 class Model {
   constructor() {
+    this.init();
+  }
+
+  init() {
     this.logs = [];
     this.filter = {
       id: [],
@@ -24,11 +28,16 @@ class Model {
       this.filter[logKey].splice(logKeyIndex, 1);
     }
   }
+
+  clearLogs() {
+    this.init();
+  }
 }
 
 class View {
   constructor() {
     this.logView = document.querySelector('log-view');
+    this.clearLogBtn = document.querySelector('#clearLogBtn');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.notice = document.querySelector('.notice');
 
@@ -40,6 +49,7 @@ class View {
       'filter-option[filter-key="type"]'
     );
 
+    this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
   }
 
@@ -52,6 +62,9 @@ class View {
       switch (event.target) {
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
+        case this.clearLogBtn:
+          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         default:
           throw new Error(`wrong event target - ${event.target.tagName}`);
@@ -81,6 +94,17 @@ class View {
       this.notice.classList.remove('failure');
     }
   }
+
+  clearTable() {
+    this.logView.clearTable();
+    this.clearFilterCheckboxes();
+  }
+
+  clearFilterCheckboxes() {
+    this.extFilter.clearFilterCheckboxes();
+    this.viewTypeFilter.clearFilterCheckboxes();
+    this.apiTypeFilter.clearFilterCheckboxes();
+  }
 }
 
 class Controller {
@@ -92,6 +116,7 @@ class Controller {
   }
 
   async init() {
+    this.view.clearLogBtn.addEventListener('clearlog', this);
     this.view.saveLogBtn.addEventListener('savelog', this);
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
@@ -145,6 +170,8 @@ class Controller {
       this.saveLogs();
     } else if (event.type === 'filterchange') {
       this.onFilterChange(event.detail);
+    } else if (event.type === 'clearlog') {
+      this.handleClearLogs();
     } else {
       throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -164,6 +191,19 @@ class Controller {
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
     this.view.setLogFilter((log) => this.isFilterMatched(log));
+  }
+
+  handleClearLogs() {
+    this.clearBackgroundLogs();
+    this.model.clearLogs();
+    this.view.clearTable();
+  }
+
+  async clearBackgroundLogs() {
+    await browser.runtime.sendMessage({
+      requestType: 'clearLogs',
+      requestTo: 'ext-monitor',
+    });
   }
 }
 
