@@ -43,6 +43,10 @@ class View {
     this.saveLogBtn.addEventListener('click', this);
   }
 
+  setLogFilter(filterFunc) {
+    this.logView.setLogFilter(filterFunc);
+  }
+
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
@@ -92,7 +96,6 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
-    this.view.logView.modelFilter = (log) => this.isFilterMatched(log);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -160,7 +163,7 @@ class Controller {
     const { filterDetail, isFilterRemoved } = filterObject;
 
     this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.logView.filterLogViewItems();
+    this.view.setLogFilter((log) => this.isFilterMatched(log));
   }
 }
 

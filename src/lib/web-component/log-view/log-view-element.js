@@ -1,6 +1,7 @@
 class LogView extends HTMLElement {
   constructor() {
     super();
+    this.isFilterMatched = () => false;
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -22,8 +23,12 @@ class LogView extends HTMLElement {
     shadow.appendChild(logTableInstance);
   }
 
-  set modelFilter(filterFunc) {
-    this.isModelFilterMatched = filterFunc;
+  setLogFilter(filterFunc) {
+    this.isFilterMatched = filterFunc;
+
+    for (const row of this.tableBody.rows) {
+      row.hidden = this.isFilterMatched(row._log);
+    }
   }
 
   addNewRows(logs) {
@@ -31,7 +36,7 @@ class LogView extends HTMLElement {
     for (const log of logs) {
       const logTableRowInstance = this.logTableRow.cloneNode(true);
       logTableRowInstance._log = log;
-      logTableRowInstance.hidden = this.isModelFilterMatched(log);
+      logTableRowInstance.hidden = this.isFilterMatched(log);
 
       logTableRowInstance.querySelector('.id').textContent = log.id;
       logTableRowInstance.querySelector('.timestamp').textContent =
@@ -70,12 +75,6 @@ class LogView extends HTMLElement {
       if (event.target === this.closeBtn) {
         this.closeDetailSidebar();
       }
-    }
-  }
-
-  filterLogViewItems() {
-    for (const row of this.tableBody.rows) {
-      row.hidden = this.isModelFilterMatched(row._log);
     }
   }
 
