@@ -30,13 +30,19 @@
         <div class="filter-wrapper">
           <filter-keyword></filter-keyword>
           <filter-option filter-key="id">
-            Select extensions to filter logs
+            Select extensions to filter
           </filter-option>
           <filter-option filter-key="viewType">
-            Select view type to filter logs
+            Select view type to filter
           </filter-option>
           <filter-option filter-key="type">
-            Select api type to filter logs
+            Select api type to filter
+          </filter-option>
+          <filter-option filter-key="name">
+            Select api name to filter
+          </filter-option>
+          <filter-option filter-key="other">
+            Select other options to filter
           </filter-option>
         </div>
         <log-view></log-view>
@@ -88,13 +94,17 @@
         rel="stylesheet"
         href="/lib/web-component/filter-option/filter-option.css"
       />
-      <div class="filter-container">
-        <div class="toggle-btn"></div>
+      <div class="filter-container toggle-btn">
+        <div class="title"></div>
         <div class="checkbox-list" hidden></div>
       </div>
     </template>
 
     <template id="filterKeywordTemplate">
+      <link
+        rel="stylesheet"
+        href="/lib/web-component/filter-keyword/filter-keyword.css"
+      />
       <div class="filter-container">
         <input type="text" name="keyword" />
       </div>

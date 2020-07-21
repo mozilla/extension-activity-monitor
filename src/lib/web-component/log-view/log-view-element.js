@@ -42,9 +42,20 @@ export class LogView extends HTMLElement {
       logTableRowInstance.querySelector('.timestamp').textContent =
         log.timeStamp;
       logTableRowInstance.querySelector('.api-type').textContent = log.type;
-      logTableRowInstance.querySelector('.name').textContent = log.name;
-      logTableRowInstance.querySelector('.view-type').textContent =
-        log.viewType || 'undefined';
+
+      if (log.type === 'content_script') {
+        const contentScriptTD = logTableRowInstance.querySelector('.name');
+        contentScriptTD.textContent = log.name;
+        contentScriptTD.setAttribute('colspan', '2');
+        // view type is undefined for log.type = content_script
+        logTableRowInstance
+          .querySelector('.view-type')
+          .setAttribute('hidden', true);
+      } else {
+        logTableRowInstance.querySelector('.name').textContent = log.name;
+        logTableRowInstance.querySelector('.view-type').textContent =
+          log.viewType;
+      }
 
       rowsFragment.appendChild(logTableRowInstance);
     }

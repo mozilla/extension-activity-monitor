@@ -7,6 +7,8 @@ class Model {
       id: new Set(),
       viewType: new Set(),
       type: new Set(),
+      name: new Set(),
+      other: new Set(),
       keyword: '',
     };
   }
@@ -35,6 +37,7 @@ class Model {
       this.matchFilterId(log.id) &&
       this.matchFilterViewType(log.viewType) &&
       this.matchFilterType(log.type) &&
+      this.matchFilterApiName(log.name) &&
       this.matchFilterKeyword(log.data)
     );
   }
@@ -49,6 +52,11 @@ class Model {
 
   matchFilterType(logType) {
     return this.filter.type.has(logType);
+  }
+
+  matchFilterApiName(name) {
+    // since we store the content script url in "filter.other"
+    return this.filter.name.has(name) || this.filter.other.has(name);
   }
 
   matchFilterKeyword(logData) {
@@ -75,7 +83,13 @@ class View {
     this.apiTypeFilter = document.querySelector(
       'filter-option[filter-key="type"]'
     );
+    this.apiNameFilter = document.querySelector(
+      'filter-option[filter-key="name"]'
+    );
     this.keywordFilter = document.querySelector('filter-keyword');
+    this.otherFilter = document.querySelector(
+      'filter-option[filter-key="other"]'
+    );
 
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
@@ -108,9 +122,22 @@ class View {
   }
 
   updateFilterOptions(logs) {
+    const otherLogs = [];
+    const apiNameLogs = logs.filter((log) => {
+      if (log.type !== 'content_script') {
+        return true;
+      } else {
+        otherLogs.push(log);
+      }
+    });
+
     this.extFilter.updateFilterCheckboxes(logs);
     this.viewTypeFilter.updateFilterCheckboxes(logs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
+    this.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
+    if (otherLogs) {
+      this.otherFilter.updateFilterCheckboxes(otherLogs);
+    }
   }
 
   setError(errorMessage) {
@@ -143,6 +170,8 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
+    this.view.apiNameFilter.addEventListener('filterchange', this);
+    this.view.otherFilter.addEventListener('filterchange', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
