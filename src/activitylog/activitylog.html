@@ -8,6 +8,10 @@
     <script src="activitylog.js" type="module"></script>
     <script
       type="module"
+      src="/lib/web-component/filter-keyword/filter-keyword-element.js"
+    ></script>
+    <script
+      type="module"
       src="/lib/web-component/filter-option/filter-option-element.js"
     ></script>
     <script
@@ -23,6 +27,7 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">
+          <filter-keyword></filter-keyword>
           <filter-option filter-key="id">
             Select extensions to filter logs
           </filter-option>
@@ -85,6 +90,16 @@
       <div class="filter-container">
         <div class="toggle-btn"></div>
         <div class="checkbox-list" hidden></div>
+      </div>
+    </template>
+
+    <template id="filterKeywordTemplate">
+      <link
+        rel="stylesheet"
+        href="/lib/web-component/filter-keyword/filter-keyword.css"
+      />
+      <div class="filter-container">
+        <input type="text" name="keyword" />
       </div>
     </template>
   </body>
