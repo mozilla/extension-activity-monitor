@@ -2,10 +2,6 @@ import { save } from './save-load.js';
 
 class Model {
   constructor() {
-    this.init();
-  }
-
-  init() {
     this.logs = [];
     this.filter = {
       id: [],
@@ -30,7 +26,7 @@ class Model {
   }
 
   clearLogs() {
-    this.init();
+    this.logs = [];
   }
 }
 
@@ -97,13 +93,6 @@ class View {
 
   clearTable() {
     this.logView.clearTable();
-    this.clearFilterCheckboxes();
-  }
-
-  clearFilterCheckboxes() {
-    this.extFilter.clearFilterCheckboxes();
-    this.viewTypeFilter.clearFilterCheckboxes();
-    this.apiTypeFilter.clearFilterCheckboxes();
   }
 }
 

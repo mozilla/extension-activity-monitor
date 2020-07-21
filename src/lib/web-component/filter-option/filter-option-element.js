@@ -85,11 +85,6 @@ class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  clearFilterCheckboxes() {
-    this.checkboxLabels.clear();
-    this.checkboxList.textContent = '';
-  }
-
   disconnectedCallback() {
     this.toggleBtn.addEventListener('click', this);
     this.checkboxList.addEventListener('change', this);
