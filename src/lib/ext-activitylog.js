@@ -12,7 +12,18 @@ class Model {
   }
 
   addNewLogs(logs) {
-    this.logs.push(...logs);
+    for (const log of logs) {
+      this.logs.push(log);
+      this.updateFilter(log);
+    }
+  }
+
+  updateFilter(log) {
+    for (const key in this.filter) {
+      if (key !== 'keyword' && !this.filter[key].includes(log[key])) {
+        this.addFilter({ logKey: this.filter[key], valueEquals: log[key] });
+      }
+    }
   }
 
   addFilter({ logKey, valueEquals }) {
@@ -32,9 +43,9 @@ class Model {
 
   matchLogWithFilterObj(log) {
     return (
-      this.matchFilterId(log.id) ||
-      this.matchFilterViewType(log.viewType) ||
-      this.matchFilterType(log.type) ||
+      this.matchFilterId(log.id) &&
+      this.matchFilterViewType(log.viewType) &&
+      this.matchFilterType(log.type) &&
       this.matchFilterKeyword(log.data)
     );
   }
@@ -53,7 +64,7 @@ class Model {
 
   matchFilterKeyword(logData) {
     const logDataStr = JSON.stringify(logData);
-    return !logDataStr.includes(this.filter.keyword);
+    return logDataStr.includes(this.filter.keyword);
   }
 }
 
@@ -190,9 +201,9 @@ class Controller {
   }
 
   onFilterChange(filterObject) {
-    const { filterDetail, isFilterRemoved } = filterObject;
+    const { filterDetail, isFilterAdded } = filterObject;
 
-    this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
+    this.model[isFilterAdded ? 'addFilter' : 'removeFilter'](filterDetail);
     this.view.setLogFilter((log) => this.isFilterMatched(log));
   }
 

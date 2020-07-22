@@ -68,7 +68,7 @@ class FilterOption extends HTMLElement {
           valueEquals:
             event.target.value === 'undefined' ? undefined : event.target.value,
         },
-        isFilterRemoved: event.target.checked,
+        isFilterAdded: event.target.checked,
       };
 
       const filterEvent = new CustomEvent('filterchange', {

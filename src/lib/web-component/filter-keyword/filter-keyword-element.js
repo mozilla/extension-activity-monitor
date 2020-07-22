@@ -14,7 +14,7 @@ class filterKeyword extends HTMLElement {
 
   connectedCallback() {
     this.inputBoxListener = this.delay(
-      (event) => this.onKeywordSubmit(event.originalTarget.value),
+      (event) => this.onKeywordSubmit(event.target.inputBox.value),
       500
     );
 
