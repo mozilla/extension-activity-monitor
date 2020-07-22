@@ -21,7 +21,7 @@ class Model {
   updateFilter(log) {
     for (const key in this.filter) {
       if (key !== 'keyword' && !this.filter[key].includes(log[key])) {
-        this.addFilter({ logKey: this.filter[key], valueEquals: log[key] });
+        this.addFilter({ logKey: key, valueEquals: log[key] });
       }
     }
   }
@@ -219,6 +219,6 @@ class Controller {
 
 export default class ActivityLog {
   constructor() {
-    new Controller(new Model(), new View());
+    this.activityLog = new Controller(new Model(), new View());
   }
 }
