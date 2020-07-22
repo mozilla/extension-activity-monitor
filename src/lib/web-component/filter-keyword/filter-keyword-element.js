@@ -13,13 +13,12 @@ class filterKeyword extends HTMLElement {
   }
 
   connectedCallback() {
-    this.inputBox.addEventListener(
-      'input',
-      this.delay(
-        (event) => this.onKeywordSubmit(event.originalTarget.value),
-        500
-      )
+    this.inputBoxListener = this.delay(
+      (event) => this.onKeywordSubmit(event.originalTarget.value),
+      500
     );
+
+    this.inputBox.addEventListener('input', this.inputBoxListener);
   }
 
   delay(fn, ms) {
@@ -32,6 +31,10 @@ class filterKeyword extends HTMLElement {
 
   onKeywordSubmit(keyword) {
     this.dispatchEvent(new CustomEvent('keywordchange', { detail: keyword }));
+  }
+
+  disconnectedCallback() {
+    this.inputBox.removeEventListener('input', this.inputBoxListener);
   }
 }
 

@@ -29,6 +29,32 @@ class Model {
   setFilterKeyword(keyword) {
     this.filter.keyword = keyword;
   }
+
+  matchLogWithFilterObj(log) {
+    return (
+      this.matchFilterId(log.id) ||
+      this.matchFilterViewType(log.viewType) ||
+      this.matchFilterType(log.type) ||
+      this.matchFilterKeyword(log.data)
+    );
+  }
+
+  matchFilterId(logId) {
+    return this.filter.id.includes(logId);
+  }
+
+  matchFilterViewType(logViewType) {
+    return this.filter.viewType.includes(logViewType);
+  }
+
+  matchFilterType(logType) {
+    return this.filter.type.includes(logType);
+  }
+
+  matchFilterKeyword(logData) {
+    const logDataStr = JSON.stringify(logData);
+    return !logDataStr.includes(this.filter.keyword);
+  }
 }
 
 class View {
@@ -176,15 +202,7 @@ class Controller {
   }
 
   isFilterMatched(log) {
-    for (const key of Object.keys(this.model.filter)) {
-      if (this.model.filter[key].includes(log[key])) {
-        return true;
-      } else if (key === 'keyword') {
-        const dataStr = JSON.stringify(log.data);
-        return !dataStr.includes(this.model.filter[key]);
-      }
-    }
-    return false;
+    return this.model.matchLogWithFilterObj(log);
   }
 }
 
