@@ -30,7 +30,15 @@ class filterKeyword extends HTMLElement {
   }
 
   onKeywordSubmit(keyword) {
-    this.dispatchEvent(new CustomEvent('keywordchange', { detail: keyword }));
+    const filterDetail = {
+      filterObject: {
+        logKey: 'keyword',
+        valueEquals: keyword,
+      },
+    };
+    this.dispatchEvent(
+      new CustomEvent('filterchange', { detail: filterDetail })
+    );
   }
 
   disconnectedCallback() {

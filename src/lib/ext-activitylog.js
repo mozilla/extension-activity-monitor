@@ -4,9 +4,9 @@ class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: [],
-      viewType: [],
-      type: [],
+      id: new Set([]),
+      viewType: new Set([]),
+      type: new Set([]),
       keyword: '',
     };
   }
@@ -15,19 +15,8 @@ class Model {
     this.logs.push(...logs);
   }
 
-  addFilter({ logKey, valueEquals }) {
-    this.filter[logKey].push(valueEquals);
-  }
-
-  removeFilter({ logKey, valueEquals }) {
-    const logKeyIndex = this.filter[logKey].indexOf(valueEquals);
-    if (logKeyIndex > -1) {
-      this.filter[logKey].splice(logKeyIndex, 1);
-    }
-  }
-
-  setFilterKeyword(keyword) {
-    this.filter.keyword = keyword;
+  setFilter({ logKey, valueEquals }) {
+    this.filter[logKey] = valueEquals;
   }
 
   matchLogWithFilterObj(log) {
@@ -40,15 +29,15 @@ class Model {
   }
 
   matchFilterId(logId) {
-    return this.filter.id.includes(logId);
+    return this.filter.id.has(logId);
   }
 
   matchFilterViewType(logViewType) {
-    return this.filter.viewType.includes(logViewType);
+    return this.filter.viewType.has(logViewType);
   }
 
   matchFilterType(logType) {
-    return this.filter.type.includes(logType);
+    return this.filter.type.has(logType);
   }
 
   matchFilterKeyword(logData) {
@@ -125,8 +114,7 @@ class Controller {
 
   async init() {
     this.view.saveLogBtn.addEventListener('savelog', this);
-    this.view.keywordFilter.addEventListener('keywordchange', this);
-
+    this.view.keywordFilter.addEventListener('filterchange', this);
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
@@ -173,9 +161,6 @@ class Controller {
       case 'filterchange':
         this.onFilterChange(event.detail);
         break;
-      case 'keywordchange':
-        this.onKeywordChange(event.detail);
-        break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -191,29 +176,18 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { filterObject, isFilterAdded, isNewFilterOption } = filterDetail;
+    const { filterObject, isNewFilterAdded } = filterDetail;
 
-    if (isNewFilterOption) {
-      this.onNewFilterOption(filterObject);
-    } else {
-      this.model[isFilterAdded ? 'addFilter' : 'removeFilter'](filterObject);
+    this.model.setFilter(filterObject);
+    // When new filter checkbox is added, it is in checked condition by default
+    // No need to match filters to render rows then.
+    if (!isNewFilterAdded) {
       this.view.setLogFilter((log) => this.isFilterMatched(log));
     }
   }
 
-  onKeywordChange(newKeyword) {
-    this.model.setFilterKeyword(newKeyword);
-    this.view.setLogFilter((log) => this.isFilterMatched(log));
-  }
-
   isFilterMatched(log) {
     return this.model.matchLogWithFilterObj(log);
-  }
-
-  // when a new checkbox is created in view, this adds its label in model
-  // this is needed to determine the hidden property of future logs rendering.
-  onNewFilterOption(filterObject) {
-    this.model.addFilter(filterObject);
   }
 }
 

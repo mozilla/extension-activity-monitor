@@ -9,6 +9,7 @@ const activityLogHtml = fs.readFileSync(
 );
 
 const domParser = new DOMParser();
+
 const activityLogBody = domParser.parseFromString(activityLogHtml, 'text/html')
   .body.innerHTML;
 
@@ -44,44 +45,8 @@ test('isFilterMatched function returns true when all properties of a log are mat
   });
 
   const { activityLog } = new ActivityLog();
-  activityLog.model.addNewLogs([log]);
+  activityLog.handleNewLogs([log]);
 
   expect(activityLog.isFilterMatched(log)).toBeTruthy();
   expect(activityLog.isFilterMatched(logUnmatch)).toBeFalsy();
-});
-
-test('removeFilter function removes a given values from a given key in filter object', () => {
-  document.body.innerHTML = activityLogBody;
-
-  const log = {
-    id: 'id@test',
-    viewType: 'viewType@test',
-    type: 'type@test',
-    data: [{ test: 'test@data' }],
-  };
-
-  const logKey = 'id';
-  const valueEquals = 'id@test';
-
-  const addListener = jest.fn();
-  const sendMessage = jest.fn();
-
-  window.browser = {
-    runtime: {
-      onMessage: { addListener },
-      sendMessage,
-    },
-  };
-
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
-
-  const { activityLog } = new ActivityLog();
-
-  activityLog.model.addNewLogs([log]);
-  expect(activityLog.model.filter.id).toContain('id@test');
-
-  activityLog.model.removeFilter({ logKey, valueEquals });
-  expect(activityLog.model.filter.id).not.toContain('id@test');
 });
