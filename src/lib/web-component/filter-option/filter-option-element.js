@@ -30,9 +30,14 @@ class FilterOption extends HTMLElement {
       if (!this.checkboxLabels.has(checkboxLabel)) {
         this.checkboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
+
+        const filterDetail = {
+          filterObject: { logKey: this.filterKey, valueEquals: checkboxLabel },
+          isNewFilterOption: true,
+        };
         this.dispatchEvent(
-          new CustomEvent('filterupdate', {
-            detail: { logKey: this.filterKey, valueEquals: checkboxLabel },
+          new CustomEvent('filterchange', {
+            detail: filterDetail,
           })
         );
       }
@@ -67,8 +72,8 @@ class FilterOption extends HTMLElement {
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
     ) {
-      const filterObject = {
-        filterDetail: {
+      const filterDetail = {
+        filterObject: {
           logKey: this.filterKey,
           valueEquals:
             event.target.value === 'undefined' ? undefined : event.target.value,
@@ -77,7 +82,7 @@ class FilterOption extends HTMLElement {
       };
 
       const filterEvent = new CustomEvent('filterchange', {
-        detail: filterObject,
+        detail: filterDetail,
       });
       this.dispatchEvent(filterEvent);
     } else {

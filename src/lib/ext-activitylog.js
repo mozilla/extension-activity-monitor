@@ -131,10 +131,6 @@ class Controller {
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
 
-    this.view.extFilter.addEventListener('filterupdate', this);
-    this.view.viewTypeFilter.addEventListener('filterupdate', this);
-    this.view.apiTypeFilter.addEventListener('filterupdate', this);
-
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
 
@@ -180,9 +176,6 @@ class Controller {
       case 'keywordchange':
         this.onKeywordChange(event.detail);
         break;
-      case 'filterupdate':
-        this.onFilterUpdate(event.detail);
-        break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -197,11 +190,15 @@ class Controller {
     }
   }
 
-  onFilterChange(filterObject) {
-    const { filterDetail, isFilterAdded } = filterObject;
+  onFilterChange(filterDetail) {
+    const { filterObject, isFilterAdded, isNewFilterOption } = filterDetail;
 
-    this.model[isFilterAdded ? 'addFilter' : 'removeFilter'](filterDetail);
-    this.view.setLogFilter((log) => this.isFilterMatched(log));
+    if (isNewFilterOption) {
+      this.onNewFilterOption(filterObject);
+    } else {
+      this.model[isFilterAdded ? 'addFilter' : 'removeFilter'](filterObject);
+      this.view.setLogFilter((log) => this.isFilterMatched(log));
+    }
   }
 
   onKeywordChange(newKeyword) {
@@ -213,7 +210,8 @@ class Controller {
     return this.model.matchLogWithFilterObj(log);
   }
 
-  onFilterUpdate(filterObject) {
+  // when a new checkbox is created in view, this adds its label in model
+  onNewFilterOption(filterObject) {
     this.model.addFilter(filterObject);
   }
 }
