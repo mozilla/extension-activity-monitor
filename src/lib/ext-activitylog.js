@@ -211,6 +211,7 @@ class Controller {
   }
 
   // when a new checkbox is created in view, this adds its label in model
+  // this is needed to determine the hidden property of future logs rendering.
   onNewFilterOption(filterObject) {
     this.model.addFilter(filterObject);
   }
