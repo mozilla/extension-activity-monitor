@@ -12,7 +12,7 @@ const domParser = new DOMParser();
 const activityLogBody = domParser.parseFromString(activityLogHtml, 'text/html')
   .body.innerHTML;
 
-test('isFilterMatched function returns true when all properties of a log are matched with filter object, else it returns false', () => {
+test('isFilterMatched function returns true when all properties of a log are matched with filter object, else it returns true', () => {
   document.body.innerHTML = activityLogBody;
 
   const log = {
@@ -80,7 +80,7 @@ test('removeFilter function removes a given values from a given key in filter ob
   const { activityLog } = new ActivityLog();
 
   activityLog.model.addNewLogs([log]);
-  expect(activityLog.model.filter.id).toContain('id@test');
+  expect(activityLog.model.filter.id) .toContain('id@test');
 
   activityLog.model.removeFilter({ logKey, valueEquals });
   expect(activityLog.model.filter.id).not.toContain('id@test');

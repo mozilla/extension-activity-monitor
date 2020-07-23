@@ -30,6 +30,11 @@ class FilterOption extends HTMLElement {
       if (!this.checkboxLabels.has(checkboxLabel)) {
         this.checkboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
+        this.dispatchEvent(
+          new CustomEvent('filterupdate', {
+            detail: { logKey: this.filterKey, valueEquals: checkboxLabel },
+          })
+        );
       }
     }
   }

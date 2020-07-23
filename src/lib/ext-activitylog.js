@@ -12,18 +12,7 @@ class Model {
   }
 
   addNewLogs(logs) {
-    for (const log of logs) {
-      this.logs.push(log);
-      this.updateFilter(log);
-    }
-  }
-
-  updateFilter(log) {
-    for (const key in this.filter) {
-      if (key !== 'keyword' && !this.filter[key].includes(log[key])) {
-        this.addFilter({ logKey: key, valueEquals: log[key] });
-      }
-    }
+    this.logs.push(...logs);
   }
 
   addFilter({ logKey, valueEquals }) {
@@ -105,8 +94,8 @@ class View {
   }
 
   addTableRows(logs) {
-    this.logView.addNewRows(logs);
     this.updateFilterOptions(logs);
+    this.logView.addNewRows(logs);
   }
 
   updateFilterOptions(logs) {
@@ -136,10 +125,15 @@ class Controller {
 
   async init() {
     this.view.saveLogBtn.addEventListener('savelog', this);
+    this.view.keywordFilter.addEventListener('keywordchange', this);
+
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
-    this.view.keywordFilter.addEventListener('keywordchange', this);
+
+    this.view.extFilter.addEventListener('filterupdate', this);
+    this.view.viewTypeFilter.addEventListener('filterupdate', this);
+    this.view.apiTypeFilter.addEventListener('filterupdate', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -186,6 +180,9 @@ class Controller {
       case 'keywordchange':
         this.onKeywordChange(event.detail);
         break;
+      case 'filterupdate':
+        this.onFilterUpdate(event.detail);
+        break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
     }
@@ -214,6 +211,10 @@ class Controller {
 
   isFilterMatched(log) {
     return this.model.matchLogWithFilterObj(log);
+  }
+
+  onFilterUpdate(filterObject) {
+    this.model.addFilter(filterObject);
   }
 }
 
