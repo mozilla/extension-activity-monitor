@@ -80,7 +80,7 @@ test('removeFilter function removes a given values from a given key in filter ob
   const { activityLog } = new ActivityLog();
 
   activityLog.model.addNewLogs([log]);
-  expect(activityLog.model.filter.id) .toContain('id@test');
+  expect(activityLog.model.filter.id).toContain('id@test');
 
   activityLog.model.removeFilter({ logKey, valueEquals });
   expect(activityLog.model.filter.id).not.toContain('id@test');
