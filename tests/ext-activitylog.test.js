@@ -144,6 +144,8 @@ test('show/hide logs associated with extension id that is checked/unchecked from
 test("keyword search show a row when the given keyword is matched in log's data, otherwise hides the row", async () => {
   document.body.innerHTML = activityLogBody;
 
+  expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
+
   const logs = [
     {
       /* renders 1st row in table */
@@ -190,7 +192,11 @@ test("keyword search show a row when the given keyword is matched in log's data,
     'input[name="keyword"]'
   );
   searchInput.value = 'matched@data';
-  activityLog.view.keywordFilter.onKeywordSubmit(searchInput.value);
+
+  let event = new Event('input');
+  event.data = { target: activityLog.view.keywordFilter };
+
+  searchInput.dispatchEvent(new Event(event));
 
   tableRows = getTableRows();
 

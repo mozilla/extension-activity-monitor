@@ -1,4 +1,4 @@
-export class filterKeyword extends HTMLElement {
+export class FilterKeyword extends HTMLElement {
   constructor() {
     super();
 
@@ -46,4 +46,4 @@ export class filterKeyword extends HTMLElement {
   }
 }
 
-window.customElements.define('filter-keyword', filterKeyword);
+window.customElements.define('filter-keyword', FilterKeyword);
