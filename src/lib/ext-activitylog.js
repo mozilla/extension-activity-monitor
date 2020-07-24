@@ -186,6 +186,9 @@ class Controller {
       case 'filterchange':
         this.onFilterChange(event.detail);
         break;
+      case 'clearlog':
+        this.handleClearLogs();
+        break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
     }

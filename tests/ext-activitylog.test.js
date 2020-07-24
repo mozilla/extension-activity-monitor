@@ -202,3 +202,57 @@ test("keyword search show a row when the given keyword is matched in log's data,
   expect(tableRows[0].hidden).toBeTruthy();
   expect(tableRows[1].hidden).toBeFalsy();
 });
+
+test('clearing logs from activitylog page', async () => {
+  document.body.innerHTML = activityLogBody;
+
+  const logs = [
+    {
+      /* renders 1st row in table */
+      id: 'id1@test',
+      viewType: 'viewType@test',
+      type: 'type@test',
+      data: [{ test: 'test1@data' }],
+    },
+    {
+      /* renders 2nd row in table */
+      id: 'id2@test',
+      viewType: 'viewType2@test',
+      type: 'type2@test',
+      data: [{ test: 'test2@data' }],
+    },
+  ];
+
+  const addListener = jest.fn();
+  const sendMessage = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+    },
+  };
+
+  // sendMessage is called by getExistingLogs method for first 2 times
+  // and it is called by clearBackgroundLogs() method on third time.
+  sendMessage.mockResolvedValueOnce({ existingLogs: logs });
+  sendMessage.mockResolvedValueOnce({ existingLogs: logs });
+  sendMessage.mockResolvedValueOnce();
+
+  const { activityLog } = new ActivityLog();
+  const clearBackgroundLogsFn = jest.spyOn(activityLog, 'clearBackgroundLogs');
+
+  const clearLogBtn = activityLog.view.clearLogBtn;
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const getTableRows = () => tableBody.querySelectorAll('tr');
+
+  await expect(activityLog.getExistingLogs()).resolves.toMatchObject(logs);
+  expect(activityLog.model.logs).toMatchObject(logs);
+  expect(getTableRows().length).toBe(2);
+
+  clearLogBtn.click();
+
+  expect(clearBackgroundLogsFn).toHaveBeenCalled();
+  expect(activityLog.model.logs).toMatchObject([]);
+  expect(getTableRows().length).toBe(0);
+});
