@@ -4,9 +4,10 @@ class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: [],
-      viewType: [],
-      type: [],
+      id: new Set(),
+      viewType: new Set(),
+      type: new Set(),
+      keyword: '',
     };
   }
 
@@ -14,15 +15,45 @@ class Model {
     this.logs.push(...logs);
   }
 
-  addFilter({ logKey, valueEquals }) {
-    this.filter[logKey].push(valueEquals);
+  /**
+   * @param {object} updateFilter - It contains key and value to replace
+   * the filter
+   * @param {Set<string>} [updateFilter.id] - It contains the extension ids.
+   * @param {Set<string|undefined>} [updateFilter.viewType] - It contains view
+   * types that includes background, popup, sidebar, tab, devtools_page,
+   * devtools_panel. It is undefined when [updateFilter.type] is content_script.
+   * @param {Set<string>} [updateFilter.type] - It contains api types that
+   * includes api_call, api_event, content_script, user_script.
+   * @param {string} [updateFilter.keyword]
+   */
+  setFilter(updateFilter) {
+    Object.assign(this.filter, updateFilter);
   }
 
-  removeFilter({ logKey, valueEquals }) {
-    const logKeyIndex = this.filter[logKey].indexOf(valueEquals);
-    if (logKeyIndex > -1) {
-      this.filter[logKey].splice(logKeyIndex, 1);
-    }
+  matchLogWithFilterObj(log) {
+    return (
+      this.matchFilterId(log.id) &&
+      this.matchFilterViewType(log.viewType) &&
+      this.matchFilterType(log.type) &&
+      this.matchFilterKeyword(log.data)
+    );
+  }
+
+  matchFilterId(logId) {
+    return this.filter.id.has(logId);
+  }
+
+  matchFilterViewType(logViewType) {
+    return this.filter.viewType.has(logViewType);
+  }
+
+  matchFilterType(logType) {
+    return this.filter.type.has(logType);
+  }
+
+  matchFilterKeyword(logData) {
+    const logDataStr = JSON.stringify(logData);
+    return logDataStr.includes(this.filter.keyword);
   }
 
   clearLogs() {
@@ -44,6 +75,7 @@ class View {
     this.apiTypeFilter = document.querySelector(
       'filter-option[filter-key="type"]'
     );
+    this.keywordFilter = document.querySelector('filter-keyword');
 
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
@@ -71,8 +103,8 @@ class View {
   }
 
   addTableRows(logs) {
-    this.logView.addNewRows(logs);
     this.updateFilterOptions(logs);
+    this.logView.addNewRows(logs);
   }
 
   updateFilterOptions(logs) {
@@ -107,6 +139,7 @@ class Controller {
   async init() {
     this.view.clearLogBtn.addEventListener('clearlog', this);
     this.view.saveLogBtn.addEventListener('savelog', this);
+    this.view.keywordFilter.addEventListener('filterchange', this);
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
@@ -132,15 +165,6 @@ class Controller {
     }
   }
 
-  isFilterMatched(log) {
-    for (const key of Object.keys(this.model.filter)) {
-      if (this.model.filter[key].includes(log[key])) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   async getExistingLogs() {
     const { existingLogs } = await browser.runtime.sendMessage({
       requestType: 'sendAllLogs',
@@ -155,14 +179,15 @@ class Controller {
   }
 
   handleEvent(event) {
-    if (event.type === 'savelog') {
-      this.saveLogs();
-    } else if (event.type === 'filterchange') {
-      this.onFilterChange(event.detail);
-    } else if (event.type === 'clearlog') {
-      this.handleClearLogs();
-    } else {
-      throw new Error(`wrong event type found - ${event.type}`);
+    switch (event.type) {
+      case 'savelog':
+        this.saveLogs();
+        break;
+      case 'filterchange':
+        this.onFilterChange(event.detail);
+        break;
+      default:
+        throw new Error(`wrong event type found - ${event.type}`);
     }
   }
 
@@ -175,11 +200,19 @@ class Controller {
     }
   }
 
-  onFilterChange(filterObject) {
-    const { filterDetail, isFilterRemoved } = filterObject;
+  onFilterChange(filterDetail) {
+    const { updateFilter, isNewFilterAdded } = filterDetail;
 
-    this.model[isFilterRemoved ? 'removeFilter' : 'addFilter'](filterDetail);
-    this.view.setLogFilter((log) => this.isFilterMatched(log));
+    this.model.setFilter(updateFilter);
+    // When new filter checkbox is added, it is in checked condition by default
+    // No need to re-render the rows then.
+    if (!isNewFilterAdded) {
+      this.view.setLogFilter((log) => this.isFilterMatched(log));
+    }
+  }
+
+  isFilterMatched(log) {
+    return this.model.matchLogWithFilterObj(log);
   }
 
   handleClearLogs() {
@@ -198,6 +231,6 @@ class Controller {
 
 export default class ActivityLog {
   constructor() {
-    new Controller(new Model(), new View());
+    this.activityLog = new Controller(new Model(), new View());
   }
 }
