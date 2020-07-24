@@ -195,7 +195,7 @@ test("keyword search show a row when the given keyword is matched in log's data,
   tableRows = getTableRows();
 
   // only 2nd row should be visible since the keyword
-  // matches with 2nd row's log's data object.
+  // matches with 2nd row's data.
   expect(tableRows[0].hidden).toBeTruthy();
   expect(tableRows[1].hidden).toBeFalsy();
 });
