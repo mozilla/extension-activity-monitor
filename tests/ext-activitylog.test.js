@@ -193,12 +193,9 @@ test("keyword search show a row when the given keyword is matched in log's data,
   );
   searchInput.value = 'matched@data';
 
-  let event = new Event('input');
-  event.data = { target: activityLog.view.keywordFilter };
-
-  searchInput.dispatchEvent(new Event(event));
-
-  tableRows = getTableRows();
+  const tableRowPropChanged = observeChange(tableRows[0]);
+  activityLog.view.keywordFilter.dispatchEvent(new Event('input'));
+  await tableRowPropChanged;
 
   // only 2nd row should be visible since the keyword
   // matches with 2nd row's data.

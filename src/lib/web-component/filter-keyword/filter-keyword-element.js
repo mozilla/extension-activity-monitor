@@ -18,7 +18,7 @@ export class FilterKeyword extends HTMLElement {
       500
     );
 
-    this.inputBox.addEventListener('input', this.inputBoxListener);
+    this.addEventListener('input', this.inputBoxListener);
   }
 
   delay(fn, ms) {
@@ -42,7 +42,7 @@ export class FilterKeyword extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.inputBox.removeEventListener('input', this.inputBoxListener);
+    this.removeEventListener('input', this.inputBoxListener);
   }
 }
 
