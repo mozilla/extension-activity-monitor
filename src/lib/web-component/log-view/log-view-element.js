@@ -1,4 +1,4 @@
-class LogView extends HTMLElement {
+export class LogView extends HTMLElement {
   constructor() {
     super();
     this.isFilterMatched = () => true;

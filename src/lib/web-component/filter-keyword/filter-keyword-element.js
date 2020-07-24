@@ -1,4 +1,4 @@
-class filterKeyword extends HTMLElement {
+export class filterKeyword extends HTMLElement {
   constructor() {
     super();
 

@@ -1,4 +1,4 @@
-class FilterOption extends HTMLElement {
+export class FilterOption extends HTMLElement {
   constructor() {
     super();
 
@@ -97,7 +97,7 @@ class FilterOption extends HTMLElement {
     const filterDetail = {
       filterObject: {
         logKey: this.filterKey,
-        filterDescriptor: new Set([...this.activeCheckboxLabels]),
+        filterDescriptor: new Set(this.activeCheckboxLabels),
       },
       isNewFilterAdded,
     };

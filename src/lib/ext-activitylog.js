@@ -16,11 +16,11 @@ class Model {
   }
 
   /**
-   * Sets the values of any key in filter object
-   * @param {string} logKey - The key in the filter object.
-   * @param {Set} filterDescriptor - It contains the active checkboxes.
+   * Sets the value of any key in filter
+   * @param {string} logKey - The key in the filter.
+   * @param {Set} filterDescriptor - It contains collection of string for any key except keyword key.
+   * @param {string} filterDescriptor - It contains string for keyword key.
    */
-
   setFilter({ logKey, filterDescriptor }) {
     this.filter[logKey] = filterDescriptor;
   }
@@ -183,10 +183,10 @@ class Controller {
 
   onFilterChange(filterDetail) {
     const { filterObject, isNewFilterAdded } = filterDetail;
-    //console.log(filterObject);
+
     this.model.setFilter(filterObject);
     // When new filter checkbox is added, it is in checked condition by default
-    // No need to match filters to render rows then.
+    // No need to re-render the rows then.
     if (!isNewFilterAdded) {
       this.view.setLogFilter((log) => this.isFilterMatched(log));
     }
