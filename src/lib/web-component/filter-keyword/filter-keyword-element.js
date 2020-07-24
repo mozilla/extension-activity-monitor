@@ -33,7 +33,7 @@ class filterKeyword extends HTMLElement {
     const filterDetail = {
       filterObject: {
         logKey: 'keyword',
-        valueEquals: keyword,
+        filterDescriptor: keyword,
       },
     };
     this.dispatchEvent(

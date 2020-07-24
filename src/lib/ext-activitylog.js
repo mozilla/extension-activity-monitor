@@ -4,9 +4,9 @@ class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: new Set([]),
-      viewType: new Set([]),
-      type: new Set([]),
+      id: new Set(),
+      viewType: new Set(),
+      type: new Set(),
       keyword: '',
     };
   }
@@ -15,8 +15,14 @@ class Model {
     this.logs.push(...logs);
   }
 
-  setFilter({ logKey, valueEquals }) {
-    this.filter[logKey] = valueEquals;
+  /**
+   * Sets the values of any key in filter object
+   * @param {string} logKey - The key in the filter object.
+   * @param {Set} filterDescriptor - It contains the active checkboxes.
+   */
+
+  setFilter({ logKey, filterDescriptor }) {
+    this.filter[logKey] = filterDescriptor;
   }
 
   matchLogWithFilterObj(log) {
@@ -177,7 +183,7 @@ class Controller {
 
   onFilterChange(filterDetail) {
     const { filterObject, isNewFilterAdded } = filterDetail;
-
+    //console.log(filterObject);
     this.model.setFilter(filterObject);
     // When new filter checkbox is added, it is in checked condition by default
     // No need to match filters to render rows then.

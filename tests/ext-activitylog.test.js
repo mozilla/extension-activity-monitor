@@ -1,6 +1,7 @@
 /* eslint no-unsanitized/property: "off" */
 import fs from 'fs';
 import path from 'path';
+import { JSDOM } from 'jsdom';
 import ActivityLog from '../src/lib/ext-activitylog';
 
 const activityLogHtml = fs.readFileSync(
@@ -13,8 +14,24 @@ const domParser = new DOMParser();
 const activityLogBody = domParser.parseFromString(activityLogHtml, 'text/html')
   .body.innerHTML;
 
+const dom = new JSDOM(
+  `<html>
+    <head>
+      <script
+        type="module"
+        src="../src/lib/web-component/filter-option/filter-option-element.js"
+      ></script>
+    </head>
+    <body>
+    ${activityLogBody}
+    </body>
+  </html>`,
+  { runScripts: 'dangerously' }
+);
+
 test('isFilterMatched function returns true when all properties of a log are matched with filter object, else it returns true', () => {
-  document.body.innerHTML = activityLogBody;
+  global.document.head.innerHTML = dom.window.document.head.innerHTML;
+  global.document.body.innerHTML = dom.window.document.body.innerHTML;
 
   const log = {
     id: 'id@test1',

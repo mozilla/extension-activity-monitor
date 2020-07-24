@@ -2,10 +2,10 @@ class FilterOption extends HTMLElement {
   constructor() {
     super();
 
-    this.viewCheckboxLabels = new Set([]);
+    this.viewCheckboxLabels = new Set();
 
     // It contains the checked checkboxes
-    this.activeCheckboxLabels = new Set([]);
+    this.activeCheckboxLabels = new Set();
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -71,7 +71,9 @@ class FilterOption extends HTMLElement {
     ) {
       const checkboxLabel =
         event.target.value === 'undefined' ? undefined : event.target.value;
-      this.handleCheckbox(checkboxLabel);
+      const isChecked = event.target.checked;
+
+      this.onCheckboxChange(checkboxLabel, isChecked);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
@@ -82,11 +84,11 @@ class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  handleCheckbox(checkboxLabel) {
-    if (this.activeCheckboxLabels.has(checkboxLabel)) {
-      this.activeCheckboxLabels.delete(checkboxLabel);
-    } else {
+  onCheckboxChange(checkboxLabel, isChecked) {
+    if (isChecked) {
       this.activeCheckboxLabels.add(checkboxLabel);
+    } else {
+      this.activeCheckboxLabels.delete(checkboxLabel);
     }
     this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
   }
@@ -95,7 +97,7 @@ class FilterOption extends HTMLElement {
     const filterDetail = {
       filterObject: {
         logKey: this.filterKey,
-        valueEquals: this.activeCheckboxLabels,
+        filterDescriptor: new Set([...this.activeCheckboxLabels]),
       },
       isNewFilterAdded,
     };
