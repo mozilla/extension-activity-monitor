@@ -73,7 +73,12 @@ export class FilterOption extends HTMLElement {
         event.target.value === 'undefined' ? undefined : event.target.value;
       const isChecked = event.target.checked;
 
-      this.onCheckboxChange(checkboxLabel, isChecked);
+      if (isChecked) {
+        this.activeCheckboxLabels.add(checkboxLabel);
+      } else {
+        this.activeCheckboxLabels.delete(checkboxLabel);
+      }
+      this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
@@ -84,18 +89,9 @@ export class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  onCheckboxChange(checkboxLabel, isChecked) {
-    if (isChecked) {
-      this.activeCheckboxLabels.add(checkboxLabel);
-    } else {
-      this.activeCheckboxLabels.delete(checkboxLabel);
-    }
-    this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
-  }
-
   dispatchFilterChangeEvent({ isNewFilterAdded }) {
     const filterDetail = {
-      updateFilterProps: {
+      updateFilter: {
         [this.filterKey]: new Set(this.activeCheckboxLabels),
       },
       isNewFilterAdded,

@@ -9,29 +9,29 @@ export class FilterKeyword extends HTMLElement {
 
     this.inputBox = filterContainer.querySelector('input[name="keyword"]');
 
+    this.timer = 0;
+    this.inputBoxListener = (event) => {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        const filterDetail = {
+          updateFilter: { keyword: event.target.inputBox.value },
+        };
+
+        this.dispatchEvent(
+          new CustomEvent('filterchange', { detail: filterDetail })
+        );
+      }, 500);
+    };
+
     shadow.appendChild(filterContainer);
   }
 
   connectedCallback() {
-    let timer = 0;
-    this.inputBoxListener = (event) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        this.onKeywordSubmit(event.target.inputBox.value);
-      }, 500);
-    };
-
     this.addEventListener('input', this.inputBoxListener);
   }
 
-  onKeywordSubmit(keyword) {
-    const filterDetail = { updateFilterProps: { keyword } };
-    this.dispatchEvent(
-      new CustomEvent('filterchange', { detail: filterDetail })
-    );
-  }
-
   disconnectedCallback() {
+    clearTimeout(this.timer);
     this.removeEventListener('input', this.inputBoxListener);
   }
 }

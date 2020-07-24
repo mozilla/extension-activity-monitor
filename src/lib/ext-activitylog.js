@@ -16,12 +16,20 @@ class Model {
   }
 
   /**
-   * Set the value of any key in filter
-   * @param {object} updateFilterProps - It contains key and value to update
-   * the filter.
+   * @param {object} updateFilter - It contains key and value to replace
+   * the filter
+   * @param {Set<string>} [updateFilter.id] - It contains the extension ids.
+   * @param {Set<string>} [updateFilter.viewType] - It contains view types that
+   * includes background, popup, sidebar, tab, devtools_page, devtools_panel.
+   * @param {undefined} [updateFilter.viewType] - when [updateFilter.type] is
+   * content_script.
+   * @param {Set<string>} [updateFilter.type] - It contains api types that
+   * includes api_call, api_event, content_script, user_script.
+   * @param {string} [updateFilter.keyword] - It contains a string for
+   * keyword search.
    */
-  setFilter(updateFilterProps) {
-    Object.assign(this.filter, updateFilterProps);
+  setFilter(updateFilter) {
+    Object.assign(this.filter, updateFilter);
   }
 
   matchLogWithFilterObj(log) {
@@ -181,9 +189,9 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { updateFilterProps, isNewFilterAdded } = filterDetail;
+    const { updateFilter, isNewFilterAdded } = filterDetail;
 
-    this.model.setFilter(updateFilterProps);
+    this.model.setFilter(updateFilter);
     // When new filter checkbox is added, it is in checked condition by default
     // No need to re-render the rows then.
     if (!isNewFilterAdded) {
