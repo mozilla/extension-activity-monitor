@@ -95,9 +95,8 @@ export class FilterOption extends HTMLElement {
 
   dispatchFilterChangeEvent({ isNewFilterAdded }) {
     const filterDetail = {
-      filterObject: {
-        logKey: this.filterKey,
-        filterDescriptor: new Set(this.activeCheckboxLabels),
+      updateFilterProps: {
+        [this.filterKey]: new Set(this.activeCheckboxLabels),
       },
       isNewFilterAdded,
     };

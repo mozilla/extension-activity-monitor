@@ -16,13 +16,12 @@ class Model {
   }
 
   /**
-   * Sets the value of any key in filter
-   * @param {string} logKey - The key in the filter.
-   * @param {Set} filterDescriptor - It contains collection of string for any key except keyword key.
-   * @param {string} filterDescriptor - It contains string for keyword key.
+   * Set the value of any key in filter
+   * @param {object} updateFilterProps - It contains key and value to update
+   * the filter.
    */
-  setFilter({ logKey, filterDescriptor }) {
-    this.filter[logKey] = filterDescriptor;
+  setFilter(updateFilterProps) {
+    Object.assign(this.filter, updateFilterProps);
   }
 
   matchLogWithFilterObj(log) {
@@ -182,9 +181,9 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { filterObject, isNewFilterAdded } = filterDetail;
+    const { updateFilterProps, isNewFilterAdded } = filterDetail;
 
-    this.model.setFilter(filterObject);
+    this.model.setFilter(updateFilterProps);
     // When new filter checkbox is added, it is in checked condition by default
     // No need to re-render the rows then.
     if (!isNewFilterAdded) {

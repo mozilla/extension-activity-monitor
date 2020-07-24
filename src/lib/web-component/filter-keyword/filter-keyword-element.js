@@ -13,29 +13,19 @@ export class FilterKeyword extends HTMLElement {
   }
 
   connectedCallback() {
-    this.inputBoxListener = this.delay(
-      (event) => this.onKeywordSubmit(event.target.inputBox.value),
-      500
-    );
+    let timer = 0;
+    this.inputBoxListener = (event) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        this.onKeywordSubmit(event.target.inputBox.value);
+      }, 500);
+    };
 
     this.addEventListener('input', this.inputBoxListener);
   }
 
-  delay(fn, ms) {
-    let timer = 0;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(fn.bind(this, ...args), ms || 0);
-    };
-  }
-
   onKeywordSubmit(keyword) {
-    const filterDetail = {
-      filterObject: {
-        logKey: 'keyword',
-        filterDescriptor: keyword,
-      },
-    };
+    const filterDetail = { updateFilterProps: { keyword } };
     this.dispatchEvent(
       new CustomEvent('filterchange', { detail: filterDetail })
     );
