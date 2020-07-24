@@ -10,20 +10,22 @@ export class FilterKeyword extends HTMLElement {
     this.inputBox = filterContainer.querySelector('input[name="keyword"]');
 
     this.timer = 0;
-    this.inputBoxListener = (event) => {
+    this.inputBoxListener = () => {
       clearTimeout(this.timer);
-      this.timer = setTimeout(() => {
-        const filterDetail = {
-          updateFilter: { keyword: event.target.inputBox.value },
-        };
-
-        this.dispatchEvent(
-          new CustomEvent('filterchange', { detail: filterDetail })
-        );
-      }, 500);
+      this.timer = setTimeout(this.dispatchFilterChanged.bind(this), 500);
     };
 
     shadow.appendChild(filterContainer);
+  }
+
+  dispatchFilterChanged() {
+    const filterDetail = {
+      updateFilter: { keyword: this.inputBox.value },
+    };
+
+    this.dispatchEvent(
+      new CustomEvent('filterchange', { detail: filterDetail })
+    );
   }
 
   connectedCallback() {
