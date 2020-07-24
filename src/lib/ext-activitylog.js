@@ -55,11 +55,16 @@ class Model {
     const logDataStr = JSON.stringify(logData);
     return logDataStr.includes(this.filter.keyword);
   }
+
+  clearLogs() {
+    this.logs = [];
+  }
 }
 
 class View {
   constructor() {
     this.logView = document.querySelector('log-view');
+    this.clearLogBtn = document.querySelector('#clearLogBtn');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.notice = document.querySelector('.notice');
 
@@ -72,6 +77,7 @@ class View {
     );
     this.keywordFilter = document.querySelector('filter-keyword');
 
+    this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
   }
 
@@ -84,6 +90,9 @@ class View {
       switch (event.target) {
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
+        case this.clearLogBtn:
+          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         default:
           throw new Error(`wrong event target - ${event.target.tagName}`);
@@ -113,6 +122,10 @@ class View {
       this.notice.classList.remove('failure');
     }
   }
+
+  clearTable() {
+    this.logView.clearTable();
+  }
 }
 
 class Controller {
@@ -124,6 +137,7 @@ class Controller {
   }
 
   async init() {
+    this.view.clearLogBtn.addEventListener('clearlog', this);
     this.view.saveLogBtn.addEventListener('savelog', this);
     this.view.keywordFilter.addEventListener('filterchange', this);
     this.view.extFilter.addEventListener('filterchange', this);
@@ -199,6 +213,19 @@ class Controller {
 
   isFilterMatched(log) {
     return this.model.matchLogWithFilterObj(log);
+  }
+
+  handleClearLogs() {
+    this.clearBackgroundLogs();
+    this.model.clearLogs();
+    this.view.clearTable();
+  }
+
+  async clearBackgroundLogs() {
+    await browser.runtime.sendMessage({
+      requestType: 'clearLogs',
+      requestTo: 'ext-monitor',
+    });
   }
 }
 

@@ -71,6 +71,7 @@ export default class ExtensionMonitor {
   }
 
   messageHandlers = {
+    clearLogs: () => (this.logs = []),
     getMonitorStatus: () => ({ active: this.hasActivityListeners() }),
     startMonitor: () => this.startMonitor(),
     stopMonitor: () => this.stopMonitor(),
