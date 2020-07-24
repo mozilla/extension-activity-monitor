@@ -12,7 +12,9 @@ export class FilterKeyword extends HTMLElement {
     this.timer = 0;
     this.inputBoxListener = () => {
       clearTimeout(this.timer);
-      this.timer = setTimeout(this.dispatchFilterChanged.bind(this), 500);
+      this.timer = setTimeout(() => {
+        this.dispatchFilterChanged();
+      }, 500);
     };
 
     shadow.appendChild(filterContainer);
