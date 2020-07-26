@@ -8,7 +8,14 @@
   "author": "Mozilla Add-ons Team",
   "homepage_url": "https://github.com/mozilla/extension-activity-monitor",
 
-  "permissions": ["activityLog", "management", "tabs", "downloads"],
+  "permissions": [
+    "activityLog",
+    "management",
+    "tabs",
+    "downloads",
+    "menus",
+    "menus.overrideContext"
+  ],
 
   "icons": {
     "48": "icons/eam-48.png"

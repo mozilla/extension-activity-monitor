@@ -76,5 +76,5 @@ table tbody tr {
 table td {
   word-wrap: anywhere;
   text-align: center;
-  padding: 5px;
+  padding: 10px 5px;
 }

@@ -9,6 +9,7 @@ class Model {
       type: new Set(),
       name: new Set(),
       keyword: '',
+      timeStamp: null,
     };
   }
 
@@ -27,6 +28,10 @@ class Model {
    * includes api_call, api_event, content_script, user_script.
    * @param {Set<string>} [updateFilter.name] - It contains API names only.
    * @param {string} [updateFilter.keyword]
+   * @param {null|object} [updateFilter.timeStamp] - It is null when timestamp
+   * filter is not applied.
+   * @param {number} [updateFilter.timeStamp.start]
+   * @param {number} [updateFilter.timeStamp.stop]
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -38,7 +43,8 @@ class Model {
       this.matchFilterViewType(log) &&
       this.matchFilterType(log.type) &&
       this.matchFilterApiName(log) &&
-      this.matchFilterKeyword(log.data)
+      this.matchFilterKeyword(log.data) &&
+      this.matchFilterTimestamp(log.timeStamp)
     );
   }
 
@@ -73,6 +79,22 @@ class Model {
     return logDataStr.includes(this.filter.keyword);
   }
 
+  matchFilterTimestamp(logTimestamp) {
+    if (!this.filter.timeStamp) {
+      return true;
+    }
+
+    const startTime = this.filter.timeStamp.start;
+    const endTime = this.filter.timeStamp.stop;
+    const logTime = Date.parse(logTimestamp);
+
+    if (logTime < startTime || logTime > endTime) {
+      return false;
+    }
+
+    return true;
+  }
+
   clearLogs() {
     this.logs = [];
   }
@@ -96,6 +118,7 @@ class View {
       'filter-option[filter-key="name"]'
     );
     this.keywordFilter = document.querySelector('filter-keyword');
+    this.timestampFilter = document.querySelector('filter-timestamp');
 
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
@@ -170,6 +193,7 @@ class Controller {
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
+    this.view.timestampFilter.addEventListener('filterchange', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
