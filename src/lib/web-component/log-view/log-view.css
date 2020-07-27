@@ -28,7 +28,6 @@
   white-space: pre-wrap;
   max-height: 450px;
   overflow-y: scroll;
-  box-sizing: border-box;
   padding-left: 20px;
 }
 
