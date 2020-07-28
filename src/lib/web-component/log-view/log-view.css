@@ -8,7 +8,7 @@
 }
 
 .log-table-wrapper {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 500px;
   height: auto;
 }
@@ -27,7 +27,7 @@
   margin: 40px 0 10px;
   white-space: pre-wrap;
   max-height: 450px;
-  overflow-y: scroll;
+  overflow-y: auto;
   padding-left: 20px;
 }
 
