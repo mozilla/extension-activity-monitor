@@ -8,7 +8,7 @@ class Model {
       viewType: new Set(),
       type: new Set(),
       name: new Set(),
-      other: new Set(),
+      contentScriptUrls: new Set(),
       keyword: '',
     };
   }
@@ -55,8 +55,9 @@ class Model {
   }
 
   matchFilterApiName(name) {
-    // since we store the content script url in "filter.other"
-    return this.filter.name.has(name) || this.filter.other.has(name);
+    return (
+      this.filter.name.has(name) || this.filter.contentScriptUrls.has(name)
+    );
   }
 
   matchFilterKeyword(logData) {
@@ -87,9 +88,6 @@ class View {
       'filter-option[filter-key="name"]'
     );
     this.keywordFilter = document.querySelector('filter-keyword');
-    this.otherFilter = document.querySelector(
-      'filter-option[filter-key="other"]'
-    );
 
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
@@ -117,27 +115,7 @@ class View {
   }
 
   addTableRows(logs) {
-    this.updateFilterOptions(logs);
     this.logView.addNewRows(logs);
-  }
-
-  updateFilterOptions(logs) {
-    const otherLogs = [];
-    const apiNameLogs = logs.filter((log) => {
-      if (log.type !== 'content_script') {
-        return true;
-      } else {
-        otherLogs.push(log);
-      }
-    });
-
-    this.extFilter.updateFilterCheckboxes(logs);
-    this.viewTypeFilter.updateFilterCheckboxes(logs);
-    this.apiTypeFilter.updateFilterCheckboxes(logs);
-    this.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
-    if (otherLogs) {
-      this.otherFilter.updateFilterCheckboxes(otherLogs);
-    }
   }
 
   setError(errorMessage) {
@@ -171,7 +149,6 @@ class Controller {
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
-    this.view.otherFilter.addEventListener('filterchange', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -205,6 +182,23 @@ class Controller {
   handleNewLogs(logs) {
     this.model.addNewLogs(logs);
     this.view.addTableRows(logs);
+    this.updateFilterCheckboxes(logs);
+  }
+
+  updateFilterCheckboxes(logs) {
+    const apiNameLogs = logs.filter((log) => {
+      if (log.type !== 'content_script') {
+        return true;
+      } else {
+        //log.name contains content script url
+        this.model.filter.contentScriptUrls.add(log.name);
+      }
+    });
+
+    this.view.extFilter.updateFilterCheckboxes(logs);
+    this.view.viewTypeFilter.updateFilterCheckboxes(logs);
+    this.view.apiTypeFilter.updateFilterCheckboxes(logs);
+    this.view.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
   }
 
   handleEvent(event) {
