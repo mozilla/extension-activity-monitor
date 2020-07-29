@@ -52,7 +52,7 @@ export class LogView extends HTMLElement {
   }
 
   openDetailSidebar(logDetails) {
-    const logString = JSON.stringify(logDetails);
+    const logString = JSON.stringify(logDetails, null, 2);
     this.logDetails.textContent = logString;
     this.logTableWrapper.classList.add('width-60');
     this.logDetailWrapper.hidden = false;

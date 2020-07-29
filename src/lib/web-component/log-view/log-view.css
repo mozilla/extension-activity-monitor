@@ -1,9 +1,14 @@
+* {
+  box-sizing: border-box;
+}
+
 .activity-log-container {
   position: relative;
+  margin-bottom: 30px;
 }
 
 .log-table-wrapper {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: 500px;
   height: auto;
 }
@@ -19,7 +24,11 @@
 }
 
 .log-details {
-  margin: 50px 15px 10px;
+  margin: 40px 0 10px;
+  white-space: pre-wrap;
+  max-height: 450px;
+  overflow-y: auto;
+  padding-left: 20px;
 }
 
 .width-60 {
