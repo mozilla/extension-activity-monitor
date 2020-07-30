@@ -31,7 +31,6 @@ export class FilterOption extends HTMLElement {
   updateFilterCheckboxes(logs) {
     for (const log of logs) {
       const checkboxLabel = log[this.filterKey];
-
       if (!this.viewCheckboxLabels.has(checkboxLabel)) {
         this.viewCheckboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
