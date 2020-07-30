@@ -115,6 +115,16 @@ class View {
     this.logView.addNewRows(logs);
   }
 
+  updateFilterCheckboxes(logs) {
+    // log.name contains the script URL instead of the API name for content scripts.
+    const apiNameLogs = logs.filter((log) => log.type !== 'content_script');
+
+    this.extFilter.updateFilterCheckboxes(logs);
+    this.viewTypeFilter.updateFilterCheckboxes(logs);
+    this.apiTypeFilter.updateFilterCheckboxes(logs);
+    this.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
+  }
+
   setError(errorMessage) {
     if (errorMessage) {
       this.notice.textContent = errorMessage;
@@ -179,17 +189,7 @@ class Controller {
   handleNewLogs(logs) {
     this.model.addNewLogs(logs);
     this.view.addTableRows(logs);
-    this.updateFilterCheckboxes(logs);
-  }
-
-  updateFilterCheckboxes(logs) {
-    // log.name contains the script URL instead of the API name for content scripts.
-    const apiNameLogs = logs.filter((log) => log.type !== 'content_script');
-
-    this.view.extFilter.updateFilterCheckboxes(logs);
-    this.view.viewTypeFilter.updateFilterCheckboxes(logs);
-    this.view.apiTypeFilter.updateFilterCheckboxes(logs);
-    this.view.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
+    this.view.updateFilterCheckboxes(logs);
   }
 
   handleEvent(event) {
