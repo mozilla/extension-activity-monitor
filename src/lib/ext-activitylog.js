@@ -111,11 +111,12 @@ class View {
     }
   }
 
-  addTableRows(logs) {
+  handleNewLogs(logs) {
+    this.updateFilterOptions(logs);
     this.logView.addNewRows(logs);
   }
 
-  updateFilterCheckboxes(logs) {
+  updateFilterOptions(logs) {
     // log.name contains the script URL instead of the API name for content scripts.
     const apiNameLogs = logs.filter((log) => log.type !== 'content_script');
 
@@ -188,8 +189,7 @@ class Controller {
 
   handleNewLogs(logs) {
     this.model.addNewLogs(logs);
-    this.view.addTableRows(logs);
-    this.view.updateFilterCheckboxes(logs);
+    this.view.handleNewLogs(logs);
   }
 
   handleEvent(event) {
