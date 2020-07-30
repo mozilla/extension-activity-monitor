@@ -8,7 +8,6 @@ class Model {
       viewType: new Set(),
       type: new Set(),
       name: new Set(),
-      contentScriptUrls: new Set(),
       keyword: '',
     };
   }
@@ -37,31 +36,29 @@ class Model {
       this.matchFilterId(log.id) &&
       this.matchFilterViewType(log.viewType) &&
       this.matchFilterType(log.type) &&
-      this.matchFilterApiName(log.name) &&
+      this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data)
     );
   }
 
-  matchFilterId(logId) {
-    return this.filter.id.has(logId);
+  matchFilterId(id) {
+    return this.filter.id.has(id);
   }
 
-  matchFilterViewType(logViewType) {
-    return this.filter.viewType.has(logViewType);
+  matchFilterViewType(viewType) {
+    return this.filter.viewType.has(viewType);
   }
 
-  matchFilterType(logType) {
-    return this.filter.type.has(logType);
+  matchFilterType(type) {
+    return this.filter.type.has(type);
   }
 
-  matchFilterApiName(name) {
-    return (
-      this.filter.name.has(name) || this.filter.contentScriptUrls.has(name)
-    );
+  matchFilterApiName({ name, type }) {
+    return type === 'content_script' ? true : this.filter.name.has(name);
   }
 
-  matchFilterKeyword(logData) {
-    const logDataStr = JSON.stringify(logData);
+  matchFilterKeyword(data) {
+    const logDataStr = JSON.stringify(data);
     return logDataStr.includes(this.filter.keyword);
   }
 
@@ -186,14 +183,8 @@ class Controller {
   }
 
   updateFilterCheckboxes(logs) {
-    const apiNameLogs = logs.filter((log) => {
-      if (log.type !== 'content_script') {
-        return true;
-      } else {
-        //log.name contains content script url
-        this.model.filter.contentScriptUrls.add(log.name);
-      }
-    });
+    // log.name contains the script URL instead of the API name for content scripts.
+    const apiNameLogs = logs.filter((log) => log.type !== 'content_script');
 
     this.view.extFilter.updateFilterCheckboxes(logs);
     this.view.viewTypeFilter.updateFilterCheckboxes(logs);

@@ -46,11 +46,9 @@ export class LogView extends HTMLElement {
       if (log.type === 'content_script') {
         const contentScriptTD = logTableRowInstance.querySelector('.name');
         contentScriptTD.textContent = log.name;
-        contentScriptTD.setAttribute('colspan', '2');
+        contentScriptTD.colSpan = 2;
         // view type is undefined for log.type = content_script
-        logTableRowInstance
-          .querySelector('.view-type')
-          .setAttribute('hidden', true);
+        logTableRowInstance.querySelector('.view-type').hidden = true;
       } else {
         logTableRowInstance.querySelector('.name').textContent = log.name;
         logTableRowInstance.querySelector('.view-type').textContent =
