@@ -1,5 +1,7 @@
-export function getActivityLogPageURL() {
-  return browser.runtime.getURL('/activitylog/activitylog.html');
+export function getActivityLogPageURL(searchParams) {
+  return browser.runtime.getURL(
+    `/activitylog/activitylog.html${searchParams ? `?${searchParams}` : ''}`
+  );
 }
 
 export async function getMonitorStatus() {

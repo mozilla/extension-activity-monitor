@@ -22,9 +22,13 @@
   <body>
     <div class="container">
       <h1>Extension Activity Monitor</h1>
-      <button id="saveLogBtn">Save logs</button>
-      <button id="clearLogBtn">Clear All Logs</button>
-      <div class="notice"></div>
+      <div class="menu-container">
+        <input type="file" name="loadLogFile" accept="application/JSON" />
+        <button id="saveLogBtn">Save logs</button>
+        <button id="clearLogBtn">Clear All Logs</button>
+        <button id="clearLoadedLogs">Clear All Loaded Logs</button>
+        <div class="notice"></div>
+      </div>
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">

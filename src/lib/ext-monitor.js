@@ -1,6 +1,10 @@
 import { getActivityLogPageURL } from './ext-listen.js';
 
 export default class ExtensionMonitor {
+  /**
+   * @type {Array.<{logs: Array<Object>, fileName: String}>}
+   */
+  loadedLogs = [];
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
@@ -76,17 +80,46 @@ export default class ExtensionMonitor {
     startMonitor: () => this.startMonitor(),
     stopMonitor: () => this.stopMonitor(),
     sendAllLogs: () => ({ existingLogs: this.logs }),
+    loadLogs: (detail) => this.pushToLoadedLogs(detail),
+    getLoadedLogs: ({ fileName }) => this.getLoadedLogs(fileName),
+    clearLoadedLogs: () => (this.loadedLogs = []),
   };
 
+  pushToLoadedLogs(loadedLogObj) {
+    let repeatTimes = 0;
+    this.loadedLogs.forEach(({ fileName }) => {
+      if (fileName.includes(loadedLogObj.fileName)) {
+        repeatTimes++;
+      }
+    });
+
+    // if file exists with same name
+    if (repeatTimes) {
+      loadedLogObj.fileName = `${loadedLogObj.fileName}-${repeatTimes}`;
+    }
+
+    this.loadedLogs.push(loadedLogObj);
+    return loadedLogObj.fileName;
+  }
+
+  getLoadedLogs(fileName) {
+    for (const loadedLog of this.loadedLogs) {
+      if (loadedLog.fileName === fileName) {
+        return loadedLog.logs;
+      }
+    }
+    return [];
+  }
+
   messageListener = (message) => {
-    const { requestType, requestTo } = message;
+    const { requestType, requestTo, detail } = message;
     if (requestTo !== 'ext-monitor') {
       return;
     }
 
     if (requestType in this.messageHandlers) {
       try {
-        return Promise.resolve(this.messageHandlers[requestType]());
+        return Promise.resolve(this.messageHandlers[requestType](detail));
       } catch (error) {
         return Promise.reject(error);
       }
