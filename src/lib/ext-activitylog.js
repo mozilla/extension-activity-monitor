@@ -18,13 +18,14 @@ class Model {
 
   /**
    * @param {object} updateFilter - It contains key and value to replace
-   * the filter
+   * the filter.
    * @param {Set<string>} [updateFilter.id] - It contains the extension ids.
    * @param {Set<string|undefined>} [updateFilter.viewType] - It contains view
-   * types that includes background, popup, sidebar, tab, devtools_page,
+   * types that include background, popup, sidebar, tab, devtools_page,
    * devtools_panel. It is undefined when [updateFilter.type] is content_script.
    * @param {Set<string>} [updateFilter.type] - It contains api types that
    * includes api_call, api_event, content_script, user_script.
+   * @param {Set<string>} [updateFilter.name] - It contains API names only.
    * @param {string} [updateFilter.keyword]
    */
   setFilter(updateFilter) {
