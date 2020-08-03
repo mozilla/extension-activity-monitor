@@ -35,7 +35,7 @@ class Model {
   matchLogWithFilterObj(log) {
     return (
       this.matchFilterId(log.id) &&
-      this.matchFilterViewType(log.viewType) &&
+      this.matchFilterViewType(log) &&
       this.matchFilterType(log.type) &&
       this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data)
@@ -46,8 +46,10 @@ class Model {
     return this.filter.id.has(id);
   }
 
-  matchFilterViewType(viewType) {
-    return this.filter.viewType.has(viewType);
+  matchFilterViewType({ viewType, type }) {
+    return type === 'content_script'
+      ? true
+      : this.filter.viewType.has(viewType);
   }
 
   matchFilterType(type) {
@@ -118,13 +120,15 @@ class View {
   }
 
   updateFilterOptions(logs) {
-    // log.name contains the script URL instead of the API name for content scripts.
-    const apiNameLogs = logs.filter((log) => log.type !== 'content_script');
+    // log.name contains a script URL instead of API name and log.viewtype is
+    // undefined when log.type = content_script. Excluding them from being
+    // rendered as filter option in api names and viewtypes.
+    const filteredLogs = logs.filter((log) => log.type !== 'content_script');
 
     this.extFilter.updateFilterCheckboxes(logs);
-    this.viewTypeFilter.updateFilterCheckboxes(logs);
+    this.viewTypeFilter.updateFilterCheckboxes(filteredLogs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
-    this.apiNameFilter.updateFilterCheckboxes(apiNameLogs);
+    this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
   setError(errorMessage) {
