@@ -7,6 +7,7 @@ class Model {
       id: new Set(),
       viewType: new Set(),
       type: new Set(),
+      name: new Set(),
       keyword: '',
     };
   }
@@ -17,13 +18,14 @@ class Model {
 
   /**
    * @param {object} updateFilter - It contains key and value to replace
-   * the filter
+   * the filter.
    * @param {Set<string>} [updateFilter.id] - It contains the extension ids.
    * @param {Set<string|undefined>} [updateFilter.viewType] - It contains view
-   * types that includes background, popup, sidebar, tab, devtools_page,
+   * types that include background, popup, sidebar, tab, devtools_page,
    * devtools_panel. It is undefined when [updateFilter.type] is content_script.
    * @param {Set<string>} [updateFilter.type] - It contains api types that
    * includes api_call, api_event, content_script, user_script.
+   * @param {Set<string>} [updateFilter.name] - It contains API names only.
    * @param {string} [updateFilter.keyword]
    */
   setFilter(updateFilter) {
@@ -33,26 +35,41 @@ class Model {
   matchLogWithFilterObj(log) {
     return (
       this.matchFilterId(log.id) &&
-      this.matchFilterViewType(log.viewType) &&
+      this.matchFilterViewType(log) &&
       this.matchFilterType(log.type) &&
+      this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data)
     );
   }
 
-  matchFilterId(logId) {
-    return this.filter.id.has(logId);
+  matchFilterId(id) {
+    return this.filter.id.has(id);
   }
 
-  matchFilterViewType(logViewType) {
-    return this.filter.viewType.has(logViewType);
+  matchFilterViewType({ type, viewType }) {
+    if (type === 'content_script') {
+      // viewtype is undefined when log.type = content_script. We don't store
+      // undefined in viewType Set. Hence, we don't filter here.
+      return true;
+    }
+    return this.filter.viewType.has(viewType);
   }
 
-  matchFilterType(logType) {
-    return this.filter.type.has(logType);
+  matchFilterType(type) {
+    return this.filter.type.has(type);
   }
 
-  matchFilterKeyword(logData) {
-    const logDataStr = JSON.stringify(logData);
+  matchFilterApiName({ name, type }) {
+    if (type === 'content_script') {
+      // name is a content script url when log.type = content_script. We don't
+      // store content script urls in API name Set. Hence, we don't filter here.
+      return true;
+    }
+    return this.filter.name.has(name);
+  }
+
+  matchFilterKeyword(data) {
+    const logDataStr = JSON.stringify(data);
     return logDataStr.includes(this.filter.keyword);
   }
 
@@ -74,6 +91,9 @@ class View {
     );
     this.apiTypeFilter = document.querySelector(
       'filter-option[filter-key="type"]'
+    );
+    this.apiNameFilter = document.querySelector(
+      'filter-option[filter-key="name"]'
     );
     this.keywordFilter = document.querySelector('filter-keyword');
 
@@ -102,15 +122,21 @@ class View {
     }
   }
 
-  addTableRows(logs) {
+  handleNewLogs(logs) {
     this.updateFilterOptions(logs);
     this.logView.addNewRows(logs);
   }
 
   updateFilterOptions(logs) {
+    // log.name contains a script URL instead of API name and log.viewtype is
+    // undefined when log.type = content_script. Excluding them from being
+    // rendered as filter option in api names and viewtypes.
+    const filteredLogs = logs.filter((log) => log.type !== 'content_script');
+
     this.extFilter.updateFilterCheckboxes(logs);
-    this.viewTypeFilter.updateFilterCheckboxes(logs);
+    this.viewTypeFilter.updateFilterCheckboxes(filteredLogs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
+    this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
   setError(errorMessage) {
@@ -143,6 +169,7 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
+    this.view.apiNameFilter.addEventListener('filterchange', this);
 
     browser.runtime.onMessage.addListener((message) => {
       const { requestTo, requestType } = message;
@@ -175,7 +202,7 @@ class Controller {
 
   handleNewLogs(logs) {
     this.model.addNewLogs(logs);
-    this.view.addTableRows(logs);
+    this.view.handleNewLogs(logs);
   }
 
   handleEvent(event) {

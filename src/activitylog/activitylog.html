@@ -32,11 +32,20 @@
           <filter-option filter-key="id">
             Select extensions to filter logs
           </filter-option>
-          <filter-option filter-key="viewType">
+          <filter-option
+            filter-key="viewType"
+            title="This filter applies to all log entries except content scripts."
+          >
             Select view type to filter logs
           </filter-option>
           <filter-option filter-key="type">
             Select api type to filter logs
+          </filter-option>
+          <filter-option
+            filter-key="name"
+            title="This filter only applies to log entries related to API events."
+          >
+            Select api name to filter logs
           </filter-option>
         </div>
         <log-view></log-view>
@@ -88,13 +97,17 @@
         rel="stylesheet"
         href="/lib/web-component/filter-option/filter-option.css"
       />
-      <div class="filter-container">
-        <div class="toggle-btn"></div>
+      <div class="filter-container toggle-btn">
+        <div class="title"></div>
         <div class="checkbox-list" hidden></div>
       </div>
     </template>
 
     <template id="filterKeywordTemplate">
+      <link
+        rel="stylesheet"
+        href="/lib/web-component/filter-keyword/filter-keyword.css"
+      />
       <div class="filter-container">
         <input type="text" name="keyword" />
       </div>

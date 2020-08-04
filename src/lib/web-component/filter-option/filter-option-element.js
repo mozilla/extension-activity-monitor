@@ -3,7 +3,6 @@ export class FilterOption extends HTMLElement {
     super();
 
     this.viewCheckboxLabels = new Set();
-
     // It contains the checked checkboxes
     this.activeCheckboxLabels = new Set();
 
@@ -19,7 +18,9 @@ export class FilterOption extends HTMLElement {
 
     this.toggleBtn = filterContainer.querySelector('.toggle-btn');
     this.toggleBtn.classList.add(this.filterKey);
-    this.toggleBtn.textContent = this.textContent;
+
+    this.filterOptionTitle = filterContainer.querySelector('.title');
+    this.filterOptionTitle.textContent = this.textContent;
 
     this.checkboxList = filterContainer.querySelector('.checkbox-list');
     this.checkboxList.classList.add(this.filterKey);
