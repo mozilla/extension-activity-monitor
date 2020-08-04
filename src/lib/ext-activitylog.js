@@ -46,10 +46,13 @@ class Model {
     return this.filter.id.has(id);
   }
 
-  matchFilterViewType({ viewType, type }) {
-    return type === 'content_script'
-      ? true
-      : this.filter.viewType.has(viewType);
+  matchFilterViewType({ type, viewType }) {
+    if (type === 'content_script') {
+      // viewtype is undefined when log.type = content_script. We don't store
+      // undefined in viewType Set. Hence, we don't filter here.
+      return true;
+    }
+    return this.filter.viewType.has(viewType);
   }
 
   matchFilterType(type) {
@@ -57,7 +60,12 @@ class Model {
   }
 
   matchFilterApiName({ name, type }) {
-    return type === 'content_script' ? true : this.filter.name.has(name);
+    if (type === 'content_script') {
+      // name is a content script url when log.type = content_script. We don't
+      // store content script urls in API name Set. Hence, we don't filter here.
+      return true;
+    }
+    return this.filter.name.has(name);
   }
 
   matchFilterKeyword(data) {
