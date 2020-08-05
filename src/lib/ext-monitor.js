@@ -135,6 +135,7 @@ export default class ExtensionMonitor {
     // When we close any tab which is loaded with logs from a log file.
     if (fileName && this.loadedLogs.has(fileName)) {
       this.loadedLogs.delete(fileName);
+      delete this.tabToUrl[tabId];
     }
   };
 
