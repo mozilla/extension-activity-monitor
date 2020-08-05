@@ -140,8 +140,8 @@ export default class ExtensionMonitor {
 
   init() {
     this.tabToUrl = {};
-    browser.runtime.onMessage.addListener(this.messageListener);
 
+    browser.runtime.onMessage.addListener(this.messageListener);
     browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.tabToUrl[tabId] = tab.url;
     });
