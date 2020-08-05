@@ -247,8 +247,14 @@ class Controller {
 
       this.view.setError(null);
 
-      browser.tabs.create({
+      const tab = await browser.tabs.create({
         url: getActivityLogPageURL(searchParams),
+      });
+
+      await browser.runtime.sendMessage({
+        requestTo: 'ext-monitor',
+        requestType: 'setLoadedLogsTabId',
+        detail: { tabId: tab.id, fileName: storedFileName },
       });
     } catch (error) {
       this.view.setError(error.message);

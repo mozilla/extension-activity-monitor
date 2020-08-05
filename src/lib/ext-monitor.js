@@ -3,6 +3,8 @@ import { getActivityLogPageURL } from './ext-listen.js';
 export default class ExtensionMonitor {
   // Map<string, Array>
   loadedLogs = new Map();
+  // Map<number, string>
+  loadedLogsTabIds = new Map();
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
@@ -80,6 +82,7 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     setLoadedLogs: (detail) => this.setLoadedLogs(detail),
     getLoadedLogs: (detail) => this.getLoadedLogs(detail),
+    setLoadedLogsTabId: (detail) => this.setLoadedLogsTabId(detail),
   };
 
   setLoadedLogs({ fileName, logs }) {
@@ -104,8 +107,11 @@ export default class ExtensionMonitor {
     if (!logs) {
       throw new Error(`The following log file is not found: ${fileName}`);
     }
-
     return logs;
+  }
+
+  setLoadedLogsTabId({ fileName, tabId }) {
+    this.loadedLogsTabIds.set(tabId, fileName);
   }
 
   messageListener = (message) => {
@@ -128,24 +134,16 @@ export default class ExtensionMonitor {
   };
 
   onRemovedListener = (tabId) => {
-    const url = new URL(this.tabToUrl[tabId]);
-    const searchParams = new URLSearchParams(url.search);
-    const fileName = searchParams.get('file');
-
+    const fileName = this.loadedLogsTabIds.get(tabId);
     // When we close any tab which is loaded with logs from a log file.
-    if (fileName && this.loadedLogs.has(fileName)) {
+    if (fileName) {
       this.loadedLogs.delete(fileName);
-      delete this.tabToUrl[tabId];
+      this.loadedLogsTabIds.delete(tabId);
     }
   };
 
   init() {
-    this.tabToUrl = {};
-
     browser.runtime.onMessage.addListener(this.messageListener);
-    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-      this.tabToUrl[tabId] = tab.url;
-    });
     browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }
 }
