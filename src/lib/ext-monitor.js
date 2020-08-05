@@ -132,7 +132,7 @@ export default class ExtensionMonitor {
     const searchParams = new URLSearchParams(url.search);
     const fileName = searchParams.get('file');
 
-    // When we close any loaded Logs tab
+    // When we close any tab which is loaded with logs from a log file.
     if (fileName && this.loadedLogs.has(fileName)) {
       this.loadedLogs.delete(fileName);
     }
