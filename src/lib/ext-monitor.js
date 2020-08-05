@@ -80,7 +80,6 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     setLoadedLogs: (detail) => this.setLoadedLogs(detail),
     getLoadedLogs: (detail) => this.getLoadedLogs(detail),
-    clearLoadedLogs: () => this.loadedLogs.clear(),
   };
 
   setLoadedLogs({ fileName, logs }) {
@@ -128,7 +127,24 @@ export default class ExtensionMonitor {
     }
   };
 
+  onRemovedListener = (tabId) => {
+    const url = new URL(this.tabToUrl[tabId]);
+    const searchParams = new URLSearchParams(url.search);
+    const fileName = searchParams.get('file');
+
+    // When we close any loaded Logs tab
+    if (fileName && this.loadedLogs.has(fileName)) {
+      this.loadedLogs.delete(fileName);
+    }
+  };
+
   init() {
+    this.tabToUrl = {};
     browser.runtime.onMessage.addListener(this.messageListener);
+
+    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      this.tabToUrl[tabId] = tab.url;
+    });
+    browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }
 }

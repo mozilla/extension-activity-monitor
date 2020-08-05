@@ -69,7 +69,6 @@ class View {
     this.clearLogBtn = document.querySelector('#clearLogBtn');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
-    this.clearLoadedLogBtn = document.querySelector('#clearLoadedLogs');
     this.notice = document.querySelector('.notice');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
@@ -84,7 +83,6 @@ class View {
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
-    this.clearLoadedLogBtn.addEventListener('click', this);
   }
 
   setLogFilter(filterFunc) {
@@ -99,11 +97,6 @@ class View {
           break;
         case this.clearLogBtn:
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-          break;
-        case this.clearLoadedLogBtn:
-          this.clearLoadedLogBtn.dispatchEvent(
-            new CustomEvent('clearloadedlog')
-          );
           break;
         default:
           throw new Error(`wrong event target - ${event.target.tagName}`);
@@ -185,7 +178,6 @@ class Controller {
       this.view.loadLogFile.addEventListener('loadlog', this);
       this.view.clearLogBtn.addEventListener('clearlog', this);
       this.view.saveLogBtn.addEventListener('savelog', this);
-      this.view.clearLoadedLogBtn.addEventListener('clearloadedlog', this);
 
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
@@ -235,9 +227,6 @@ class Controller {
         break;
       case 'clearlog':
         this.handleClearLogs();
-        break;
-      case 'clearloadedlog':
-        this.onClearLoadedLogs();
         break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
@@ -299,13 +288,6 @@ class Controller {
   async clearBackgroundLogs() {
     await browser.runtime.sendMessage({
       requestType: 'clearLogs',
-      requestTo: 'ext-monitor',
-    });
-  }
-
-  async onClearLoadedLogs() {
-    await browser.runtime.sendMessage({
-      requestType: 'clearLoadedLogs',
       requestTo: 'ext-monitor',
     });
   }
