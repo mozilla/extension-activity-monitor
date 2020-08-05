@@ -1,10 +1,8 @@
 import { getActivityLogPageURL } from './ext-listen.js';
 
 export default class ExtensionMonitor {
-  /**
-   * @type {Array.<{logs: Array<Object>, fileName: String}>}
-   */
-  loadedLogs = [];
+  // Map<string, Array>
+  loadedLogs = new Map();
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
@@ -80,35 +78,35 @@ export default class ExtensionMonitor {
     startMonitor: () => this.startMonitor(),
     stopMonitor: () => this.stopMonitor(),
     sendAllLogs: () => ({ existingLogs: this.logs }),
-    loadLogs: (detail) => this.pushToLoadedLogs(detail),
-    getLoadedLogs: ({ fileName }) => this.getLoadedLogs(fileName),
-    clearLoadedLogs: () => (this.loadedLogs = []),
+    setLoadedLogs: (detail) => this.setLoadedLogs(detail),
+    getLoadedLogs: (detail) => this.getLoadedLogs(detail),
+    clearLoadedLogs: () => this.loadedLogs.clear(),
   };
 
-  pushToLoadedLogs(loadedLogObj) {
+  setLoadedLogs({ fileName, logs }) {
     let repeatTimes = 0;
-    this.loadedLogs.forEach(({ fileName }) => {
-      if (fileName.includes(loadedLogObj.fileName)) {
+    for (const storedFileName of this.loadedLogs.keys()) {
+      if (storedFileName.includes(fileName)) {
         repeatTimes++;
       }
-    });
+    }
 
     // if file exists with same name
     if (repeatTimes) {
-      loadedLogObj.fileName = `${loadedLogObj.fileName}-${repeatTimes}`;
+      fileName = `${fileName}-${repeatTimes}`;
     }
 
-    this.loadedLogs.push(loadedLogObj);
-    return loadedLogObj.fileName;
+    this.loadedLogs.set(fileName, logs);
+    return fileName;
   }
 
-  getLoadedLogs(fileName) {
-    for (const loadedLog of this.loadedLogs) {
-      if (loadedLog.fileName === fileName) {
-        return loadedLog.logs;
-      }
+  getLoadedLogs({ fileName }) {
+    const logs = this.loadedLogs.get(fileName);
+    if (!logs) {
+      throw new Error(`The following log file is not found: ${fileName}`);
     }
-    return [];
+
+    return logs;
   }
 
   messageListener = (message) => {

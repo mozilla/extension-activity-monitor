@@ -158,27 +158,27 @@ class Controller {
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
-    const searchParams = window.location.search;
 
-    if (searchParams.includes('page=loadLog&file=')) {
+    const searchParams = new URLSearchParams(
+      document.location.search.substring(1)
+    );
+    const fileName = searchParams.get('file');
+
+    if (fileName) {
       this.view.menuContainer.hidden = true;
-
-      const fileName = searchParams.substring(
-        searchParams.indexOf('file=') + 5
-      );
-      if (!fileName) {
-        return;
-      }
-
       document.title = `Loaded Logs - ${fileName}`;
 
-      const logs = await browser.runtime.sendMessage({
-        requestType: 'getLoadedLogs',
-        requestTo: 'ext-monitor',
-        detail: { fileName },
-      });
+      const logs = await browser.runtime
+        .sendMessage({
+          requestType: 'getLoadedLogs',
+          requestTo: 'ext-monitor',
+          detail: { fileName },
+        })
+        .catch((error) => {
+          this.view.setError(error.message);
+        });
 
-      if (logs.length) {
+      if (logs?.length) {
         this.handleNewLogs(logs);
       }
     } else {
@@ -251,10 +251,10 @@ class Controller {
 
       const storedFileName = await browser.runtime.sendMessage({
         requestTo: 'ext-monitor',
-        requestType: 'loadLogs',
-        detail: { logs, fileName: file.name },
+        requestType: 'setLoadedLogs',
+        detail: { fileName: file.name, logs },
       });
-      const searchParams = `page=loadLog&file=${storedFileName}`;
+      const searchParams = `file=${storedFileName}`;
 
       this.view.setError(null);
 
