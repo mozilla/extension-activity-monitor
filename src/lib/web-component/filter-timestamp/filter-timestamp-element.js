@@ -107,6 +107,16 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   connectedCallback() {
+    const searchParams = new URLSearchParams(
+      document.location.search.substring(1)
+    );
+
+    const filterTabId = searchParams.get('filterTabId');
+    // context menu doesn't work on devtool_page
+    if (filterTabId) {
+      return;
+    }
+
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterContainer.addEventListener('click', this);

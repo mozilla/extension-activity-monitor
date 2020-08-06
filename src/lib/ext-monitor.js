@@ -8,6 +8,8 @@ export default class ExtensionMonitor {
   // Map<string, Function>
   extensionMapList = new Map([]);
 
+  isDevToolPanelOpen = false;
+
   async getAllExtensions() {
     const extensions = await browser.management.getAll();
     return extensions.filter((extension) => {
@@ -18,9 +20,15 @@ export default class ExtensionMonitor {
   }
 
   async isActivityLogPageOpen() {
+    const activitylogPage = getActivityLogPageURL();
+    if (this.isDevToolPanelOpen) {
+      return true;
+    }
+
     const tab = await browser.tabs.query({
-      url: getActivityLogPageURL(),
+      url: [activitylogPage, `${activitylogPage}?*`],
     });
+
     return tab.length > 0;
   }
 
@@ -110,6 +118,8 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     loadLogs: (requestParams) => this.loadLogs(requestParams),
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
+    devToolsPanelShown: () => (this.isDevToolPanelOpen = true),
+    devToolsPanelHidden: () => (this.isDevToolPanelOpen = false),
   };
 
   async loadLogs({ file }) {

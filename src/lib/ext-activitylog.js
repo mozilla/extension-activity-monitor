@@ -8,6 +8,7 @@ class Model {
       viewType: new Set(),
       type: new Set(),
       name: new Set(),
+      tabId: null,
       keyword: '',
       timeStamp: null,
     };
@@ -32,6 +33,8 @@ class Model {
    * filter is not applied.
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
+   * @param {null|number} [updateFilter.tabId] - It's null when search paramter
+   * `filterTabId` is not used.
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -44,7 +47,8 @@ class Model {
       this.matchFilterType(log.type) &&
       this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data) &&
-      this.matchFilterTimestamp(log.timeStamp)
+      this.matchFilterTimestamp(log.timeStamp) &&
+      this.matchFilterTabId(log.data)
     );
   }
 
@@ -93,6 +97,18 @@ class Model {
     }
 
     return true;
+  }
+
+  matchFilterTabId({ tabId }) {
+    if (!this.filter.tabId) {
+      return true;
+    }
+
+    if (tabId && tabId === this.filter.tabId) {
+      return true;
+    }
+
+    return false;
   }
 
   clearLogs() {
@@ -206,6 +222,7 @@ class Controller {
       document.location.search.substring(1)
     );
     const fileName = searchParams.get('file');
+    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
     if (fileName) {
       this.view.menuContainer.hidden = true;
@@ -228,10 +245,6 @@ class Controller {
         this.handleNewLogs(logs);
       }
     } else {
-      this.view.loadLogFile.addEventListener('loadlog', this);
-      this.view.clearLogBtn.addEventListener('clearlog', this);
-      this.view.saveLogBtn.addEventListener('savelog', this);
-
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
 
@@ -251,6 +264,23 @@ class Controller {
       if (existingLogs.length) {
         this.handleNewLogs(existingLogs);
       }
+
+      if (filterTabId) {
+        // currently menu container is hidden when activity log page is
+        // filtered by tab id
+        this.view.menuContainer.hidden = true;
+
+        const filterDetail = {
+          updateFilter: { tabId: filterTabId },
+        };
+
+        this.onFilterChange(filterDetail);
+        return;
+      }
+
+      this.view.loadLogFile.addEventListener('loadlog', this);
+      this.view.clearLogBtn.addEventListener('clearlog', this);
+      this.view.saveLogBtn.addEventListener('savelog', this);
     }
   }
 

@@ -28,5 +28,7 @@
   "browser_action": {
     "default_title": "EAM Popup",
     "default_popup": "popup/popup.html"
-  }
+  },
+
+  "devtools_page": "devtools/devtools.html"
 }

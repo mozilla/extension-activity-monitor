@@ -115,8 +115,17 @@ export class LogView extends HTMLElement {
   }
 
   connectedCallback() {
+    const searchParams = new URLSearchParams(
+      document.location.search.substring(1)
+    );
+
+    const filterTabId = searchParams.get('filterTabId');
+    // context menu doesn't work on devtool_page
+    if (!filterTabId) {
+      this.tableBody.addEventListener('contextmenu', this);
+    }
+
     this.tableBody.addEventListener('click', this);
-    this.tableBody.addEventListener('contextmenu', this);
     this.closeBtn.addEventListener('click', this);
   }
 
