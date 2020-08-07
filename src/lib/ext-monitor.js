@@ -2,10 +2,8 @@ import { getActivityLogPageURL } from './ext-listen.js';
 import { load } from './save-load.js';
 
 export default class ExtensionMonitor {
-  // Map<string, Array>
+  // Map<number, Array>
   loadedLogs = new Map();
-  // Map<number, string>
-  loadedLogsTabIds = new Map();
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
