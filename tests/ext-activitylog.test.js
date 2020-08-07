@@ -29,8 +29,6 @@ function observeChange(element) {
 // This applies for other filter options, such as - view type,
 // api type, api name
 test('show/hide logs associated with extension id that is checked/unchecked from filter option', async () => {
-  document.body.innerHTML = activityLogBody;
-
   expect(window.customElements.get('log-view')).toBe(LogView);
   expect(window.customElements.get('filter-option')).toBe(FilterOption);
 
@@ -41,6 +39,7 @@ test('show/hide logs associated with extension id that is checked/unchecked from
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
+      timeStamp: new Date(),
     },
     {
       /* renders 2nd row in table */
@@ -48,6 +47,7 @@ test('show/hide logs associated with extension id that is checked/unchecked from
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
+      timeStamp: new Date(),
     },
   ];
 
@@ -64,6 +64,8 @@ test('show/hide logs associated with extension id that is checked/unchecked from
   sendMessage.mockImplementation(() => {
     return Promise.resolve({ existingLogs: [] });
   });
+
+  document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
   const extFilterBtn = activityLog.view.extFilter.shadowRoot.querySelector(
@@ -120,6 +122,7 @@ test('show/hide logs associated with extension id that is checked/unchecked from
     viewType: 'randomViewType@test',
     type: 'randomtype@test',
     data: [{ test: 'randomTestData' }],
+    timeStamp: new Date(),
   };
 
   activityLog.handleNewLogs([newLog]);
@@ -142,8 +145,6 @@ test('show/hide logs associated with extension id that is checked/unchecked from
 });
 
 test("keyword search show a row when the given keyword is matched in log's data, otherwise hides the row", async () => {
-  document.body.innerHTML = activityLogBody;
-
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
 
   const logs = [
@@ -153,6 +154,7 @@ test("keyword search show a row when the given keyword is matched in log's data,
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
+      timeStamp: new Date(),
     },
     {
       /* renders 2nd row in table */
@@ -160,6 +162,7 @@ test("keyword search show a row when the given keyword is matched in log's data,
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'matched@data' }],
+      timeStamp: new Date(),
     },
   ];
 
@@ -176,6 +179,8 @@ test("keyword search show a row when the given keyword is matched in log's data,
   sendMessage.mockImplementation(() => {
     return Promise.resolve({ existingLogs: [] });
   });
+
+  document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
 
@@ -204,8 +209,6 @@ test("keyword search show a row when the given keyword is matched in log's data,
 });
 
 test('clearing logs from activitylog page', async () => {
-  document.body.innerHTML = activityLogBody;
-
   const logs = [
     {
       /* renders 1st row in table */
@@ -213,6 +216,7 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
+      timeStamp: new Date(),
     },
     {
       /* renders 2nd row in table */
@@ -220,6 +224,7 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
+      timeStamp: new Date(),
     },
   ];
 
@@ -238,6 +243,8 @@ test('clearing logs from activitylog page', async () => {
   sendMessage.mockResolvedValueOnce({ existingLogs: logs });
   sendMessage.mockResolvedValueOnce({ existingLogs: logs });
   sendMessage.mockResolvedValueOnce();
+
+  document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
   const clearBackgroundLogsFn = jest.spyOn(activityLog, 'clearBackgroundLogs');

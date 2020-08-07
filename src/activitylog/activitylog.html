@@ -12,6 +12,10 @@
     ></script>
     <script
       type="module"
+      src="/lib/web-component/filter-timestamp/filter-timestamp-element.js"
+    ></script>
+    <script
+      type="module"
       src="/lib/web-component/filter-option/filter-option-element.js"
     ></script>
     <script
@@ -28,25 +32,28 @@
       <div class="activity-log-wrapper">
         <h2>Activity Logs</h2>
         <div class="filter-wrapper">
-          <filter-keyword></filter-keyword>
-          <filter-option filter-key="id">
-            Select extensions to filter logs
-          </filter-option>
-          <filter-option
-            filter-key="viewType"
-            title="This filter applies to all log entries except content scripts."
-          >
-            Select view type to filter logs
-          </filter-option>
-          <filter-option filter-key="type">
-            Select api type to filter logs
-          </filter-option>
-          <filter-option
-            filter-key="name"
-            title="This filter only applies to log entries related to API events."
-          >
-            Select api name to filter logs
-          </filter-option>
+          <div class="filter-boxes">
+            <filter-keyword></filter-keyword>
+            <filter-option filter-key="id">
+              Select extensions to filter logs
+            </filter-option>
+            <filter-option
+              filter-key="viewType"
+              title="This filter applies to all log entries except content scripts."
+            >
+              Select view type to filter logs
+            </filter-option>
+            <filter-option filter-key="type">
+              Select api type to filter logs
+            </filter-option>
+            <filter-option
+              filter-key="name"
+              title="This filter only applies to log entries related to API events."
+            >
+              Select api name to filter logs
+            </filter-option>
+          </div>
+          <filter-timestamp></filter-timestamp>
         </div>
         <log-view></log-view>
       </div>
@@ -113,4 +120,27 @@
       </div>
     </template>
   </body>
+
+  <template id="filterTimestampTemplate">
+    <link
+      rel="stylesheet"
+      href="/lib/web-component/filter-timestamp/filter-timestamp.css"
+    />
+    <div class="timestamp-filter-container" hidden>
+      <div class="label">
+        Timestamp Filter Applied
+        <div id="clearBtn" title="Clear timestamp filter"></div>
+      </div>
+      <div class="timestamp-filter-options">
+        <div class="start-time-container">
+          <div class="title">Start Time:</div>
+          <div id="startTimeLabel">From beginning</div>
+        </div>
+        <div class="stop-time-container">
+          <div class="title">Stop Time:</div>
+          <div id="stopTimeLabel">Up to End</div>
+        </div>
+      </div>
+    </div>
+  </template>
 </html>

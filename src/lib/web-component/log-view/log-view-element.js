@@ -60,18 +60,6 @@ export class LogView extends HTMLElement {
     this.tableBody.appendChild(rowsFragment);
   }
 
-  openDetailSidebar(logDetails) {
-    const logString = JSON.stringify(logDetails, null, 2);
-    this.logDetails.textContent = logString;
-    this.logTableWrapper.classList.add('width-60');
-    this.logDetailWrapper.hidden = false;
-  }
-
-  closeDetailSidebar() {
-    this.logDetailWrapper.hidden = true;
-    this.logTableWrapper.classList.remove('width-60');
-  }
-
   handleEvent(event) {
     if (event.type === 'click') {
       const logDetails = event.target.closest('tr')?._log;
@@ -84,7 +72,42 @@ export class LogView extends HTMLElement {
       if (event.target === this.closeBtn) {
         this.closeDetailSidebar();
       }
+    } else if (event.type === 'contextmenu') {
+      // This event can only be triggered in table body.
+      browser.menus.overrideContext({});
+      this.createContextMenu();
+      browser.menus.refresh();
     }
+  }
+
+  openDetailSidebar(logDetails) {
+    const logString = JSON.stringify(logDetails);
+    this.logDetails.textContent = logString;
+    this.logTableWrapper.classList.add('width-60');
+    this.logDetailWrapper.hidden = false;
+  }
+
+  closeDetailSidebar() {
+    this.logDetailWrapper.hidden = true;
+    this.logTableWrapper.classList.remove('width-60');
+  }
+
+  createContextMenu() {
+    browser.menus.create({
+      id: 'startTime',
+      title: 'Start from this timestamp',
+      contexts: ['page'],
+      viewTypes: ['tab'],
+      documentUrlPatterns: [location.href],
+    });
+
+    browser.menus.create({
+      id: 'stopTime',
+      title: 'Stop at this timestamp',
+      contexts: ['page'],
+      viewTypes: ['tab'],
+      documentUrlPatterns: [location.href],
+    });
   }
 
   clearTable() {
@@ -93,11 +116,13 @@ export class LogView extends HTMLElement {
 
   connectedCallback() {
     this.tableBody.addEventListener('click', this);
+    this.tableBody.addEventListener('contextmenu', this);
     this.closeBtn.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     this.tableBody.removeEventListener('click', this);
+    this.tableBody.removeEventListener('contextmenu', this);
     this.closeBtn.removeEventListener('click', this);
   }
 }

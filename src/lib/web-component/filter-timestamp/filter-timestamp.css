@@ -1,0 +1,40 @@
+.timestamp-filter-container .label {
+  width: max-content;
+  display: flex;
+  background: #000;
+  padding: 10px 20px;
+  color: #ffffff;
+  align-items: center;
+}
+
+.timestamp-filter-options {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 5px;
+  border-top: 2px solid #000000;
+  border-left: 2px solid #000000;
+  border-right: 2px solid #000000;
+}
+
+.timestamp-filter-options .title {
+  font-weight: bold;
+}
+
+#clearBtn {
+  cursor: pointer;
+  background: url(/icons/circle-close.svg) no-repeat center center / cover;
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  margin-left: 15px;
+}
+
+#startTimeLabel,
+#stopTimeLabel {
+  padding-left: 5px;
+}
+
+.start-time-container,
+.stop-time-container {
+  display: flex;
+}
