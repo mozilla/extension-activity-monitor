@@ -126,7 +126,7 @@ export default class ExtensionMonitor {
   };
 
   onRemovedListener = (tabId) => {
-    // When we close any tab which is loaded with logs from a log file.
+    // When we close any tab which was loaded with logs from a log file.
     if (this.loadedLogs.has(tabId)) {
       this.loadedLogs.delete(tabId);
     }
