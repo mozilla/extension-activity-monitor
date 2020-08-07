@@ -12,8 +12,9 @@ export const load = {
     });
   },
 
-  async loadLogAsText(logFile) {
-    return await this.readFile(logFile);
+  async loadLogAsJSON(logFile) {
+    const logStr = await this.readFile(logFile);
+    return JSON.parse(logStr);
   },
 };
 

@@ -234,17 +234,19 @@ describe('messageListeners functionalities test', () => {
   });
 });
 
-test('onMessage listener is registered at initialization', () => {
+test('listeners are registered at initialization', () => {
   const addListener = jest.fn().mockResolvedValue();
 
   window.browser = {
     runtime: { onMessage: { addListener } },
+    tabs: { onRemoved: { addListener } },
   };
 
   const extMonitor = new ExtensionMonitor();
   extMonitor.init();
 
-  expect(addListener).toHaveBeenCalled();
+  // runtime.onMessage.addListener and tabs.onRemoved.addListener are called.
+  expect(addListener).toHaveBeenCalledTimes(2);
 });
 
 test('empty log array is found after clearing logs', async () => {

@@ -86,16 +86,14 @@ export default class ExtensionMonitor {
   };
 
   async loadLogs({ file }) {
-    const logStr = await load.loadLogAsText(file);
-    const logs = JSON.parse(logStr);
+    const loadedLogs = await load.loadLogAsJSON(file);
 
     const searchParams = `file=${file.name}`;
-
     const tab = await browser.tabs.create({
       url: getActivityLogPageURL(searchParams),
     });
 
-    this.loadedLogs.set(tab.id, logs);
+    this.loadedLogs.set(tab.id, loadedLogs);
   }
 
   getLoadedLogs({ tabId }) {
