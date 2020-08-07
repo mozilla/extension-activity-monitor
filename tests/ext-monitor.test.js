@@ -243,10 +243,14 @@ test('listeners are registered at initialization', () => {
   };
 
   const extMonitor = new ExtensionMonitor();
+  const messageListenerFn = jest.spyOn(extMonitor, 'messageListener');
+  const onRemovedListenerFn = jest.spyOn(extMonitor, 'onRemovedListener');
+
   extMonitor.init();
 
-  // runtime.onMessage.addListener and tabs.onRemoved.addListener are called.
   expect(addListener).toHaveBeenCalledTimes(2);
+  expect(addListener).toHaveBeenNthCalledWith(1, messageListenerFn);
+  expect(addListener).toHaveBeenNthCalledWith(2, onRemovedListenerFn);
 });
 
 test('empty log array is found after clearing logs', async () => {

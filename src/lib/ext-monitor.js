@@ -3,7 +3,7 @@ import { load } from './save-load.js';
 
 export default class ExtensionMonitor {
   // Map<number, Array>
-  loadedLogs = new Map();
+  loadedLogsByTabId = new Map();
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
@@ -91,11 +91,11 @@ export default class ExtensionMonitor {
       url: getActivityLogPageURL(searchParams),
     });
 
-    this.loadedLogs.set(tab.id, loadedLogs);
+    this.loadedLogsByTabId.set(tab.id, loadedLogs);
   }
 
   getLoadedLogs({ tabId }) {
-    const logs = this.loadedLogs.get(tabId);
+    const logs = this.loadedLogsByTabId.get(tabId);
     if (!logs) {
       throw new Error(`No loaded logs found for tab id: ${tabId}`);
     }
@@ -124,9 +124,9 @@ export default class ExtensionMonitor {
   };
 
   onRemovedListener = (tabId) => {
-    // When we close any tab which was loaded with logs from a log file.
-    if (this.loadedLogs.has(tabId)) {
-      this.loadedLogs.delete(tabId);
+    // Remove the loaded logs related to the closed tab
+    if (this.loadedLogsByTabId.has(tabId)) {
+      this.loadedLogsByTabId.delete(tabId);
     }
   };
 
