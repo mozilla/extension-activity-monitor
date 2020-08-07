@@ -1,5 +1,5 @@
 import { getActivityLogPageURL } from './ext-listen.js';
-import { load, save } from './save-load.js';
+import { save } from './save-load.js';
 
 class Model {
   constructor() {
@@ -161,15 +161,18 @@ class Controller {
       this.view.menuContainer.hidden = true;
       document.title = `Loaded Logs - ${fileName}`;
 
-      const logs = await browser.runtime
-        .sendMessage({
+      const currentTab = await browser.tabs.getCurrent();
+      let logs;
+
+      try {
+        logs = await browser.runtime.sendMessage({
           requestType: 'getLoadedLogs',
           requestTo: 'ext-monitor',
-          detail: { fileName },
-        })
-        .catch((error) => {
-          this.view.setError(error.message);
+          requestParams: { tabId: currentTab.id },
         });
+      } catch (error) {
+        this.view.setError(error.message);
+      }
 
       if (logs?.length) {
         this.handleNewLogs(logs);
@@ -235,26 +238,10 @@ class Controller {
 
   async loadLogs(file) {
     try {
-      const logStr = await load.loadLogAsText(file);
-      const logs = JSON.parse(logStr);
-
-      const storedFileName = await browser.runtime.sendMessage({
-        requestTo: 'ext-monitor',
-        requestType: 'setLoadedLogs',
-        detail: { fileName: file.name, logs },
-      });
-      const searchParams = `file=${storedFileName}`;
-
-      this.view.setError(null);
-
-      const tab = await browser.tabs.create({
-        url: getActivityLogPageURL(searchParams),
-      });
-
       await browser.runtime.sendMessage({
         requestTo: 'ext-monitor',
-        requestType: 'setLoadedLogsTabId',
-        detail: { tabId: tab.id, fileName: storedFileName },
+        requestType: 'loadLogs',
+        requestParams: { file },
       });
     } catch (error) {
       this.view.setError(error.message);

@@ -1,4 +1,5 @@
 import { getActivityLogPageURL } from './ext-listen.js';
+import { load } from './save-load.js';
 
 export default class ExtensionMonitor {
   // Map<string, Array>
@@ -80,49 +81,42 @@ export default class ExtensionMonitor {
     startMonitor: () => this.startMonitor(),
     stopMonitor: () => this.stopMonitor(),
     sendAllLogs: () => ({ existingLogs: this.logs }),
-    setLoadedLogs: (detail) => this.setLoadedLogs(detail),
-    getLoadedLogs: (detail) => this.getLoadedLogs(detail),
-    setLoadedLogsTabId: (detail) => this.setLoadedLogsTabId(detail),
+    loadLogs: (requestParams) => this.loadLogs(requestParams),
+    getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
   };
 
-  setLoadedLogs({ fileName, logs }) {
-    let repeatTimes = 0;
-    for (const storedFileName of this.loadedLogs.keys()) {
-      if (storedFileName.includes(fileName)) {
-        repeatTimes++;
-      }
-    }
+  async loadLogs({ file }) {
+    const logStr = await load.loadLogAsText(file);
+    const logs = JSON.parse(logStr);
 
-    // if file exists with same name
-    if (repeatTimes) {
-      fileName = `${fileName}-${repeatTimes}`;
-    }
+    const searchParams = `file=${file.name}`;
 
-    this.loadedLogs.set(fileName, logs);
-    return fileName;
+    const tab = await browser.tabs.create({
+      url: getActivityLogPageURL(searchParams),
+    });
+
+    this.loadedLogs.set(tab.id, logs);
   }
 
-  getLoadedLogs({ fileName }) {
-    const logs = this.loadedLogs.get(fileName);
+  getLoadedLogs({ tabId }) {
+    const logs = this.loadedLogs.get(tabId);
     if (!logs) {
-      throw new Error(`The following log file is not found: ${fileName}`);
+      throw new Error(`No loaded logs found for tab id: ${tabId}`);
     }
     return logs;
   }
 
-  setLoadedLogsTabId({ fileName, tabId }) {
-    this.loadedLogsTabIds.set(tabId, fileName);
-  }
-
   messageListener = (message) => {
-    const { requestType, requestTo, detail } = message;
+    const { requestType, requestTo, requestParams } = message;
     if (requestTo !== 'ext-monitor') {
       return;
     }
 
     if (requestType in this.messageHandlers) {
       try {
-        return Promise.resolve(this.messageHandlers[requestType](detail));
+        return Promise.resolve(
+          this.messageHandlers[requestType](requestParams)
+        );
       } catch (error) {
         return Promise.reject(error);
       }
@@ -134,11 +128,9 @@ export default class ExtensionMonitor {
   };
 
   onRemovedListener = (tabId) => {
-    const fileName = this.loadedLogsTabIds.get(tabId);
     // When we close any tab which is loaded with logs from a log file.
-    if (fileName) {
-      this.loadedLogs.delete(fileName);
-      this.loadedLogsTabIds.delete(tabId);
+    if (this.loadedLogs.has(tabId)) {
+      this.loadedLogs.delete(tabId);
     }
   };
 
