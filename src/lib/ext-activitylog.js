@@ -1,4 +1,3 @@
-import { getActivityLogPageURL } from './ext-listen.js';
 import { save } from './save-load.js';
 
 class Model {
