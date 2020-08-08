@@ -10,36 +10,48 @@ test('getAllExtensions should return all extensions but themes and self', async 
   const allExts = [...expectedExts, themeExt, selfExt];
 
   const getAll = jest.fn(() => Promise.resolve(allExts));
-  const getSelf = jest.fn(() => Promise.resolve(selfExt));
+
+  const addListener = jest.fn();
 
   window.browser = {
-    management: { getAll, getSelf },
+    management: { getAll },
+    runtime: { onMessage: { addListener: addListener }, id: selfExt.id },
   };
 
   const extMonitor = new ExtensionMonitor();
+  extMonitor.init();
+
   const extensionsPromise = extMonitor.getAllExtensions();
   await expect(extensionsPromise).resolves.toMatchObject(expectedExts);
 });
 
-describe('start extension monitoring', () => {
+describe('start extension monitoring and register event listeners', () => {
   test('while no extensions are being monitoring', async () => {
-    const addListener = jest.fn();
+    const onExtActivityAddListener = jest.fn();
+    const onInstalledAddListener = jest.fn();
+    const onUninstalledAddListener = jest.fn();
 
     const extensions = [{ id: 'ext1' }, { id: 'ext2' }];
 
     window.browser = {
       activityLog: {
-        onExtensionActivity: { addListener },
+        onExtensionActivity: { addListener: onExtActivityAddListener },
+      },
+      management: {
+        onInstalled: { addListener: onInstalledAddListener },
+        onUninstalled: { addListener: onUninstalledAddListener },
       },
     };
 
     const listeners = [];
-    addListener.mockImplementation((callback) => {
+    onExtActivityAddListener.mockImplementation((callback) => {
       listeners.push(callback);
     });
 
     const extMonitor = new ExtensionMonitor();
     const getAllExtensionsFn = jest.spyOn(extMonitor, 'getAllExtensions');
+    const onInstalledExtFn = jest.spyOn(extMonitor, 'onInstalledExtension');
+    const onUninstalledExtFn = jest.spyOn(extMonitor, 'onUninstalledExtension');
 
     getAllExtensionsFn.mockImplementation(() => {
       return extensions;
@@ -52,10 +64,13 @@ describe('start extension monitoring', () => {
     await expect(startMonitor).resolves.toBeUndefined();
 
     expect(extMonitor.extensionMapList.size).toBe(2);
-    expect(addListener.mock.calls).toMatchObject([
+    expect(onExtActivityAddListener.mock.calls).toMatchObject([
       [listeners[0], 'ext1'],
       [listeners[1], 'ext2'],
     ]);
+
+    expect(onInstalledAddListener).toHaveBeenCalledWith(onInstalledExtFn);
+    expect(onUninstalledAddListener).toHaveBeenCalledWith(onUninstalledExtFn);
   });
 
   test('throws error while extensions are already being monitored', async () => {
@@ -78,24 +93,84 @@ describe('start extension monitoring', () => {
       'EAM is already running'
     );
   });
+
+  test('start monitoring newly installed extensions automatically', async () => {
+    const onExtActivityAddListener = jest.fn();
+    const onInstalledAddListener = jest.fn();
+    const onUninstalledAddListener = jest.fn();
+
+    const selfExt = { id: 'ext1', type: 'extension' };
+    const initialMonitoringExts = [
+      { id: 'ext2', type: 'extension' },
+      { id: 'ext3', type: 'extension' },
+    ];
+    const newExtension = { id: 'ext4', type: 'extension' };
+    const newTheme = { id: 'ext5', type: 'theme' };
+    const expectMonitorExtIds = ['ext2', 'ext3', 'ext4'];
+
+    window.browser = {
+      activityLog: {
+        onExtensionActivity: { addListener: onExtActivityAddListener },
+      },
+      management: {
+        onInstalled: { addListener: onInstalledAddListener },
+        onUninstalled: { addListener: onUninstalledAddListener },
+      },
+    };
+
+    const extMonitor = new ExtensionMonitor();
+    const getAllExtensionsFn = jest.spyOn(extMonitor, 'getAllExtensions');
+
+    extMonitor.selfId = selfExt.id;
+
+    getAllExtensionsFn.mockResolvedValue(initialMonitoringExts);
+
+    expect(extMonitor.extensionMapList.size).toBe(0);
+
+    await extMonitor.startMonitor();
+    expect(extMonitor.extensionMapList.size).toBe(2);
+
+    // When a new extension is installed, `onInstalledExtension` method is
+    // being called with new extension's info.
+    extMonitor.onInstalledExtension(newExtension);
+
+    // Since this is a theme, it will not be monitored.
+    extMonitor.onInstalledExtension(newTheme);
+
+    let monitoringExtIds = [];
+    for (const extId of extMonitor.extensionMapList.keys()) {
+      monitoringExtIds.push(extId);
+    }
+
+    expect(extMonitor.extensionMapList.size).toBe(3);
+    expect(monitoringExtIds).toMatchObject(expectMonitorExtIds);
+  });
 });
 
-test('stop monitoring all extensions should make extensionMapList empty', async () => {
+test('stop monitoring all extensions should make extensionMapList empty and unregister event listeners', async () => {
   const extensions = [{ id: 'ext1' }, { id: 'ext2' }];
-  const removeListener = jest.fn();
+  const onExtActivityRemoveListener = jest.fn();
+  const onInstalledRemoveListener = jest.fn();
+  const onUninstalledRemoveListener = jest.fn();
 
   window.browser = {
     activityLog: {
-      onExtensionActivity: { removeListener },
+      onExtensionActivity: { removeListener: onExtActivityRemoveListener },
+    },
+    management: {
+      onInstalled: { removeListener: onInstalledRemoveListener },
+      onUninstalled: { removeListener: onUninstalledRemoveListener },
     },
   };
 
   const listeners = [];
-  removeListener.mockImplementation((callback) => {
+  onExtActivityRemoveListener.mockImplementation((callback) => {
     listeners.push(callback);
   });
 
   const extMonitor = new ExtensionMonitor();
+  const onInstalledExtFn = jest.spyOn(extMonitor, 'onInstalledExtension');
+  const onUninstalledExtFn = jest.spyOn(extMonitor, 'onUninstalledExtension');
 
   extMonitor.extensionMapList.set(
     extensions[0].id,
@@ -113,11 +188,58 @@ test('stop monitoring all extensions should make extensionMapList empty', async 
 
   await expect(stopMonitor).resolves.toBeUndefined();
 
-  expect(removeListener.mock.calls).toMatchObject([
+  expect(onExtActivityRemoveListener.mock.calls).toMatchObject([
     [listeners[0], 'ext1'],
     [listeners[1], 'ext2'],
   ]);
   expect(extMonitor.extensionMapList.size).toBe(0);
+
+  expect(onInstalledRemoveListener).toHaveBeenCalledWith(onInstalledExtFn);
+  expect(onUninstalledRemoveListener).toHaveBeenCalledWith(onUninstalledExtFn);
+});
+
+test("stop monitoring uninstalled extension if it's already being monitored", async () => {
+  const removeListener = jest.fn();
+  const fakeListener = () => jest.fn();
+
+  const monitoringExts = [
+    { id: 'ext1', type: 'extension' },
+    { id: 'ext2', type: 'extension' },
+    { id: 'ext3', type: 'extension' },
+  ];
+
+  const uninstalledExt = { id: 'ext3', type: 'extension' };
+  const expectMonitorExtIds = ['ext1', 'ext2'];
+
+  window.browser = {
+    activityLog: {
+      onExtensionActivity: { removeListener },
+    },
+  };
+
+  const extMonitor = new ExtensionMonitor();
+
+  // When no extensions are being monitored, uninstalling any extension won't
+  // affact the extension monitoring status.
+  extMonitor.onUninstalledExtension(uninstalledExt);
+
+  // set extensions to monitor
+  for (const ext of monitoringExts) {
+    extMonitor.extensionMapList.set(ext.id, fakeListener());
+  }
+
+  expect(extMonitor.extensionMapList.size).toBe(3);
+  // When an existing monitoring extension is uninstalled,
+  // `onUninstalledExtension` method is being called with the extension's info.
+  extMonitor.onUninstalledExtension(uninstalledExt);
+
+  let monitoringExtIds = [];
+  for (const extId of extMonitor.extensionMapList.keys()) {
+    monitoringExtIds.push(extId);
+  }
+
+  expect(extMonitor.extensionMapList.size).toBe(2);
+  expect(monitoringExtIds).toMatchObject(expectMonitorExtIds);
 });
 
 test('send logs to extension page if it is opened, as well as storing logs in background', async () => {
@@ -239,7 +361,7 @@ test('listeners are registered at initialization', () => {
   const tabsRemovedAddListener = jest.fn();
 
   window.browser = {
-    runtime: { onMessage: { addListener: runtimeMessageAddListener } },
+    runtime: { onMessage: { addListener: runtimeMessageAddListener }, id: 'ext1' },
     tabs: { onRemoved: { addListener: tabsRemovedAddListener } },
   };
 
@@ -249,6 +371,7 @@ test('listeners are registered at initialization', () => {
 
   extMonitor.init();
 
+  expect(extMonitor.selfId).toBe('ext1');
   expect(runtimeMessageAddListener).toHaveBeenCalledWith(messageListenerFn);
   expect(tabsRemovedAddListener).toHaveBeenCalledWith(onRemovedListenerFn);
 });
