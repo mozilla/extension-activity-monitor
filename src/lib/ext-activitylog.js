@@ -9,7 +9,7 @@ class Model {
       type: new Set(),
       name: new Set(),
       keyword: '',
-      timeStamp: null,
+      timeStamp: {},
     };
   }
 
@@ -28,8 +28,8 @@ class Model {
    * includes api_call, api_event, content_script, user_script.
    * @param {Set<string>} [updateFilter.name] - It contains API names only.
    * @param {string} [updateFilter.keyword]
-   * @param {null|object} [updateFilter.timeStamp] - It is null when timestamp
-   * filter is not applied.
+   * @param {object} [updateFilter.timeStamp] - It is an empty object when
+   * timestamp filter is not applied.
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
    */
@@ -80,15 +80,15 @@ class Model {
   }
 
   matchFilterTimestamp(logTimestamp) {
-    if (!this.filter.timeStamp) {
+    if (Object.keys(this.filter.timeStamp).length === 0) {
       return true;
     }
 
-    const startTime = this.filter.timeStamp.start;
-    const endTime = this.filter.timeStamp.stop;
+    const startTime = this.filter.timeStamp?.start;
+    const stopTime = this.filter.timeStamp?.stop;
     const logTime = Date.parse(logTimestamp);
 
-    if (logTime < startTime || logTime > endTime) {
+    if (logTime < startTime || logTime > stopTime) {
       return false;
     }
 
