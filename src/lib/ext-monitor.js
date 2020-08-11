@@ -1,6 +1,9 @@
 import { getActivityLogPageURL } from './ext-listen.js';
+import { load } from './save-load.js';
 
 export default class ExtensionMonitor {
+  // Map<number, Array>
+  loadedLogsByTabId = new Map();
   logs = [];
   // Map<string, Function>
   extensionMapList = new Map([]);
@@ -76,17 +79,40 @@ export default class ExtensionMonitor {
     startMonitor: () => this.startMonitor(),
     stopMonitor: () => this.stopMonitor(),
     sendAllLogs: () => ({ existingLogs: this.logs }),
+    loadLogs: (requestParams) => this.loadLogs(requestParams),
+    getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
   };
 
+  async loadLogs({ file }) {
+    const loadedLogs = await load.loadLogAsJSON(file);
+
+    const searchParams = `file=${file.name}`;
+    const tab = await browser.tabs.create({
+      url: getActivityLogPageURL(searchParams),
+    });
+
+    this.loadedLogsByTabId.set(tab.id, loadedLogs);
+  }
+
+  getLoadedLogs({ tabId }) {
+    const logs = this.loadedLogsByTabId.get(tabId);
+    if (!logs) {
+      throw new Error(`No loaded logs found for tab id: ${tabId}`);
+    }
+    return logs;
+  }
+
   messageListener = (message) => {
-    const { requestType, requestTo } = message;
+    const { requestType, requestTo, requestParams } = message;
     if (requestTo !== 'ext-monitor') {
       return;
     }
 
     if (requestType in this.messageHandlers) {
       try {
-        return Promise.resolve(this.messageHandlers[requestType]());
+        return Promise.resolve(
+          this.messageHandlers[requestType](requestParams)
+        );
       } catch (error) {
         return Promise.reject(error);
       }
@@ -97,7 +123,15 @@ export default class ExtensionMonitor {
     }
   };
 
+  onRemovedListener = (tabId) => {
+    // Remove the loaded logs related to the closed tab
+    if (this.loadedLogsByTabId.has(tabId)) {
+      this.loadedLogsByTabId.delete(tabId);
+    }
+  };
+
   init() {
     browser.runtime.onMessage.addListener(this.messageListener);
+    browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }
 }

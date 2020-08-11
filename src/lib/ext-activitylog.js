@@ -103,8 +103,10 @@ class Model {
 class View {
   constructor() {
     this.logView = document.querySelector('log-view');
+    this.menuContainer = document.querySelector('.menu-container');
     this.clearLogBtn = document.querySelector('#clearLogBtn');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
+    this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
@@ -122,6 +124,7 @@ class View {
 
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
+    this.loadLogFile.addEventListener('change', this);
   }
 
   setLogFilter(filterFunc) {
@@ -140,6 +143,12 @@ class View {
         default:
           throw new Error(`wrong event target - ${event.target.tagName}`);
       }
+    } else if (event.type === 'change' && event.target === this.loadLogFile) {
+      const logFile = event.target.files[0];
+      this.loadLogFile.value = '';
+      this.loadLogFile.dispatchEvent(
+        new CustomEvent('loadlog', { detail: logFile })
+      );
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
@@ -186,8 +195,6 @@ class Controller {
   }
 
   async init() {
-    this.view.clearLogBtn.addEventListener('clearlog', this);
-    this.view.saveLogBtn.addEventListener('savelog', this);
     this.view.keywordFilter.addEventListener('filterchange', this);
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
@@ -195,24 +202,55 @@ class Controller {
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
 
-    browser.runtime.onMessage.addListener((message) => {
-      const { requestTo, requestType } = message;
+    const searchParams = new URLSearchParams(
+      document.location.search.substring(1)
+    );
+    const fileName = searchParams.get('file');
 
-      if (requestTo !== 'activity-log') {
-        return;
+    if (fileName) {
+      this.view.menuContainer.hidden = true;
+      document.title = `Loaded Logs - ${fileName}`;
+
+      const currentTab = await browser.tabs.getCurrent();
+      let logs;
+
+      try {
+        logs = await browser.runtime.sendMessage({
+          requestType: 'getLoadedLogs',
+          requestTo: 'ext-monitor',
+          requestParams: { tabId: currentTab.id },
+        });
+      } catch (error) {
+        this.view.setError(error.message);
       }
 
-      if (requestType === 'appendLogs') {
-        this.handleNewLogs([message.log]);
-      } else {
-        throw new Error(`wrong request type found - ${requestType}`);
+      if (logs?.length) {
+        this.handleNewLogs(logs);
       }
-    });
+    } else {
+      this.view.loadLogFile.addEventListener('loadlog', this);
+      this.view.clearLogBtn.addEventListener('clearlog', this);
+      this.view.saveLogBtn.addEventListener('savelog', this);
 
-    const existingLogs = await this.getExistingLogs();
+      browser.runtime.onMessage.addListener((message) => {
+        const { requestTo, requestType } = message;
 
-    if (existingLogs.length) {
-      this.handleNewLogs(existingLogs);
+        if (requestTo !== 'activity-log') {
+          return;
+        }
+
+        if (requestType === 'appendLogs') {
+          this.handleNewLogs([message.log]);
+        } else {
+          throw new Error(`wrong request type found - ${requestType}`);
+        }
+      });
+
+      const existingLogs = await this.getExistingLogs();
+
+      if (existingLogs.length) {
+        this.handleNewLogs(existingLogs);
+      }
     }
   }
 
@@ -231,6 +269,9 @@ class Controller {
 
   handleEvent(event) {
     switch (event.type) {
+      case 'loadlog':
+        this.loadLogs(event.detail);
+        break;
       case 'savelog':
         this.saveLogs();
         break;
@@ -242,6 +283,18 @@ class Controller {
         break;
       default:
         throw new Error(`wrong event type found - ${event.type}`);
+    }
+  }
+
+  async loadLogs(file) {
+    try {
+      await browser.runtime.sendMessage({
+        requestTo: 'ext-monitor',
+        requestType: 'loadLogs',
+        requestParams: { file },
+      });
+    } catch (error) {
+      this.view.setError(error.message);
     }
   }
 

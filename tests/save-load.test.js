@@ -2,13 +2,14 @@ import { load, save } from '../src/lib/save-load';
 
 describe('load file functionalities', () => {
   test('load data from a file', async () => {
-    const file = JSON.stringify([{ prop: 'log' }]);
+    const logs = [{ prop: 'log' }];
+    const file = JSON.stringify(logs);
     const blob = new Blob([file], {
       type: 'application/json',
     });
 
-    const loadedLogs = load.loadLogAsText(blob);
-    await expect(loadedLogs).resolves.toBe(file);
+    const loadedLogs = load.loadLogAsJSON(blob);
+    await expect(loadedLogs).resolves.toMatchObject(logs);
   });
 
   test('throws error while reading file', async () => {
@@ -26,7 +27,7 @@ describe('load file functionalities', () => {
       this.onerror();
     });
 
-    const loadedLogs = load.loadLogAsText(blob);
+    const loadedLogs = load.loadLogAsJSON(blob);
     await expect(loadedLogs).rejects.toThrowError('read-error');
 
     readAsTextFn.mockRestore();
