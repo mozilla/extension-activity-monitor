@@ -9,9 +9,10 @@ export default class ExtensionMonitor {
   extensionMapList = new Map([]);
 
   async getAllExtensions() {
+    const selfId = browser.runtime.id;
     const extensions = await browser.management.getAll();
     return extensions.filter((extension) => {
-      return extension.type === 'extension' && extension.id !== this.selfId;
+      return extension.type === 'extension' && extension.id !== selfId;
     });
   }
 
@@ -86,7 +87,8 @@ export default class ExtensionMonitor {
   }
 
   onInstalledExtension = ({ id, type }) => {
-    if (type !== 'extension' || id === this.selfId) {
+    const selfId = browser.runtime.id;
+    if (type !== 'extension' || id === selfId) {
       return;
     }
 
@@ -158,7 +160,6 @@ export default class ExtensionMonitor {
   };
 
   init() {
-    this.selfId = browser.runtime.id;
     browser.runtime.onMessage.addListener(this.messageListener);
     browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }

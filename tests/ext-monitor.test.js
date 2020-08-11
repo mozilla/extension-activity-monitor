@@ -15,7 +15,8 @@ test('getAllExtensions should return all extensions but themes and self', async 
 
   window.browser = {
     management: { getAll },
-    runtime: { onMessage: { addListener: addListener }, id: selfExt.id },
+    runtime: { onMessage: { addListener }, id: selfExt.id },
+    tabs: { onRemoved: { addListener } },
   };
 
   const extMonitor = new ExtensionMonitor();
@@ -116,6 +117,7 @@ describe('start extension monitoring and register event listeners', () => {
         onInstalled: { addListener: onInstalledAddListener },
         onUninstalled: { addListener: onUninstalledAddListener },
       },
+      runtime: { id: selfExt.id },
     };
 
     const extMonitor = new ExtensionMonitor();
@@ -361,7 +363,7 @@ test('listeners are registered at initialization', () => {
   const tabsRemovedAddListener = jest.fn();
 
   window.browser = {
-    runtime: { onMessage: { addListener: runtimeMessageAddListener }, id: 'ext1' },
+    runtime: { onMessage: { addListener: runtimeMessageAddListener } },
     tabs: { onRemoved: { addListener: tabsRemovedAddListener } },
   };
 
@@ -371,7 +373,6 @@ test('listeners are registered at initialization', () => {
 
   extMonitor.init();
 
-  expect(extMonitor.selfId).toBe('ext1');
   expect(runtimeMessageAddListener).toHaveBeenCalledWith(messageListenerFn);
   expect(tabsRemovedAddListener).toHaveBeenCalledWith(onRemovedListenerFn);
 });
