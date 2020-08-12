@@ -1,7 +1,7 @@
 export class FilterTimestamp extends HTMLElement {
   constructor() {
     super();
-    this.timeStamp = {};
+    this.timeStamp = null;
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -31,18 +31,22 @@ export class FilterTimestamp extends HTMLElement {
       return;
     }
 
+    const timeStamp = this.timeStamp || {};
+
     const chosenTimestamp = selectedRow.querySelector('.timestamp').textContent;
     if (info.menuItemId === 'startTime') {
-      this.timeStamp.start = Date.parse(chosenTimestamp);
+      timeStamp.start = Date.parse(chosenTimestamp);
       this.startTimeLabel.textContent = chosenTimestamp;
       this.clearStartTimeBtn.hidden = false;
     } else if (info.menuItemId === 'stopTime') {
-      this.timeStamp.stop = Date.parse(chosenTimestamp);
+      timeStamp.stop = Date.parse(chosenTimestamp);
       this.stopTimeLabel.textContent = chosenTimestamp;
       this.clearStopTimeBtn.hidden = false;
     }
 
+    this.timeStamp = timeStamp;
     this.filterContainer.hidden = false;
+
     this.dispatchFilterChange();
   };
 
@@ -58,22 +62,30 @@ export class FilterTimestamp extends HTMLElement {
     );
   }
 
-  onClearFilter(clearRequest) {
-    if (clearRequest === 'startTime') {
+  onClearFilter(clearStart, clearStop) {
+    if (clearStart) {
       this.startTimeLabel.textContent = 'From Beginning';
       this.clearStartTimeBtn.hidden = true;
       delete this.timeStamp.start;
-    } else if (clearRequest === 'stopTime') {
+    }
+
+    if (clearStop) {
       this.stopTimeLabel.textContent = 'Up to End';
       this.clearStopTimeBtn.hidden = true;
       delete this.timeStamp.stop;
-    } else {
+    }
+
+    if (!clearStart && !clearStop) {
       this.startTimeLabel.textContent = 'From Beginning';
       this.stopTimeLabel.textContent = 'Up to End';
       this.timeStamp = {};
     }
 
     if (Object.keys(this.timeStamp).length === 0) {
+      this.timeStamp = null;
+    }
+
+    if (!this.timeStamp) {
       this.filterContainer.hidden = true;
     }
 
@@ -88,13 +100,13 @@ export class FilterTimestamp extends HTMLElement {
     if (event.type === 'click') {
       switch (event.target) {
         case this.clearFilterBtn:
-          this.onClearFilter();
+          this.onClearFilter(null, null);
           break;
         case this.clearStartTimeBtn:
-          this.onClearFilter('startTime');
+          this.onClearFilter(true, null);
           break;
         case this.clearStopTimeBtn:
-          this.onClearFilter('stopTime');
+          this.onClearFilter(null, true);
           break;
       }
     }
