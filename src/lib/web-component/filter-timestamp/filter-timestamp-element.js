@@ -62,7 +62,7 @@ export class FilterTimestamp extends HTMLElement {
     );
   }
 
-  onClearFilter(clearStart, clearStop) {
+  onClearFilter(clearStart = true, clearStop = true) {
     if (clearStart) {
       this.startTimeLabel.textContent = 'From Beginning';
       this.clearStartTimeBtn.hidden = true;
@@ -73,12 +73,6 @@ export class FilterTimestamp extends HTMLElement {
       this.stopTimeLabel.textContent = 'Up to End';
       this.clearStopTimeBtn.hidden = true;
       delete this.timeStamp.stop;
-    }
-
-    if (!clearStart && !clearStop) {
-      this.startTimeLabel.textContent = 'From Beginning';
-      this.stopTimeLabel.textContent = 'Up to End';
-      this.timeStamp = {};
     }
 
     if (Object.keys(this.timeStamp).length === 0) {
@@ -100,13 +94,13 @@ export class FilterTimestamp extends HTMLElement {
     if (event.type === 'click') {
       switch (event.target) {
         case this.clearFilterBtn:
-          this.onClearFilter(null, null);
+          this.onClearFilter();
           break;
         case this.clearStartTimeBtn:
-          this.onClearFilter(true, null);
+          this.onClearFilter(true, false);
           break;
         case this.clearStopTimeBtn:
-          this.onClearFilter(null, true);
+          this.onClearFilter(false, true);
           break;
       }
     }
