@@ -118,8 +118,8 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.clearFilterBtn.removeEventListener('click', this);
-    this.clearStartTimeBtn.addEventListener('click', this);
-    this.clearStopTimeBtn.addEventListener('click', this);
+    this.clearStartTimeBtn.removeEventListener('click', this);
+    this.clearStopTimeBtn.removeEventListener('click', this);
   }
 }
 
