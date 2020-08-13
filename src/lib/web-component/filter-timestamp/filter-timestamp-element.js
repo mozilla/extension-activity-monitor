@@ -15,7 +15,10 @@ export class FilterTimestamp extends HTMLElement {
 
     this.startTimeLabel = filterWrapper.querySelector('#startTimeLabel');
     this.stopTimeLabel = filterWrapper.querySelector('#stopTimeLabel');
-    this.clearBtn = filterWrapper.querySelector('#clearBtn');
+
+    this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
+    this.clearStartTimeBtn = filterWrapper.querySelector('#clearStart');
+    this.clearStopTimeBtn = filterWrapper.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
   }
@@ -28,21 +31,22 @@ export class FilterTimestamp extends HTMLElement {
       return;
     }
 
-    // this.timestamp is null when timestamp filter is not applied.
-    if (!this.timeStamp) {
-      this.timeStamp = {};
-    }
+    const timeStamp = this.timeStamp || {};
 
     const chosenTimestamp = selectedRow.querySelector('.timestamp').textContent;
     if (info.menuItemId === 'startTime') {
-      this.timeStamp.start = Date.parse(chosenTimestamp);
+      timeStamp.start = Date.parse(chosenTimestamp);
       this.startTimeLabel.textContent = chosenTimestamp;
+      this.clearStartTimeBtn.hidden = false;
     } else if (info.menuItemId === 'stopTime') {
-      this.timeStamp.stop = Date.parse(chosenTimestamp);
+      timeStamp.stop = Date.parse(chosenTimestamp);
       this.stopTimeLabel.textContent = chosenTimestamp;
+      this.clearStopTimeBtn.hidden = false;
     }
 
+    this.timeStamp = timeStamp;
     this.filterContainer.hidden = false;
+
     this.dispatchFilterChange();
   };
 
@@ -58,29 +62,60 @@ export class FilterTimestamp extends HTMLElement {
     );
   }
 
-  onClearFilter = () => {
-    this.startTimeLabel.textContent = 'From Beginning';
-    this.stopTimeLabel.textContent = 'Up to End';
-    this.filterContainer.hidden = true;
+  onClearFilter(clearStart = true, clearStop = true) {
+    if (clearStart) {
+      this.startTimeLabel.textContent = 'From Beginning';
+      this.clearStartTimeBtn.hidden = true;
+      delete this.timeStamp.start;
+    }
 
-    this.timeStamp = null;
+    if (clearStop) {
+      this.stopTimeLabel.textContent = 'Up to End';
+      this.clearStopTimeBtn.hidden = true;
+      delete this.timeStamp.stop;
+    }
+
+    if (Object.keys(this.timeStamp).length === 0) {
+      this.timeStamp = null;
+    }
+
+    if (!this.timeStamp) {
+      this.filterContainer.hidden = true;
+    }
+
     this.dispatchFilterChange();
-  };
+  }
 
   onHiddenListener = () => {
     browser.menus.removeAll();
   };
 
+  handleEvent(event) {
+    if (event.type === 'click') {
+      switch (event.target) {
+        case this.clearFilterBtn:
+          this.onClearFilter();
+          break;
+        case this.clearStartTimeBtn:
+          this.onClearFilter(true, false);
+          break;
+        case this.clearStopTimeBtn:
+          this.onClearFilter(false, true);
+          break;
+      }
+    }
+  }
+
   connectedCallback() {
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
-    this.clearBtn.addEventListener('click', this.onClearFilter);
+    this.filterContainer.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
-    this.clearBtn.removeEventListener('click', this.onClearFilter);
+    this.filterContainer.removeEventListener('click', this);
   }
 }
 

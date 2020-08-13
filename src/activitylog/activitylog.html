@@ -132,16 +132,22 @@
     <div class="timestamp-filter-container" hidden>
       <div class="label">
         Timestamp Filter Applied
-        <div id="clearBtn" title="Clear timestamp filter"></div>
+        <div
+          id="clearFilter"
+          class="clear-btn white"
+          title="Clear both filter timestamps"
+        ></div>
       </div>
       <div class="timestamp-filter-options">
         <div class="start-time-container">
           <div class="title">Start Time:</div>
           <div id="startTimeLabel">From beginning</div>
+          <div id="clearStart" class="clear-btn black" hidden></div>
         </div>
         <div class="stop-time-container">
           <div class="title">Stop Time:</div>
           <div id="stopTimeLabel">Up to End</div>
+          <div id="clearStop" class="clear-btn black" hidden></div>
         </div>
       </div>
     </div>

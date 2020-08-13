@@ -20,13 +20,25 @@
   font-weight: bold;
 }
 
-#clearBtn {
+.clear-btn {
   cursor: pointer;
-  background: url(/icons/circle-close.svg) no-repeat center center / cover;
-  width: 25px;
-  height: 25px;
+  min-width: 20px;
+  height: 20px;
   display: inline-block;
-  margin-left: 15px;
+  margin-left: 10px;
+}
+
+.clear-btn.white,
+.clear-btn.black {
+  margin-right: 10px;
+}
+
+.clear-btn.white {
+  background: url(/icons/circle-close-white.svg) no-repeat center center / cover;
+}
+
+.clear-btn.black {
+  background: url(/icons/circle-close-black.svg) no-repeat center center / cover;
 }
 
 #startTimeLabel,
@@ -37,4 +49,10 @@
 .start-time-container,
 .stop-time-container {
   display: flex;
+  align-items: center;
+}
+
+/* hidden attribute is not being applied to the elements inside the shadow DOM */
+[hidden] {
+  display: none;
 }

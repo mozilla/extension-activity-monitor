@@ -84,11 +84,11 @@ class Model {
       return true;
     }
 
-    const startTime = this.filter.timeStamp.start;
-    const endTime = this.filter.timeStamp.stop;
+    const startTime = this.filter.timeStamp?.start;
+    const stopTime = this.filter.timeStamp?.stop;
     const logTime = Date.parse(logTimestamp);
 
-    if (logTime < startTime || logTime > endTime) {
+    if (logTime < startTime || logTime > stopTime) {
       return false;
     }
 
