@@ -102,6 +102,8 @@ export class FilterTimestamp extends HTMLElement {
         case this.clearStopTimeBtn:
           this.onClearFilter(false, true);
           break;
+        default:
+          break;
       }
     }
   }
