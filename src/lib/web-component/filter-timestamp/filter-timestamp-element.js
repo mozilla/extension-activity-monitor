@@ -109,17 +109,13 @@ export class FilterTimestamp extends HTMLElement {
   connectedCallback() {
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
-    this.clearFilterBtn.addEventListener('click', this);
-    this.clearStartTimeBtn.addEventListener('click', this);
-    this.clearStopTimeBtn.addEventListener('click', this);
+    this.filterContainer.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
-    this.clearFilterBtn.removeEventListener('click', this);
-    this.clearStartTimeBtn.removeEventListener('click', this);
-    this.clearStopTimeBtn.removeEventListener('click', this);
+    this.filterContainer.removeEventListener('click', this);
   }
 }
 

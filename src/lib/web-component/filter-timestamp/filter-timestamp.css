@@ -52,6 +52,7 @@
   align-items: center;
 }
 
+/* hidden attribute is not being applied to the elements inside the shadow DOM */
 [hidden] {
   display: none;
 }
