@@ -242,6 +242,10 @@ class Controller {
         this.handleNewLogs(logs);
       }
     } else {
+      this.view.loadLogFile.addEventListener('loadlog', this);
+      this.view.clearLogBtn.addEventListener('clearlog', this);
+      this.view.saveLogBtn.addEventListener('savelog', this);
+
       browser.runtime.connect({ name: 'monitor-realtime-logs' });
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
@@ -272,10 +276,6 @@ class Controller {
 
         this.onFilterChange(filterDetail);
       }
-
-      this.view.loadLogFile.addEventListener('loadlog', this);
-      this.view.clearLogBtn.addEventListener('clearlog', this);
-      this.view.saveLogBtn.addEventListener('savelog', this);
     }
   }
 
