@@ -435,18 +435,12 @@ test('saveLogs function should call download API to save logs', async () => {
     return Promise.resolve(id);
   });
 
-  const logs = [{ prop1: 'log1' }];
-  const blob = new Blob([JSON.stringify(logs)], {
-    type: 'application/json',
-  });
-
   const extMonitor = new ExtensionMonitor();
   const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
 
   const saveLogPromise = extMonitor.messageListener({
     requestTo: 'ext-monitor',
     requestType: 'saveLogs',
-    requestParams: { blob, filename: 'activitylogs.json' },
   });
 
   await expect(saveLogPromise).resolves.toBeUndefined();
@@ -505,15 +499,9 @@ test('saveLogs function should return error message if error is encountered', as
     return Promise.resolve(1);
   });
 
-  const logs = [{ prop1: 'log1' }];
-  const blob = new Blob([JSON.stringify(logs)], {
-    type: 'application/json',
-  });
-
   const saveLogPromise = extMonitor.messageListener({
     requestTo: 'ext-monitor',
     requestType: 'saveLogs',
-    requestParams: { blob, filename: 'activitylogs.json' },
   });
 
   await expect(saveLogPromise).rejects.toThrowError('save-error');

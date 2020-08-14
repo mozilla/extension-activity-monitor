@@ -100,7 +100,7 @@ class Model {
   }
 
   matchFilterTabId({ tabId }) {
-    if (this.filter.tabId === null) {
+    if (this.filter.tabId == null) {
       return true;
     }
 
@@ -197,6 +197,10 @@ class View {
   clearTable() {
     this.logView.clearTable();
   }
+
+  updateLogHeading(newHeading) {
+    this.logHeading.textContent = newHeading;
+  }
 }
 
 class Controller {
@@ -268,7 +272,9 @@ class Controller {
       }
 
       if (filterTabId) {
-        this.view.logHeading.textContent = `${this.view.logHeading.textContent} Filtered By Tab Id: ${filterTabId}`;
+        this.view.updateLogHeading(
+          `Activity Logs Filtered By Tab Id: ${filterTabId}`
+        );
 
         const filterDetail = {
           updateFilter: { tabId: filterTabId },
@@ -325,7 +331,7 @@ class Controller {
 
   async saveLogs() {
     try {
-      await save.saveAsJSON(this.model.logs);
+      await save.saveAsJSON();
       this.view.setError(null);
     } catch (error) {
       this.view.setError(error.message);

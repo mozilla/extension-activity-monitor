@@ -19,15 +19,10 @@ export const load = {
 };
 
 export const save = {
-  saveAsJSON(logs) {
-    const blob = new Blob([JSON.stringify(logs)], {
-      type: 'application/json',
-    });
-
+  saveAsJSON() {
     return browser.runtime.sendMessage({
       requestTo: 'ext-monitor',
       requestType: 'saveLogs',
-      requestParams: { blob, filename: 'activitylogs.json' },
     });
   },
 };

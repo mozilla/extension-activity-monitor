@@ -105,7 +105,7 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     loadLogs: (requestParams) => this.loadLogs(requestParams),
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
-    saveLogs: (requestParams) => this.saveLogs(requestParams),
+    saveLogs: () => this.saveLogs(),
   };
 
   async loadLogs({ file }) {
@@ -127,7 +127,11 @@ export default class ExtensionMonitor {
     return logs;
   }
 
-  async saveLogs({ blob, filename }) {
+  async saveLogs() {
+    const blob = new Blob([JSON.stringify(this.logs)], {
+      type: 'application/json',
+    });
+
     const url = URL.createObjectURL(blob);
     let downloadId = null;
     let listener;
@@ -148,7 +152,7 @@ export default class ExtensionMonitor {
     try {
       downloadId = await browser.downloads.download({
         url,
-        filename,
+        filename: 'activitylogs.json',
       });
       return await downloadDonePromise;
     } finally {
