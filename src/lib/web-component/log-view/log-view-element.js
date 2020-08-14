@@ -117,6 +117,8 @@ export class LogView extends HTMLElement {
   connectedCallback() {
     this.tableBody.addEventListener('click', this);
     this.closeBtn.addEventListener('click', this);
+
+    // issue #43: context menu doesn't work on devtool_page
     if (browser.menus?.overrideContext) {
       this.tableBody.addEventListener('contextmenu', this);
     }
