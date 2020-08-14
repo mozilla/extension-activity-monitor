@@ -35,7 +35,7 @@ describe('load file functionalities', () => {
 });
 
 describe('save file functionalities', () => {
-  test('saveAsJSON function should create a blob url and send a message to background', async () => {
+  test('saveAsJSON function should send a message to background', async () => {
     const sendMessage = jest.fn();
 
     window.browser = {
@@ -47,8 +47,7 @@ describe('save file functionalities', () => {
       listener = callback;
     });
 
-    const log = [{ prop1: 'log1' }];
-    await save.saveAsJSON(log);
+    await save.saveAsJSON();
 
     expect(sendMessage).toHaveBeenCalled();
     expect(listener.requestType).toBe('saveLogs');
