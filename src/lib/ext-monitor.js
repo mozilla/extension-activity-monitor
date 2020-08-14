@@ -115,8 +115,6 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     loadLogs: (requestParams) => this.loadLogs(requestParams),
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
-    addPanelTabId: ({ tabId }) => this.devToolsPanelTabIds.add(tabId),
-    deletePanelTabId: ({ tabId }) => this.devToolsPanelTabIds.delete(tabId),
     saveLogs: (requestParams) => this.saveLogs(requestParams),
   };
 
