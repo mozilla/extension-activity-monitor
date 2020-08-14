@@ -107,7 +107,8 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   connectedCallback() {
-    // issue #43: context menu doesn't work on devtool_page
+    // context menu doesn't work on devtool_page
+    // see: https://github.com/mozilla/extension-activity-monitor/issues/43
     if (!browser.menus?.onClicked || !browser.menus?.onHidden) {
       return;
     }
