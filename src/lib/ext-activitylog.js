@@ -270,7 +270,6 @@ class Controller {
         };
 
         this.onFilterChange(filterDetail);
-        return;
       }
 
       this.view.loadLogFile.addEventListener('loadlog', this);

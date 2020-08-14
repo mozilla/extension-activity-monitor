@@ -388,3 +388,143 @@ test('empty log array is found after clearing logs', async () => {
 
   expect(extMonitor.logs).toEqual([]);
 });
+
+test('saveLogs function should call download API to save logs', async () => {
+  const createObjectURL = jest.fn();
+  const revokeObjectURL = jest.fn();
+  window.URL = { createObjectURL, revokeObjectURL };
+
+  const download = jest.fn();
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+
+  window.browser = {
+    downloads: {
+      download,
+      onChanged: { addListener, removeListener },
+    },
+  };
+
+  createObjectURL.mockReturnValue('fake-blob-url');
+
+  let listener;
+  addListener.mockImplementation((callback) => {
+    listener = callback;
+  });
+
+  download.mockImplementation(() => {
+    const id = 123;
+    setTimeout(() => {
+      listener({
+        state: { current: 'in_progress' },
+        id,
+      });
+      listener({
+        state: { current: 'complete' },
+        id,
+      });
+    }, 0);
+    return Promise.resolve(id);
+  });
+
+  const logs = [{ prop1: 'log1' }];
+  const blob = new Blob([JSON.stringify(logs)], {
+    type: 'application/json',
+  });
+
+  const extMonitor = new ExtensionMonitor();
+  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
+
+  const saveLogPromise = extMonitor.messageListener({
+    requestTo: 'ext-monitor',
+    requestType: 'saveLogs',
+    requestParams: { blob, filename: 'activitylogs.json' },
+  });
+
+  await expect(saveLogPromise).resolves.toBeUndefined();
+
+  expect(saveLogsFn).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledWith({
+    url: 'fake-blob-url',
+    filename: 'activitylogs.json',
+  });
+
+  expect(addListener).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalledWith(listener);
+
+  expect(removeListener).toHaveBeenCalledTimes(1);
+  expect(removeListener).toHaveBeenCalledWith(listener);
+
+  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
+
+  saveLogsFn.mockRestore();
+});
+
+test('saveLogs function should return error message if error is encountered', async () => {
+  const extMonitor = new ExtensionMonitor();
+  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
+
+  const createObjectURL = jest.fn();
+  const revokeObjectURL = jest.fn();
+  window.URL = { createObjectURL, revokeObjectURL };
+
+  const download = jest.fn();
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  window.browser = {
+    downloads: {
+      download,
+      onChanged: { addListener, removeListener },
+    },
+  };
+
+  createObjectURL.mockReturnValue('fake-blob-url');
+
+  let listener;
+  addListener.mockImplementation((callback) => {
+    listener = callback;
+  });
+
+  download.mockImplementation(() => {
+    setTimeout(() => {
+      listener({
+        state: { current: 'interrupted' },
+        error: 'save-error',
+      });
+    }, 0);
+    return Promise.resolve(1);
+  });
+
+  const logs = [{ prop1: 'log1' }];
+  const blob = new Blob([JSON.stringify(logs)], {
+    type: 'application/json',
+  });
+
+  const saveLogPromise = extMonitor.messageListener({
+    requestTo: 'ext-monitor',
+    requestType: 'saveLogs',
+    requestParams: { blob, filename: 'activitylogs.json' },
+  });
+
+  await expect(saveLogPromise).rejects.toThrowError('save-error');
+
+  expect(saveLogsFn).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledWith({
+    url: 'fake-blob-url',
+    filename: 'activitylogs.json',
+  });
+
+  expect(addListener).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalledWith(listener);
+
+  expect(removeListener).toHaveBeenCalledTimes(1);
+  expect(removeListener).toHaveBeenCalledWith(listener);
+
+  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
+
+  saveLogsFn.mockRestore();
+});

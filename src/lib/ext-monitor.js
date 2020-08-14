@@ -117,6 +117,7 @@ export default class ExtensionMonitor {
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
     addPanelTabId: ({ tabId }) => this.devToolsPanelTabIds.add(tabId),
     deletePanelTabId: ({ tabId }) => this.devToolsPanelTabIds.delete(tabId),
+    saveLogs: (requestParams) => this.saveLogs(requestParams),
   };
 
   async loadLogs({ file }) {
@@ -136,6 +137,36 @@ export default class ExtensionMonitor {
       throw new Error(`No loaded logs found for tab id: ${tabId}`);
     }
     return logs;
+  }
+
+  async saveLogs({ blob, filename }) {
+    const url = URL.createObjectURL(blob);
+    let downloadId = null;
+    let listener;
+
+    const downloadDonePromise = new Promise((resolve, reject) => {
+      listener = (result) => {
+        if (result.state.current === 'complete' && result.id === downloadId) {
+          resolve();
+        }
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+      };
+
+      browser.downloads.onChanged.addListener(listener);
+    });
+
+    try {
+      downloadId = await browser.downloads.download({
+        url,
+        filename,
+      });
+      return await downloadDonePromise;
+    } finally {
+      URL.revokeObjectURL(url);
+      browser.downloads.onChanged.removeListener(listener);
+    }
   }
 
   messageListener = (message) => {
