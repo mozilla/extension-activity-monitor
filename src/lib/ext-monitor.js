@@ -21,9 +21,8 @@ export default class ExtensionMonitor {
   }
 
   async isActivityLogPageOpen() {
-    const activitylogPage = getActivityLogPageURL();
     const tab = await browser.tabs.query({
-      url: [activitylogPage],
+      url: getActivityLogPageURL(),
     });
 
     return tab.length > 0;
