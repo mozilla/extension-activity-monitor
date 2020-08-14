@@ -120,6 +120,7 @@ class View {
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
+    this.logHeading = document.querySelector('.log-heading');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -262,9 +263,7 @@ class Controller {
       }
 
       if (filterTabId) {
-        // currently menu container is hidden when activity log page is
-        // filtered by tab id
-        this.view.menuContainer.hidden = true;
+        this.view.logHeading.textContent = `${this.view.logHeading.textContent} Filtered By Tab Id: ${filterTabId}`;
 
         const filterDetail = {
           updateFilter: { tabId: filterTabId },
