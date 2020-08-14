@@ -9,10 +9,11 @@ export default class ExtensionMonitor {
   extensionMapList = new Map([]);
 
   async getAllExtensions() {
-    const selfId = browser.runtime.id;
     const extensions = await browser.management.getAll();
     return extensions.filter((extension) => {
-      return extension.type === 'extension' && extension.id !== selfId;
+      return (
+        extension.type === 'extension' && extension.id !== browser.runtime.id
+      );
     });
   }
 
@@ -87,8 +88,7 @@ export default class ExtensionMonitor {
   }
 
   onInstalledExtension = ({ id, type }) => {
-    const selfId = browser.runtime.id;
-    if (type !== 'extension' || id === selfId) {
+    if (type !== 'extension' || id === browser.runtime.id) {
       return;
     }
 

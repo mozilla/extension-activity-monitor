@@ -123,8 +123,6 @@ describe('start extension monitoring and register event listeners', () => {
     const extMonitor = new ExtensionMonitor();
     const getAllExtensionsFn = jest.spyOn(extMonitor, 'getAllExtensions');
 
-    extMonitor.selfId = selfExt.id;
-
     getAllExtensionsFn.mockResolvedValue(initialMonitoringExts);
 
     expect(extMonitor.extensionMapList.size).toBe(0);
@@ -136,7 +134,7 @@ describe('start extension monitoring and register event listeners', () => {
     // being called with new extension's info.
     extMonitor.onInstalledExtension(newExtension);
 
-    // Since this is a theme, it will not be monitored.
+    // Since this is a theme, it should not be monitored.
     extMonitor.onInstalledExtension(newTheme);
 
     let monitoringExtIds = [];
