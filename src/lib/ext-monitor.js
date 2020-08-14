@@ -8,8 +8,8 @@ export default class ExtensionMonitor {
   // Map<string, Function>
   extensionMapList = new Map([]);
 
-  // Set<number>
-  devToolsPanelTabIds = new Set();
+  // Set<Port: Object>
+  activityLogPorts = new Set();
 
   async getAllExtensions() {
     const extensions = await browser.management.getAll();
@@ -33,7 +33,7 @@ export default class ExtensionMonitor {
   // Activity Log page (as soon as it is encountered).
   async sendLogs(details) {
     const isExtPageOpen = await this.isActivityLogPageOpen();
-    if (isExtPageOpen || this.devToolsPanelTabIds.size) {
+    if (isExtPageOpen || this.activityLogPorts.size) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
         requestTo: 'activity-log',
@@ -169,6 +169,17 @@ export default class ExtensionMonitor {
     }
   }
 
+  onConnectListener = (port) => {
+    if (port.name !== 'monitor-realtime-logs') {
+      return;
+    }
+
+    this.activityLogPorts.add(port);
+    port.onDisconnect.addListener((port) => {
+      this.activityLogPorts.delete(port);
+    });
+  };
+
   messageListener = (message) => {
     const { requestType, requestTo, requestParams } = message;
     if (requestTo !== 'ext-monitor') {
@@ -198,6 +209,7 @@ export default class ExtensionMonitor {
   };
 
   init() {
+    browser.runtime.onConnect.addListener(this.onConnectListener);
     browser.runtime.onMessage.addListener(this.messageListener);
     browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }

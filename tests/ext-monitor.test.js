@@ -359,18 +359,23 @@ describe('messageListeners functionalities test', () => {
 test('listeners are registered at initialization', () => {
   const runtimeMessageAddListener = jest.fn();
   const tabsRemovedAddListener = jest.fn();
+  const onConnectAddListener = jest.fn();
 
   window.browser = {
-    runtime: { onMessage: { addListener: runtimeMessageAddListener } },
+    runtime: {
+      onMessage: { addListener: runtimeMessageAddListener },
+      onConnect: { addListener: onConnectAddListener },
+    },
     tabs: { onRemoved: { addListener: tabsRemovedAddListener } },
   };
 
   const extMonitor = new ExtensionMonitor();
+  const onConnectListenerFn = jest.spyOn(extMonitor, 'onConnectListener');
   const messageListenerFn = jest.spyOn(extMonitor, 'messageListener');
   const onRemovedListenerFn = jest.spyOn(extMonitor, 'onRemovedListener');
 
   extMonitor.init();
-
+  expect(onConnectAddListener).toHaveBeenCalledWith(onConnectListenerFn);
   expect(runtimeMessageAddListener).toHaveBeenCalledWith(messageListenerFn);
   expect(tabsRemovedAddListener).toHaveBeenCalledWith(onRemovedListenerFn);
 });

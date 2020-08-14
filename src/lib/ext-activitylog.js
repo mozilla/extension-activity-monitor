@@ -242,6 +242,7 @@ class Controller {
         this.handleNewLogs(logs);
       }
     } else {
+      browser.runtime.connect({ name: 'monitor-realtime-logs' });
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
 
