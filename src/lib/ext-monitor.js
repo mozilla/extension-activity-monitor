@@ -20,20 +20,10 @@ export default class ExtensionMonitor {
     });
   }
 
-  async isActivityLogPageOpen() {
-    const activitylogPage = getActivityLogPageURL();
-    const tab = await browser.tabs.query({
-      url: [activitylogPage, `${activitylogPage}?filterTabId=*`],
-    });
-
-    return tab.length > 0;
-  }
-
   // If the Activity Log page is open, each logs will be send to
   // Activity Log page (as soon as it is encountered).
   async sendLogs(details) {
-    const isExtPageOpen = await this.isActivityLogPageOpen();
-    if (isExtPageOpen || this.activityLogPorts.size) {
+    if (this.activityLogPorts.size) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
         requestTo: 'activity-log',

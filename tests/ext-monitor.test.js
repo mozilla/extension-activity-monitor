@@ -251,7 +251,6 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
 
   window.browser = {
     runtime: { getURL, sendMessage },
-    tabs: { query },
   };
 
   const extMonitor = new ExtensionMonitor();
@@ -266,7 +265,11 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
   expect(extMonitor.logs).toMatchObject([log1]);
   expect(sendMessage).not.toHaveBeenCalled();
 
-  // extension page is open
+  // extension page exist when activityLogPorts is not empty
+  // activityLogPorts contains port objects from runtime.onConnect
+  const port = { port: 'extension-page-open' };
+  extMonitor.activityLogPorts.add(port);
+
   listener = extMonitor.createLogListener();
   await listener(log2);
 
