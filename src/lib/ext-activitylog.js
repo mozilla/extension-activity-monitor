@@ -198,8 +198,8 @@ class View {
     this.logView.clearTable();
   }
 
-  updateLogHeading(newHeading) {
-    this.logHeading.textContent = newHeading;
+  renderView({ filterTabId }) {
+    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filterTabId}`;
   }
 }
 
@@ -272,9 +272,7 @@ class Controller {
       }
 
       if (filterTabId) {
-        this.view.updateLogHeading(
-          `Activity Logs Filtered By Tab Id: ${filterTabId}`
-        );
+        this.view.renderView({ filterTabId });
 
         const filterDetail = {
           updateFilter: { tabId: filterTabId },
