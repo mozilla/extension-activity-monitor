@@ -100,15 +100,11 @@ class Model {
   }
 
   matchFilterTabId({ tabId }) {
-    if (!this.filter.tabId) {
+    if (this.filter.tabId === null) {
       return true;
     }
 
-    if (tabId && tabId === this.filter.tabId) {
-      return true;
-    }
-
-    return false;
+    return this.filter.tabId === tabId;
   }
 
   clearLogs() {

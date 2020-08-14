@@ -8,7 +8,8 @@ export default class ExtensionMonitor {
   // Map<string, Function>
   extensionMapList = new Map([]);
 
-  isDevToolPanelOpen = false;
+  // Set<number>
+  devToolsPanelTabIds = new Set();
 
   async getAllExtensions() {
     const extensions = await browser.management.getAll();
@@ -21,12 +22,8 @@ export default class ExtensionMonitor {
 
   async isActivityLogPageOpen() {
     const activitylogPage = getActivityLogPageURL();
-    if (this.isDevToolPanelOpen) {
-      return true;
-    }
-
     const tab = await browser.tabs.query({
-      url: [activitylogPage, `${activitylogPage}?*`],
+      url: [activitylogPage],
     });
 
     return tab.length > 0;
@@ -36,7 +33,7 @@ export default class ExtensionMonitor {
   // Activity Log page (as soon as it is encountered).
   async sendLogs(details) {
     const isExtPageOpen = await this.isActivityLogPageOpen();
-    if (isExtPageOpen) {
+    if (isExtPageOpen || this.devToolsPanelTabIds.size) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
         requestTo: 'activity-log',
@@ -118,8 +115,8 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     loadLogs: (requestParams) => this.loadLogs(requestParams),
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
-    devToolsPanelShown: () => (this.isDevToolPanelOpen = true),
-    devToolsPanelHidden: () => (this.isDevToolPanelOpen = false),
+    addPanelTabId: ({ tabId }) => this.devToolsPanelTabIds.add(tabId),
+    deletePanelTabId: ({ tabId }) => this.devToolsPanelTabIds.delete(tabId),
   };
 
   async loadLogs({ file }) {
