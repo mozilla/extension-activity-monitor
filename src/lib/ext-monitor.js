@@ -10,9 +10,10 @@ export default class ExtensionMonitor {
 
   async getAllExtensions() {
     const extensions = await browser.management.getAll();
-    const self = await browser.management.getSelf();
     return extensions.filter((extension) => {
-      return extension.type === 'extension' && extension.id !== self.id;
+      return (
+        extension.type === 'extension' && extension.id !== browser.runtime.id
+      );
     });
   }
 
@@ -43,35 +44,63 @@ export default class ExtensionMonitor {
     };
   }
 
+  async startMonitor() {
+    if (this.hasActivityListeners()) {
+      throw new Error('EAM is already running');
+    }
+
+    const extensions = await this.getAllExtensions();
+    extensions.forEach((extension) => {
+      this.addMonitorListener(extension.id);
+    });
+
+    browser.management.onInstalled.addListener(this.onInstalledExtension);
+    browser.management.onUninstalled.addListener(this.onUninstalledExtension);
+  }
+
   hasActivityListeners() {
     return this.extensionMapList.size > 0;
   }
 
-  async startMonitor() {
-    if (!this.hasActivityListeners()) {
-      const extensions = await this.getAllExtensions();
-      extensions.forEach((extension) => {
-        const listener = this.createLogListener();
-        this.extensionMapList.set(extension.id, listener);
-        browser.activityLog.onExtensionActivity.addListener(
-          listener,
-          extension.id
-        );
-      });
-    } else {
-      throw new Error('EAM is already running');
-    }
+  addMonitorListener(extensionId) {
+    const listener = this.createLogListener();
+    this.extensionMapList.set(extensionId, listener);
+    browser.activityLog.onExtensionActivity.addListener(listener, extensionId);
   }
 
   stopMonitor() {
     this.extensionMapList.forEach((listener, extensionId) => {
-      browser.activityLog.onExtensionActivity.removeListener(
-        listener,
-        extensionId
-      );
-      this.extensionMapList.delete(extensionId);
+      this.removeMonitorListener(extensionId, listener);
     });
+
+    browser.management.onInstalled.removeListener(this.onInstalledExtension);
+    browser.management.onUninstalled.removeListener(
+      this.onUninstalledExtension
+    );
   }
+
+  removeMonitorListener(extensionId, listener) {
+    browser.activityLog.onExtensionActivity.removeListener(
+      listener,
+      extensionId
+    );
+    this.extensionMapList.delete(extensionId);
+  }
+
+  onInstalledExtension = ({ id, type }) => {
+    if (type !== 'extension' || id === browser.runtime.id) {
+      return;
+    }
+
+    this.addMonitorListener(id);
+  };
+
+  onUninstalledExtension = ({ id }) => {
+    if (this.extensionMapList.has(id)) {
+      const listener = this.extensionMapList.get(id);
+      this.removeMonitorListener(id, listener);
+    }
+  };
 
   messageHandlers = {
     clearLogs: () => (this.logs = []),
