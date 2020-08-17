@@ -25,7 +25,7 @@ export class FilterTimestamp extends HTMLElement {
 
   setFilterRange = (info) => {
     const selectedEl = browser.menus.getTargetElement(info.targetElementId);
-    const selectedRow = selectedEl.closest('tr');
+    const selectedRow = selectedEl?.closest('tr');
 
     if (!selectedRow) {
       return;
