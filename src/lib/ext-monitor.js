@@ -34,6 +34,9 @@ export default class ExtensionMonitor {
 
   createLogListener() {
     return async (details) => {
+      // set a timestamp(number) as the value of timeStamp property
+      details.timeStamp = Date.parse(details.timeStamp);
+
       this.logs.push(details);
       await this.sendLogs(details);
     };

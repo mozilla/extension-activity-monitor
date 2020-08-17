@@ -31,3 +31,14 @@ export function openActivityLogPage() {
     url: getActivityLogPageURL(),
   });
 }
+
+export function timeFormat(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleTimeString()}`;
+}
+
+export function dateTimeFormat(timestamp) {
+  const date = new Date(timestamp);
+  const month = date.getMonth() + 1;
+  return `${date.getDate()}-${month}-${date.getFullYear()} ${date.toLocaleTimeString()}`;
+}

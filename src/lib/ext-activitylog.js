@@ -90,9 +90,8 @@ class Model {
 
     const startTime = this.filter.timeStamp?.start;
     const stopTime = this.filter.timeStamp?.stop;
-    const logTime = Date.parse(logTimestamp);
 
-    if (logTime < startTime || logTime > stopTime) {
+    if (logTimestamp < startTime || logTimestamp > stopTime) {
       return false;
     }
 
