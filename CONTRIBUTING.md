@@ -38,7 +38,7 @@ The extension recevies logs in the form of `object` from activityLog API. The ac
     - `ext-popup.js` - It runs in the popup.
     - `ext-activitylog.js` - It runs in the Activity Log page.
     - `save-load.js` - It contains the functionalities of saving and loading log file.
-  - [_`lib/web-component`_](#https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) - It contains all the web components being used in the project.
+  - [_`lib/web-component`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) - It contains all the web components being used in the project.
 - [_`tests`_](https://github.com/atiqueahmedziad/extension-activity-monitor/tree/master/tests) - Contains all the test files.
 
 ## Pick an issue
