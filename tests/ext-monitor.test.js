@@ -15,7 +15,11 @@ test('getAllExtensions should return all extensions but themes and self', async 
 
   window.browser = {
     management: { getAll },
-    runtime: { onMessage: { addListener }, id: selfExt.id },
+    runtime: {
+      onMessage: { addListener },
+      id: selfExt.id,
+      onConnect: { addListener },
+    },
     tabs: { onRemoved: { addListener } },
   };
 
