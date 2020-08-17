@@ -42,10 +42,10 @@ export class FilterOption extends HTMLElement {
   addNewCheckbox(checkboxLabel) {
     const newCheckbox = this.checkboxTemplate.cloneNode(true);
     newCheckbox.querySelector('label span').textContent =
-      checkboxLabel || 'undefined';
+      checkboxLabel || 'other';
 
     const inputCheckbox = newCheckbox.querySelector('input');
-    inputCheckbox.value = checkboxLabel;
+    inputCheckbox.value = checkboxLabel || 'other';
     inputCheckbox.checked = true;
 
     // adding to activeCheckboxLabels list since checkbox is checked
@@ -70,8 +70,9 @@ export class FilterOption extends HTMLElement {
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
     ) {
+      // when viewType is undefined, we display it as "other" in filter checkbox.
       const checkboxLabel =
-        event.target.value === 'undefined' ? undefined : event.target.value;
+        event.target.value === 'other' ? undefined : event.target.value;
       const isChecked = event.target.checked;
 
       if (isChecked) {
@@ -79,6 +80,7 @@ export class FilterOption extends HTMLElement {
       } else {
         this.activeCheckboxLabels.delete(checkboxLabel);
       }
+
       this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
     } else {
       throw new Error(`wrong event type - ${event.type}`);
