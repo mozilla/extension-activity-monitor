@@ -269,3 +269,59 @@ test('clearing logs from activitylog page', async () => {
   expect(activityLog.model.logs).toMatchObject([]);
   expect(getTableRows().length).toBe(0);
 });
+
+test('timestamp is formatted and rendered correctly', () => {
+  const logTimestamp = 1597686226302;
+
+  const logs = [
+    {
+      /* renders 1st row in table */
+      id: 'id1@test',
+      viewType: 'viewType@test',
+      type: 'type@test',
+      data: [{ test: 'test1@data' }],
+      timeStamp: logTimestamp,
+    },
+  ];
+
+  const addListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+  };
+
+  sendMessage.mockImplementation(() => {
+    return Promise.resolve({ existingLogs: [] });
+  });
+
+  document.body.innerHTML = activityLogBody;
+
+  const { activityLog } = new ActivityLog();
+
+  activityLog.handleNewLogs(logs);
+
+  const dateTime = new Date(logTimestamp);
+
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  const expectedDate = new Intl.DateTimeFormat(undefined, options).format(
+    dateTime
+  );
+
+  const expectedTime = dateTime.toLocaleTimeString();
+  const expectedDateTime = `${expectedDate} ${expectedTime}`;
+
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const tableRows = tableBody.querySelectorAll('tr');
+
+  const firstRowTimestamp = tableRows[0].querySelector('.timestamp');
+
+  // For log timestamp: 1597686226302
+  expect(firstRowTimestamp.textContent).toEqual(expectedTime);
+  expect(firstRowTimestamp.title).toEqual(expectedDateTime);
+});
