@@ -5,6 +5,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 ## Table of Contents
 
 - [Project Architecture](#project-architecture)
+  - [Data Flow](#data-flow)
   - [Project Directory Structure](#project-directory-structure)
 - [Pick an issue](#pick-an-issue)
 - [Installation](#installation)
@@ -23,7 +24,7 @@ The Activity Log page is using the MVC architecture and [web components](https:/
 
 ### Data Flow
 
-The extension recevies from logs in the form of `object` from activityLog API (priviledge API). The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). The activityLog API has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20) event. It gets triggered when an activity is found from other installed extensions and return an [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76). We store these logs in the [`logs` array in background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L7). We also stored the monitored extension in a [`Map` in Background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L9). When we open the Activity Log page from popup, the page is being rendered with existing logs collected in the background and receives the future logs in real-time via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L235-L247) while it is opened. In Activity Log page, the logs are being rendered in table view with the help of [`log-view` web component](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/log-view-element.js).
+The extension recevies logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). It has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20) event, which gets triggered everytime an activity is found from any monitored extensions and return an [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76). We store these log objects inside the [`logs` array in background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L7). We also stored the monitored extension in a [`Map` in Background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L9). When we open the Activity Log page from popup, the page is being rendered with existing logs collected in the background and receives the future logs in real-time via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L235-L247) while it is opened. In Activity Log page, the logs are being rendered in table view with the help of [`log-view` web component](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/log-view-element.js).
 
 ### Project Directory Structure
 
@@ -37,6 +38,7 @@ The extension recevies from logs in the form of `object` from activityLog API (p
     - `ext-popup.js` - It runs in the popup.
     - `ext-activitylog.js` - It runs in the Activity Log page.
     - `save-load.js` - It contains the functionalities of saving and loading log file.
+  - [_`lib/web-component`_](#https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) - It contains all the web components being used in the project.
 - [_`tests`_](https://github.com/atiqueahmedziad/extension-activity-monitor/tree/master/tests) - Contains all the test files.
 
 ## Pick an issue
