@@ -8,6 +8,8 @@ export class FilterOption extends HTMLElement {
     this.viewCheckboxLabels = new Set();
     // It contains the checked checkboxes
     this.activeCheckboxLabels = new Set();
+    // When any new unknown filter option is found, it is enabled by default.
+    this.isCheckboxChecked = () => true;
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -35,10 +37,20 @@ export class FilterOption extends HTMLElement {
     for (const log of logs) {
       const checkboxLabel = log[this.filterKey];
       if (!this.viewCheckboxLabels.has(checkboxLabel)) {
-        this.viewCheckboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
-        this.dispatchFilterChangeEvent({ isNewFilterAdded: true });
       }
+    }
+
+    this.dispatchFilterChangeEvent();
+
+    // When any new unknown filter option is found, it is enabled by default.
+    this.isCheckboxChecked = () => true;
+  }
+
+  setFilterFromURL(searchParamLabels) {
+    if (searchParamLabels.size > 0) {
+      this.isCheckboxChecked = (checkboxLabel) =>
+        searchParamLabels.has(checkboxLabel);
     }
   }
 
@@ -51,8 +63,15 @@ export class FilterOption extends HTMLElement {
     inputCheckbox.value = checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
     inputCheckbox.checked = true;
 
-    // adding to activeCheckboxLabels list since checkbox is checked
-    this.activeCheckboxLabels.add(checkboxLabel);
+    const checkboxChecked = this.isCheckboxChecked(checkboxLabel);
+    inputCheckbox.checked = checkboxChecked;
+
+    this.viewCheckboxLabels.add(checkboxLabel);
+
+    if (checkboxChecked) {
+      // if the checkbox is checked, adding the label to the activeCheckboxLabels list
+      this.activeCheckboxLabels.add(checkboxLabel);
+    }
 
     this.checkboxList.appendChild(newCheckbox);
   }
@@ -86,7 +105,7 @@ export class FilterOption extends HTMLElement {
         this.activeCheckboxLabels.delete(checkboxLabel);
       }
 
-      this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
+      this.dispatchFilterChangeEvent();
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
@@ -97,12 +116,11 @@ export class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  dispatchFilterChangeEvent({ isNewFilterAdded }) {
+  dispatchFilterChangeEvent() {
     const filterDetail = {
       updateFilter: {
         [this.filterKey]: new Set(this.activeCheckboxLabels),
       },
-      isNewFilterAdded,
     };
 
     this.dispatchEvent(

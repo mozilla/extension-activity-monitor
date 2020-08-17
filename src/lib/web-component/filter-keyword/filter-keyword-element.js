@@ -20,6 +20,11 @@ export class FilterKeyword extends HTMLElement {
     shadow.appendChild(filterContainer);
   }
 
+  setFilterFromURL(keyword) {
+    this.inputBox.value = keyword;
+    this.dispatchFilterChanged();
+  }
+
   dispatchFilterChanged() {
     const filterDetail = {
       updateFilter: { keyword: this.inputBox.value },

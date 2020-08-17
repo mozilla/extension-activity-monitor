@@ -5,6 +5,7 @@ import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
+import { FilterTimestamp } from '../src/lib/web-component/filter-timestamp/filter-timestamp-element';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -31,15 +32,16 @@ function observeChange(element) {
 test('show/hide logs associated with extension id that is checked/unchecked from filter option', async () => {
   expect(window.customElements.get('log-view')).toBe(LogView);
   expect(window.customElements.get('filter-option')).toBe(FilterOption);
+  expect(window.customElements.get('filter-timestamp')).toBe(FilterTimestamp);
 
   const logs = [
     {
       /* renders 1st row in table */
       id: 'id1@test',
-      viewType: 'viewType@test',
-      type: 'type@test',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -47,11 +49,12 @@ test('show/hide logs associated with extension id that is checked/unchecked from
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -60,6 +63,10 @@ test('show/hide logs associated with extension id that is checked/unchecked from
       onMessage: { addListener },
       sendMessage,
       connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -149,14 +156,16 @@ test('show/hide logs associated with extension id that is checked/unchecked from
 test("keyword search show a row when the given keyword is matched in log's data, otherwise hides the row", async () => {
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
 
+  history.replaceState(null, null, document.location.origin);
+
   const logs = [
     {
       /* renders 1st row in table */
       id: 'id1@test',
-      viewType: 'viewType@test',
-      type: 'type@test',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -164,11 +173,12 @@ test("keyword search show a row when the given keyword is matched in log's data,
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'matched@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -177,6 +187,10 @@ test("keyword search show a row when the given keyword is matched in log's data,
       onMessage: { addListener },
       sendMessage,
       connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -213,6 +227,8 @@ test("keyword search show a row when the given keyword is matched in log's data,
 });
 
 test('clearing logs from activitylog page', async () => {
+  history.replaceState(null, null, document.location.origin);
+
   const logs = [
     {
       /* renders 1st row in table */
@@ -220,7 +236,7 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -228,11 +244,12 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -241,6 +258,10 @@ test('clearing logs from activitylog page', async () => {
       onMessage: { addListener },
       sendMessage,
       connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -283,6 +304,7 @@ test('timestamp is formatted and rendered correctly', () => {
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -291,6 +313,10 @@ test('timestamp is formatted and rendered correctly', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 

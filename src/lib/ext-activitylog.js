@@ -183,6 +183,17 @@ class View {
     this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
+  setFilterOptionsFromURL(updateFilter) {
+    const { id, viewType, type, name, keyword, timeStamp } = updateFilter;
+
+    this.extFilter.setFilterFromURL(id);
+    this.viewTypeFilter.setFilterFromURL(viewType);
+    this.apiTypeFilter.setFilterFromURL(type);
+    this.apiNameFilter.setFilterFromURL(name);
+    this.keywordFilter.setFilterFromURL(keyword);
+    this.timestampFilter.setFilterFromURL(timeStamp);
+  }
+
   setError(errorMessage) {
     if (errorMessage) {
       this.notice.textContent = errorMessage;
@@ -221,12 +232,20 @@ class Controller {
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
     );
-    const fileName = searchParams.get('file');
-    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
-    if (fileName) {
+    const loadedFileName = searchParams.get('file');
+
+    const filterIds = searchParams.get('ids');
+    const filterViewTypes = searchParams.get('viewTypes');
+    const filterTypes = searchParams.get('types');
+    const filterNames = searchParams.get('names');
+    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
+    const filterKeyword = searchParams.get('keyword');
+    const filterTimestamp = searchParams.get('timestamp');
+
+    if (loadedFileName) {
       this.view.menuContainer.hidden = true;
-      document.title = `Loaded Logs - ${fileName}`;
+      document.title = `Loaded Logs - ${loadedFileName}`;
 
       const currentTab = await browser.tabs.getCurrent();
       let logs;
@@ -263,6 +282,37 @@ class Controller {
           throw new Error(`wrong request type found - ${requestType}`);
         }
       });
+
+      const ids = filterIds?.split(',');
+
+      const viewTypes = filterViewTypes?.split(',');
+      // converting empty string to undefined
+      if (viewTypes?.length) {
+        const undefinedIndex = viewTypes.indexOf('');
+        if (undefinedIndex !== -1) {
+          viewTypes[undefinedIndex] = undefined;
+        }
+      }
+
+      const types = filterTypes?.split(',');
+      const names = filterNames?.split(',');
+      const timestamps = filterTimestamp?.split(',').map((timestamp) => {
+        return isNaN(timestamp) ? null : Number(timestamp);
+      });
+
+      // when we open activitylog.html having search parameters
+      if (document.location.search) {
+        const updateFilter = {
+          id: new Set(ids),
+          viewType: new Set(viewTypes),
+          type: new Set(types),
+          name: new Set(names),
+          keyword: filterKeyword,
+          timeStamp: timestamps,
+        };
+
+        this.view.setFilterOptionsFromURL(updateFilter);
+      }
 
       const existingLogs = await this.getExistingLogs();
 
@@ -336,14 +386,32 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { updateFilter, isNewFilterAdded } = filterDetail;
+    const { updateFilter } = filterDetail;
 
     this.model.setFilter(updateFilter);
-    // When new filter checkbox is added, it is in checked condition by default
-    // No need to re-render the rows then.
-    if (!isNewFilterAdded) {
-      this.view.setLogFilter((log) => this.isFilterMatched(log));
-    }
+    this.setFilterSearchParams(this.model.filter);
+    this.view.setLogFilter((log) => this.isFilterMatched(log));
+  }
+
+  setFilterSearchParams(filterObj) {
+    const { id, viewType, type, name, tabId, keyword, timeStamp } = filterObj;
+
+    const startTime = timeStamp?.start ? timeStamp.start : null;
+    const stopTime = timeStamp?.stop ? timeStamp.stop : null;
+
+    const idsQuery = `ids=${[...id].toString()}`;
+    const viewTypesQuery = `viewTypes=${[...viewType].toString()}`;
+    const typesQuery = `types=${[...type].toString()}`;
+    const namesQuery = `names=${[...name].toString()}`;
+    const timestampsQuery = `timestamp=${startTime},${stopTime}`;
+    const keywordQuery = `keyword=${keyword}`;
+    const tabIdQuery = `filterTabId=${tabId}`;
+
+    history.replaceState(
+      null,
+      null,
+      `?${idsQuery}&${viewTypesQuery}&${typesQuery}&${namesQuery}&${keywordQuery}&${tabIdQuery}&${timestampsQuery}`
+    );
   }
 
   isFilterMatched(log) {
