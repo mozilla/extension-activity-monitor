@@ -107,6 +107,12 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   connectedCallback() {
+    // context menu doesn't work on devtool_page
+    // see: https://github.com/mozilla/extension-activity-monitor/issues/43
+    if (!browser.menus?.onClicked || !browser.menus?.onHidden) {
+      return;
+    }
+
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterContainer.addEventListener('click', this);

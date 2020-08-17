@@ -8,6 +8,7 @@ class Model {
       viewType: new Set(),
       type: new Set(),
       name: new Set(),
+      tabId: null,
       keyword: '',
       timeStamp: null,
     };
@@ -32,6 +33,8 @@ class Model {
    * filter is not applied.
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
+   * @param {null|number} [updateFilter.tabId] - It's null when search paramter
+   * `filterTabId` is not used.
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -44,7 +47,8 @@ class Model {
       this.matchFilterType(log.type) &&
       this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data) &&
-      this.matchFilterTimestamp(log.timeStamp)
+      this.matchFilterTimestamp(log.timeStamp) &&
+      this.matchFilterTabId(log.data)
     );
   }
 
@@ -95,6 +99,14 @@ class Model {
     return true;
   }
 
+  matchFilterTabId({ tabId }) {
+    if (this.filter.tabId == null) {
+      return true;
+    }
+
+    return this.filter.tabId === tabId;
+  }
+
   clearLogs() {
     this.logs = [];
   }
@@ -108,6 +120,7 @@ class View {
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
+    this.logHeading = document.querySelector('.log-heading');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -184,6 +197,10 @@ class View {
   clearTable() {
     this.logView.clearTable();
   }
+
+  renderHeading({ filterTabId }) {
+    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filterTabId}`;
+  }
 }
 
 class Controller {
@@ -206,6 +223,7 @@ class Controller {
       document.location.search.substring(1)
     );
     const fileName = searchParams.get('file');
+    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
     if (fileName) {
       this.view.menuContainer.hidden = true;
@@ -232,6 +250,7 @@ class Controller {
       this.view.clearLogBtn.addEventListener('clearlog', this);
       this.view.saveLogBtn.addEventListener('savelog', this);
 
+      browser.runtime.connect({ name: 'monitor-realtime-logs' });
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
 
@@ -250,6 +269,16 @@ class Controller {
 
       if (existingLogs.length) {
         this.handleNewLogs(existingLogs);
+      }
+
+      if (filterTabId) {
+        this.view.renderHeading({ filterTabId });
+
+        const filterDetail = {
+          updateFilter: { tabId: filterTabId },
+        };
+
+        this.onFilterChange(filterDetail);
       }
     }
   }
@@ -300,7 +329,7 @@ class Controller {
 
   async saveLogs() {
     try {
-      await save.saveAsJSON(this.model.logs);
+      await save.saveAsJSON();
       this.view.setError(null);
     } catch (error) {
       this.view.setError(error.message);

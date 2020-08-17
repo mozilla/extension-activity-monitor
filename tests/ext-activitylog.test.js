@@ -53,11 +53,13 @@ test('show/hide logs associated with extension id that is checked/unchecked from
 
   const addListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
     },
   };
 
@@ -168,11 +170,13 @@ test("keyword search show a row when the given keyword is matched in log's data,
 
   const addListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
     },
   };
 
@@ -230,11 +234,13 @@ test('clearing logs from activitylog page', async () => {
 
   const addListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
     },
   };
 

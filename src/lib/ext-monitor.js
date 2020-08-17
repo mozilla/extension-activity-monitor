@@ -8,6 +8,9 @@ export default class ExtensionMonitor {
   // Map<string, Function>
   extensionMapList = new Map([]);
 
+  // Set<Port: Object>
+  activityLogPorts = new Set();
+
   async getAllExtensions() {
     const extensions = await browser.management.getAll();
     return extensions.filter((extension) => {
@@ -17,18 +20,10 @@ export default class ExtensionMonitor {
     });
   }
 
-  async isActivityLogPageOpen() {
-    const tab = await browser.tabs.query({
-      url: getActivityLogPageURL(),
-    });
-    return tab.length > 0;
-  }
-
   // If the Activity Log page is open, each logs will be send to
   // Activity Log page (as soon as it is encountered).
   async sendLogs(details) {
-    const isExtPageOpen = await this.isActivityLogPageOpen();
-    if (isExtPageOpen) {
+    if (this.activityLogPorts.size) {
       await browser.runtime.sendMessage({
         requestType: 'appendLogs',
         requestTo: 'activity-log',
@@ -110,6 +105,7 @@ export default class ExtensionMonitor {
     sendAllLogs: () => ({ existingLogs: this.logs }),
     loadLogs: (requestParams) => this.loadLogs(requestParams),
     getLoadedLogs: (requestParams) => this.getLoadedLogs(requestParams),
+    saveLogs: () => this.saveLogs(),
   };
 
   async loadLogs({ file }) {
@@ -130,6 +126,51 @@ export default class ExtensionMonitor {
     }
     return logs;
   }
+
+  async saveLogs() {
+    const blob = new Blob([JSON.stringify(this.logs)], {
+      type: 'application/json',
+    });
+
+    const url = URL.createObjectURL(blob);
+    let downloadId = null;
+    let listener;
+
+    const downloadDonePromise = new Promise((resolve, reject) => {
+      listener = (result) => {
+        if (result.state.current === 'complete' && result.id === downloadId) {
+          resolve();
+        }
+        if (result.error) {
+          reject(new Error(result.error));
+        }
+      };
+
+      browser.downloads.onChanged.addListener(listener);
+    });
+
+    try {
+      downloadId = await browser.downloads.download({
+        url,
+        filename: 'activitylogs.json',
+      });
+      return await downloadDonePromise;
+    } finally {
+      URL.revokeObjectURL(url);
+      browser.downloads.onChanged.removeListener(listener);
+    }
+  }
+
+  onConnectListener = (port) => {
+    if (port.name !== 'monitor-realtime-logs') {
+      return;
+    }
+
+    this.activityLogPorts.add(port);
+    port.onDisconnect.addListener((port) => {
+      this.activityLogPorts.delete(port);
+    });
+  };
 
   messageListener = (message) => {
     const { requestType, requestTo, requestParams } = message;
@@ -160,6 +201,7 @@ export default class ExtensionMonitor {
   };
 
   init() {
+    browser.runtime.onConnect.addListener(this.onConnectListener);
     browser.runtime.onMessage.addListener(this.messageListener);
     browser.tabs.onRemoved.addListener(this.onRemovedListener);
   }

@@ -15,7 +15,11 @@ test('getAllExtensions should return all extensions but themes and self', async 
 
   window.browser = {
     management: { getAll },
-    runtime: { onMessage: { addListener }, id: selfExt.id },
+    runtime: {
+      onMessage: { addListener },
+      id: selfExt.id,
+      onConnect: { addListener },
+    },
     tabs: { onRemoved: { addListener } },
   };
 
@@ -251,7 +255,6 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
 
   window.browser = {
     runtime: { getURL, sendMessage },
-    tabs: { query },
   };
 
   const extMonitor = new ExtensionMonitor();
@@ -266,7 +269,11 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
   expect(extMonitor.logs).toMatchObject([log1]);
   expect(sendMessage).not.toHaveBeenCalled();
 
-  // extension page is open
+  // extension page exist when activityLogPorts is not empty
+  // activityLogPorts contains port objects from runtime.onConnect
+  const port = { port: 'extension-page-open' };
+  extMonitor.activityLogPorts.add(port);
+
   listener = extMonitor.createLogListener();
   await listener(log2);
 
@@ -359,18 +366,23 @@ describe('messageListeners functionalities test', () => {
 test('listeners are registered at initialization', () => {
   const runtimeMessageAddListener = jest.fn();
   const tabsRemovedAddListener = jest.fn();
+  const onConnectAddListener = jest.fn();
 
   window.browser = {
-    runtime: { onMessage: { addListener: runtimeMessageAddListener } },
+    runtime: {
+      onMessage: { addListener: runtimeMessageAddListener },
+      onConnect: { addListener: onConnectAddListener },
+    },
     tabs: { onRemoved: { addListener: tabsRemovedAddListener } },
   };
 
   const extMonitor = new ExtensionMonitor();
+  const onConnectListenerFn = jest.spyOn(extMonitor, 'onConnectListener');
   const messageListenerFn = jest.spyOn(extMonitor, 'messageListener');
   const onRemovedListenerFn = jest.spyOn(extMonitor, 'onRemovedListener');
 
   extMonitor.init();
-
+  expect(onConnectAddListener).toHaveBeenCalledWith(onConnectListenerFn);
   expect(runtimeMessageAddListener).toHaveBeenCalledWith(messageListenerFn);
   expect(tabsRemovedAddListener).toHaveBeenCalledWith(onRemovedListenerFn);
 });
@@ -387,4 +399,132 @@ test('empty log array is found after clearing logs', async () => {
   });
 
   expect(extMonitor.logs).toEqual([]);
+});
+
+test('saveLogs function should call download API to save logs', async () => {
+  const createObjectURL = jest.fn();
+  const revokeObjectURL = jest.fn();
+  window.URL = { createObjectURL, revokeObjectURL };
+
+  const download = jest.fn();
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+
+  window.browser = {
+    downloads: {
+      download,
+      onChanged: { addListener, removeListener },
+    },
+  };
+
+  createObjectURL.mockReturnValue('fake-blob-url');
+
+  let listener;
+  addListener.mockImplementation((callback) => {
+    listener = callback;
+  });
+
+  download.mockImplementation(() => {
+    const id = 123;
+    setTimeout(() => {
+      listener({
+        state: { current: 'in_progress' },
+        id,
+      });
+      listener({
+        state: { current: 'complete' },
+        id,
+      });
+    }, 0);
+    return Promise.resolve(id);
+  });
+
+  const extMonitor = new ExtensionMonitor();
+  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
+
+  const saveLogPromise = extMonitor.messageListener({
+    requestTo: 'ext-monitor',
+    requestType: 'saveLogs',
+  });
+
+  await expect(saveLogPromise).resolves.toBeUndefined();
+
+  expect(saveLogsFn).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledWith({
+    url: 'fake-blob-url',
+    filename: 'activitylogs.json',
+  });
+
+  expect(addListener).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalledWith(listener);
+
+  expect(removeListener).toHaveBeenCalledTimes(1);
+  expect(removeListener).toHaveBeenCalledWith(listener);
+
+  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
+
+  saveLogsFn.mockRestore();
+});
+
+test('saveLogs function should return error message if error is encountered', async () => {
+  const extMonitor = new ExtensionMonitor();
+  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
+
+  const createObjectURL = jest.fn();
+  const revokeObjectURL = jest.fn();
+  window.URL = { createObjectURL, revokeObjectURL };
+
+  const download = jest.fn();
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  window.browser = {
+    downloads: {
+      download,
+      onChanged: { addListener, removeListener },
+    },
+  };
+
+  createObjectURL.mockReturnValue('fake-blob-url');
+
+  let listener;
+  addListener.mockImplementation((callback) => {
+    listener = callback;
+  });
+
+  download.mockImplementation(() => {
+    setTimeout(() => {
+      listener({
+        state: { current: 'interrupted' },
+        error: 'save-error',
+      });
+    }, 0);
+    return Promise.resolve(1);
+  });
+
+  const saveLogPromise = extMonitor.messageListener({
+    requestTo: 'ext-monitor',
+    requestType: 'saveLogs',
+  });
+
+  await expect(saveLogPromise).rejects.toThrowError('save-error');
+
+  expect(saveLogsFn).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledTimes(1);
+  expect(download).toHaveBeenCalledWith({
+    url: 'fake-blob-url',
+    filename: 'activitylogs.json',
+  });
+
+  expect(addListener).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalledWith(listener);
+
+  expect(removeListener).toHaveBeenCalledTimes(1);
+  expect(removeListener).toHaveBeenCalledWith(listener);
+
+  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
+
+  saveLogsFn.mockRestore();
 });
