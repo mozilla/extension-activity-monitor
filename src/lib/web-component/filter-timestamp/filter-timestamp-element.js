@@ -35,7 +35,7 @@ export class FilterTimestamp extends HTMLElement {
 
     const timeStamp = this.timeStamp || {};
 
-    const chosenTimestamp = selectedRow.querySelector('.timestamp')?._timestamp;
+    const chosenTimestamp = selectedRow._log.timeStamp;
 
     if (info.menuItemId === 'startTime') {
       timeStamp.start = chosenTimestamp;

@@ -33,12 +33,16 @@ export function openActivityLogPage() {
 }
 
 export function timeFormat(timestamp) {
-  const date = new Date(timestamp);
-  return `${date.toLocaleTimeString()}`;
+  const dateTime = new Date(timestamp);
+  return `${dateTime.toLocaleTimeString()}`;
 }
 
 export function dateTimeFormat(timestamp) {
-  const date = new Date(timestamp);
-  const month = date.getMonth() + 1;
-  return `${date.getDate()}-${month}-${date.getFullYear()} ${date.toLocaleTimeString()}`;
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  const dateTime = new Date(timestamp);
+  const formattedDate = new Intl.DateTimeFormat(undefined, options).format(
+    dateTime
+  );
+
+  return `${formattedDate} ${dateTime.toLocaleTimeString()}`;
 }

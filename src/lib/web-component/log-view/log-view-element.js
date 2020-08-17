@@ -45,7 +45,6 @@ export class LogView extends HTMLElement {
       const timestamp = logTableRowInstance.querySelector('.timestamp');
       timestamp.textContent = timeFormat(log.timeStamp);
       timestamp.title = dateTimeFormat(log.timeStamp);
-      timestamp._timestamp = log.timeStamp;
 
       logTableRowInstance.querySelector('.api-type').textContent = log.type;
 
