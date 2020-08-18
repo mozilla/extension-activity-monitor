@@ -5,6 +5,7 @@ import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
+import * as ExtListen from '../src/lib/ext-listen';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -301,24 +302,42 @@ test('timestamp is formatted and rendered correctly', () => {
   });
 
   document.body.innerHTML = activityLogBody;
+  const dateTimeFormatFn = jest.spyOn(ExtListen, 'dateTimeFormat');
 
   const { activityLog } = new ActivityLog();
 
+  // To have consistant date format, we choose "en-US" formatting
+  let expectedDate;
+  dateTimeFormatFn.mockImplementation((timestamp, options) => {
+    const dateTime = new Date(timestamp);
+    const time = dateTime.toLocaleTimeString();
+
+    if (options?.timeOnly) {
+      return time;
+    }
+
+    const dateFormatOptions = {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    };
+    expectedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(
+      dateTime
+    );
+
+    return `${expectedDate} ${time}`;
+  });
+
   activityLog.handleNewLogs(logs);
 
+  expect(dateTimeFormatFn).toHaveBeenCalled();
+
   const dateTime = new Date(logTimestamp);
-
-  const options = { month: 'short', day: 'numeric', year: 'numeric' };
-  const expectedDate = new Intl.DateTimeFormat(undefined, options).format(
-    dateTime
-  );
-
   const expectedTime = dateTime.toLocaleTimeString();
   const expectedDateTime = `${expectedDate} ${expectedTime}`;
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');
-
   const firstRowTimestamp = tableRows[0].querySelector('.timestamp');
 
   // For log timestamp: 1597686226302

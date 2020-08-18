@@ -32,17 +32,18 @@ export function openActivityLogPage() {
   });
 }
 
-export function timeFormat(timestamp) {
+export function dateTimeFormat(timestamp, options) {
   const dateTime = new Date(timestamp);
-  return `${dateTime.toLocaleTimeString()}`;
-}
+  const time = dateTime.toLocaleTimeString();
 
-export function dateTimeFormat(timestamp) {
-  const options = { month: 'short', day: 'numeric', year: 'numeric' };
-  const dateTime = new Date(timestamp);
-  const formattedDate = new Intl.DateTimeFormat(undefined, options).format(
+  if (options?.timeOnly) {
+    return time;
+  }
+
+  const dateFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+  const date = new Intl.DateTimeFormat(undefined, dateFormatOptions).format(
     dateTime
   );
 
-  return `${formattedDate} ${dateTime.toLocaleTimeString()}`;
+  return `${date} ${time}`;
 }

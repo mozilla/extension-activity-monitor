@@ -1,4 +1,4 @@
-import { timeFormat, dateTimeFormat } from '../../ext-listen.js';
+import { dateTimeFormat } from '../../ext-listen.js';
 
 export class LogView extends HTMLElement {
   constructor() {
@@ -43,7 +43,8 @@ export class LogView extends HTMLElement {
       logTableRowInstance.querySelector('.id').textContent = log.id;
 
       const timestamp = logTableRowInstance.querySelector('.timestamp');
-      timestamp.textContent = timeFormat(log.timeStamp);
+
+      timestamp.textContent = dateTimeFormat(log.timeStamp, { timeOnly: true });
       timestamp.title = dateTimeFormat(log.timeStamp);
 
       logTableRowInstance.querySelector('.api-type').textContent = log.type;
