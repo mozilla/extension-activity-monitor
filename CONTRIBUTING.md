@@ -30,7 +30,7 @@ The extension recevies logs in the form of `object` from activityLog API. The ac
 
 - [_`src`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src) - Inside _src_ the extension's code can be found (manifest.json, background.js etc.)
   - [_`activitylog`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/activitylog) - Contains activity log page (extension page).
-  - [_`devtools`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/devtools) - Contains devtools panel.
+  - [_`devtools`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/devtools) - Contains the invisible devtools page that creates a devtools panel which loads the activitylog.html page and filters logs with the current tab id.
   - [_`popup`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/popup) - Contains popup (browserAction popup).
   - [_`icons`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/icons) - Contains icons used in the extension.
   - [_`lib`_](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib) - Contains most of the project's code. Here is a brief description of each of the files:
