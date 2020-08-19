@@ -5,6 +5,8 @@ export class FilterOption extends HTMLElement {
     this.viewCheckboxLabels = new Set();
     // It contains the checked checkboxes
     this.activeCheckboxLabels = new Set();
+    // When viewtype is undefined for API calls
+    this.FILTER_OPTION_UNDEFINED_LABEL = 'other';
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -42,10 +44,10 @@ export class FilterOption extends HTMLElement {
   addNewCheckbox(checkboxLabel) {
     const newCheckbox = this.checkboxTemplate.cloneNode(true);
     newCheckbox.querySelector('label span').textContent =
-      checkboxLabel || 'other';
+      checkboxLabel || this.FILTER_OPTION_UNDEFINED_LABEL;
 
     const inputCheckbox = newCheckbox.querySelector('input');
-    inputCheckbox.value = checkboxLabel || 'other';
+    inputCheckbox.value = checkboxLabel || this.FILTER_OPTION_UNDEFINED_LABEL;
     inputCheckbox.checked = true;
 
     // adding to activeCheckboxLabels list since checkbox is checked
@@ -72,7 +74,9 @@ export class FilterOption extends HTMLElement {
     ) {
       // when viewType is undefined, we display it as "other" in filter checkbox.
       const checkboxLabel =
-        event.target.value === 'other' ? undefined : event.target.value;
+        event.target.value === this.FILTER_OPTION_UNDEFINED_LABEL
+          ? undefined
+          : event.target.value;
       const isChecked = event.target.checked;
 
       if (isChecked) {
