@@ -72,7 +72,7 @@ export class FilterOption extends HTMLElement {
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
     ) {
-      // when viewType is undefined, we display it as "other" in filter checkbox.
+      // when viewType is undefined, we display it as "other" in filter option.
       const checkboxLabel =
         event.target.value === this.FILTER_OPTION_UNDEFINED_LABEL
           ? undefined
