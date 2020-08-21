@@ -33,15 +33,27 @@ Extension Activity Monitor is composed by a backend part (running in the backgro
 
 #### Background Page
 
-The background page is responsible for monitoring extensions, storing activity logs, saving logs to a JSON file and loading logs from JSON file. The logs remain alive in the background unless it is being cleared. It also sends the real-time logs to Activity Log page. It acts as the backend of the extension, which more often communicates with popup and activity log page to make sure monitoring is running smoothly.
+The background page acts as the backend of the extension. The core part of the background page is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). It is responsible for monitoring extensions, storing activity logs, saving logs to a JSON file and loading logs from JSON file. The logs remain alive in the background unless it receives the [`clearlogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L106) instruction from Activity Log page(frontend part). The background page also sends the real-time logs to Activity Log page. The background page communicates with popup and activity log page (which are part of frontend) more often to make sure monitoring is running smoothly.
 
 #### Popup Page
 
-The popup page is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page. The popup page communicates with the background to run most of its functionality.
+The popup page is one part of the frontend that communicates with the background page (backend part) to run most of its functionality. It is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page.
 
 #### Activity Log Page - Tab (Extension Page)
 
-The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is opened from the popup, it fetches the existing logs (if logs were collected before) from background, save the [logs in the Model](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L5), then View renders the logs with the help of [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. The Activity Log page receives and renders logs in real-time from background while it is opened. It communicates with the background to save logs to a JSON file, load logs from JSON file and clear logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+The Activity Log page is another part of the frontend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options.
+
+The **role of Model** is to store the activity logs from the the background and store the filters. It also contains the funcationalities to match a log with current filters applied.
+
+The **role of View** is to deal with DOM. It interacts with DOM to make required visual changes. The `View` also deals with the `log-view` web component in order to render the logs.
+
+The **role of Controller** is to make sure that both Model and View are synchronized. When any changes are made in the Model, the Controller make sure that the View is also affected by it. For example, when a new log is found and background page passes the log, it is actually saved in Model and then the View is updated with rendering the new log.
+
+When the Activity Log page is opened from the popup, it fetches the existing logs (if logs were collected before) from the background (backend part). The fetched logs are saved in the [**Model**](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L5), then **View** renders the logs with the help of [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component.
+
+The Activity Log page receives and renders logs in real-time from background while it is opened. It can send instructions in the background to save logs to a JSON file, load logs from JSON file and clear logs.
+
+It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component). The filters are stored in the [Model](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L6-L14) and View updates the `log-view` everytime the filters are updated.
 
 #### Activity Log Page - Devtools (Extension Page)
 
@@ -51,7 +63,7 @@ This page can be accessed via "Extension Activity" panel in devtools. The "Exten
 
 #### Collecting Logs
 
-The extension receives activity logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). It has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20), which gets triggered everytime an activity is found from any monitored extension and returns a [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76).
+The extension receives activity logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). The background page (backend part) subscribes the `browser.activityLog.onExtensionActivity` API event listeners, which gets triggered everytime an activity is found from any monitored extension and returns a log object. While monitoring other extensions, any newly installed extension also gets monitored automatically.
 
 - ##### Live Logging
 
