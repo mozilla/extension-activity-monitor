@@ -27,7 +27,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 
 ## Project Architecture
 
-This extension is primarily consist of a Popup (browserAction Popup) and Activity Log page (Extension page). The popup helps to "start monitor" or "stop monitor" all extensions and access the Activity Log page. On the other hand, the Activity Log page helps to view the logs, filter logs, save and load logs from a file.
+Extension Activity Monitor is primarily consist of a Popup (browserAction Popup) and Activity Log page (Extension page). The popup helps to "start monitor" or "stop monitor" all extensions and access the Activity Log page. On the other hand, the Activity Log page helps to view the logs, filter logs, save and load logs from a file.
 
 ### Some Important Components
 
@@ -41,7 +41,7 @@ The popup page is responsible for "start monitoring" and "stop monitoring" other
 
 #### Activity Log Page - Tab (Extension Page)
 
-The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is opened from the popup, it renders the existing logs (if logs were collected in background before) and receives future logs real-time from background while it is opened. Activity Log page communicates with the background to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is opened from the popup, it fetches the existing logs (if logs were collected before) from background, save the [logs in the Model](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L5), then the logs render in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. The Activity Log page receives and renders logs in real-time from background while it is opened. Activity Log page communicates with the background to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
 
 #### Activity Log Page - Devtools (Extension Page)
 
@@ -60,7 +60,6 @@ The extension recevies activity logs in the form of `object` from activityLog AP
 - ##### Loading / saving logs
 
   It can save all the collected logs that are available in background in a JSON file. To save logs an instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) is sent to the background where the save operation occurs. The `downloads` API is being used to save logs.
-
   We can also load logs by loading a JSON file. It will read the logs and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) opening a new tab. Both the save logs and load logs functionality can be found in [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/save-load.js).
 
 #### Rendering Logs
