@@ -27,7 +27,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 
 ## Project Architecture
 
-This extension is primarily consist of a Popup (browserAction Popup) and Activity Log page (Extension page). The popup helps to "start monitor" or "stop monitor" all extensions and access the activity log page. On the other hand, the Activity Log page helps to view the logs, filter logs, save and load logs from a file.
+This extension is primarily consist of a Popup (browserAction Popup) and Activity Log page (Extension page). The popup helps to "start monitor" or "stop monitor" all extensions and access the Activity Log page. On the other hand, the Activity Log page helps to view the logs, filter logs, save and load logs from a file.
 
 ### Some Important Components
 
@@ -65,7 +65,7 @@ The extension recevies activity logs in the form of `object` from activityLog AP
 
 #### Rendering Logs
 
-The logs are being rendered using [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. Along rendering the new logs the filter options also get updated. While filters are being applied, any new log that doesn't match the filters will be rendered as hidden in `log-view`.
+The logs are being rendered using [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. Along rendering the new logs the filter options also get updated. While filters are being applied, any new log that doesn't match the filters will be rendered as hidden in [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
 #### Filtering Log Entries
 
