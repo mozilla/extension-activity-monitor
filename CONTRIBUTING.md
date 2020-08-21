@@ -95,7 +95,7 @@ Unit test is done with [JEST Framework](https://jestjs.io/) in this project.
 
 ### Writing a test
 
-To write a test, go to [tests](https://github.com/mozilla/extension-activity-monitor/tree/master/tests) folder and search for a relevent test file to write test. If you don't find any relevent test file, you can make one using this naming convention: `test-file-name.tests.js`. Use a suitable name in `test-file-name` placeholder.
+To write a test, go to [tests](https://github.com/mozilla/extension-activity-monitor/tree/master/tests) folder and search for a relevent test file to write tests. If you don't find any relevent test file, you can make one using this naming convention: `test-file-name.tests.js`. Use a suitable name in `test-file-name` placeholder.
 
 To run all the tests once, run the following command:
 
