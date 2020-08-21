@@ -35,6 +35,8 @@ export default class ExtensionMonitor {
   createLogListener() {
     return async (details) => {
       // set a timestamp(number) as the value of timeStamp property
+      // TODO: Stop using `Date.parse` when `details.timeStamp` is a numeric timestamp.
+      // See https://bugzilla.mozilla.org/show_bug.cgi?id=1660460
       details.timeStamp = Date.parse(details.timeStamp);
 
       this.logs.push(details);

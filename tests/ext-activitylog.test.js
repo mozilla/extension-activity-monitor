@@ -303,7 +303,6 @@ test('timestamp is formatted and rendered correctly', () => {
   const originalIntlDateTimeFormat = Intl.DateTimeFormat;
   const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
 
-  const timeZone = { timeZone: 'UTC' };
   // For log timestamp: 1597686226302
   const expectedTime = '5:43:46 PM';
   const expectedDateTime = `Aug 17, 2020, 5:43:46 PM`;
@@ -311,7 +310,7 @@ test('timestamp is formatted and rendered correctly', () => {
   const { activityLog } = new ActivityLog();
   // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
   IntlDateTimeFormatFn.mockImplementation((zone, options) => {
-    Object.assign(options, timeZone);
+    options = { ...options, timeZone: 'UTC' };
     return new originalIntlDateTimeFormat('en-US', options);
   });
 
