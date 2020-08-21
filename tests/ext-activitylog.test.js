@@ -310,7 +310,7 @@ test('timestamp is formatted and rendered correctly', () => {
 
   const { activityLog } = new ActivityLog();
   // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
-  IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
+  IntlDateTimeFormatFn.mockImplementation((zone, options) => {
     Object.assign(options, timeZone);
     return new originalIntlDateTimeFormat('en-US', options);
   });
