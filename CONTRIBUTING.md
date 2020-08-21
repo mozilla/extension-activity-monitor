@@ -97,13 +97,13 @@ Unit test is done with [JEST Framework](https://jestjs.io/) in this project.
 
 To write a test, go to [tests](https://github.com/mozilla/extension-activity-monitor/tree/master/tests) folder and search for a relevent test file to write test. If you don't find any relevent test file, you can make one using this naming convention: `test-file-name.tests.js`. Use a suitable name in `test-file-name` placeholder.
 
-To run all the test suit once, run the following command:
+To run all the tests once, run the following command:
 
 ```
 $ npm test
 ```
 
-To run a single test suit once, run the following command:
+To run a single test once, run the following command:
 
 ```
 $ npm test ext-monitor.test.js
@@ -111,13 +111,13 @@ $ npm test ext-monitor.test.js
 
 Here, `ext-monitor.test.js` is the name of the test suit.
 
-To run all the test suits continously, run the following command:
+To run all the tests continously, run the following command:
 
 ```
 $ npm test:watch
 ```
 
-To get the coverage report of all the test suits, run the following command:
+To get the coverage report of all the tests, run the following command:
 
 ```
 $ npm test:coverage
