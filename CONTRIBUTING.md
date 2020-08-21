@@ -27,7 +27,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 
 ## Project Architecture
 
-Extension Activity Monitor primarily consist of a Popup (browserAction Popup) and Activity Log page (Extension page). The popup helps to "start monitor" or "stop monitor" all extensions and access the Activity Log page. On the other hand, the Activity Log page helps to view the logs, filter logs, save and load logs from a file.
+Extension Activity Monitor is composed by a backend part (running in the background page) and a frontend part (composed by a browserAction popup and an activitylog extension page opened which is loaded as a tab or as a devtools panel).
 
 ### Some Important Components
 
