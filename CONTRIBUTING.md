@@ -13,6 +13,9 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
   - [Some Core Features](#important-components)
     - [Collecting Logs](#collecting-logs)
       - [Live Logging](#live-logging)
+      - [Loading / saving logs](#loading--saving-logs)
+    - [Rendering Logs](#rendering-logs)
+    - [Filtering Log Entries](filtering-log-entries)
 - [Pick an issue](#pick-an-issue)
 - [Installation](#installation)
 - [Run Test](#run-test)
@@ -38,7 +41,7 @@ The popup page is responsible for "start monitoring" and "stop monitoring" other
 
 #### Activity Log Page - Tab (Extension Page)
 
-The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be called as the front-end part of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be called as the front-end part of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
 
 #### Activity Log Page - Devtools (Extension Page)
 
