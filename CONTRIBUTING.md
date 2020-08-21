@@ -75,7 +75,7 @@ Extension Activity Monitor offers the following filtering options-
   - These filtering options use the [`filter-option`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-option) web component.
 - Filter logs with substring.
   - It uses the [`filter-keyword`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-keyword) web component.
-- Filter logs with range of timestamp.
+- Filter logs with range of timestamp. It is implemented with the help of "context menu" in `log-view`.
   - It uses the [`filter-timestamp`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-timestamp) web component.
 - Filter logs with tab id.
   - It uses the URL search parameter `filterTabId=tabid` to set the tab id filter. Here, `tabid` should be a number.
