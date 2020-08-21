@@ -27,7 +27,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 
 ## Project Architecture
 
-Extension Activity Monitor is composed by a backend part (running in the background page) and a frontend part (composed by a browserAction popup and an activitylog extension page opened which is loaded as a tab or as a devtools panel).
+Extension Activity Monitor is composed by a backend part (running in the background page) and a frontend part (composed by a browserAction Popup and an Activity Log extension page which is loaded as a tab or as a devtools panel).
 
 ### Some Important Components
 
