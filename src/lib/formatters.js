@@ -3,9 +3,9 @@ export function dateTimeFormat(timestamp, options) {
   const timeFormatOptions = { timeStyle: 'medium' };
   const dateFormatOptions = { dateStyle: 'medium' };
 
-  const chosenOption = options?.timeOnly
+  const chosenOptions = options?.timeOnly
     ? timeFormatOptions
     : { ...timeFormatOptions, ...dateFormatOptions };
 
-  return new Intl.DateTimeFormat(undefined, chosenOption).format(dateTime);
+  return new Intl.DateTimeFormat(undefined, chosenOptions).format(dateTime);
 }
