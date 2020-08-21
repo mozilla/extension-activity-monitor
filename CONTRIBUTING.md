@@ -8,10 +8,11 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
   - [Some Important Components](#important-components)
     - [Background Page](#background-page)
     - [Popup Page](popup-page)
-    - [Activity Log Page - Tab](#activity-log-page-Tab-extension-page)
+    - [Activity Log Page - Tab](#activity-log-page---tab-extension-page)
+    - [Activity Log Page - Devtools](#activity-log-page---devtools-extension-page)
   - [Some Core Features](#important-components)
     - [Collecting Logs](#collecting-logs)
-    - [Live Logging](#live-logging)
+      - [Live Logging](#live-logging)
 - [Pick an issue](#pick-an-issue)
 - [Installation](#installation)
 - [Run Test](#run-test)
@@ -49,15 +50,15 @@ The page can be accessed via "Extension Activity" panel in devtools. Inside the 
 
 The extension recevies activity logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). It has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20), which gets triggered everytime an activity is found from any monitored extensions and returns a [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76).
 
-##### Live Logging
+- ##### Live Logging
 
-The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs(details)`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs(details)`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
-##### Loading / saving logs
+- ##### Loading / saving logs
 
-It can save all the collected logs that are available in background in a JSON file. To save logs an instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) is sent to the background where the save operation occurs. The `downloads` API is being used to save logs.
+  It can save all the collected logs that are available in background in a JSON file. To save logs an instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) is sent to the background where the save operation occurs. The `downloads` API is being used to save logs.
 
-We can also load logs by loading a JSON file. It will read the logs and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) opening a new tab. Both the save logs and load logs functionality can be found in [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/save-load.js).
+  We can also load logs by loading a JSON file. It will read the logs and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) opening a new tab. Both the save logs and load logs functionality can be found in [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/save-load.js).
 
 #### Rendering Logs
 
