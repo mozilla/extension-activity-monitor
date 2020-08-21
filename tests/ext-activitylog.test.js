@@ -5,7 +5,6 @@ import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
-import * as Formatters from '../src/lib/formatters';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -272,8 +271,6 @@ test('clearing logs from activitylog page', async () => {
 });
 
 test('timestamp is formatted and rendered correctly', () => {
-  const logTimestamp = 1597686226302;
-
   const logs = [
     {
       /* renders 1st row in table */
@@ -281,7 +278,7 @@ test('timestamp is formatted and rendered correctly', () => {
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: logTimestamp,
+      timeStamp: 1597686226302,
     },
   ];
 
@@ -303,36 +300,28 @@ test('timestamp is formatted and rendered correctly', () => {
 
   document.body.innerHTML = activityLogBody;
 
-  // const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
-  // IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
-  //   this.format = (date) =>
-  //     new Intl.DateTimeFormat('en-US', options).format(date);
-  // });
+  const originalIntlDateTimeFormat = Intl.DateTimeFormat;
+  const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
 
   const timeZone = { timeZone: 'UTC' };
+  // For log timestamp: 1597686226302
   const expectedTime = '5:43:46 PM';
-  const expectedDateTime = '17 Aug, 2020';
+  const expectedDateTime = `Aug 17, 2020 5:43:46 PM`;
 
   const { activityLog } = new ActivityLog();
-  // To have consistant date format, we choose "en-US" formatting
+  // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
   IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
-    // const newOptions = Object.assign(options, timeZone);
+    Object.assign(options, timeZone);
     this.format = (date) =>
-      new Intl.DateTimeFormat('en-US', options).format(date);
+      new originalIntlDateTimeFormat('en-US', options).format(date);
   });
 
   activityLog.handleNewLogs(logs);
-
-  //expect(dateTimeFormatFn).toHaveBeenCalled();
-
-  // const expectedTime = dateTime.toLocaleTimeString();
-  // const expectedDateTime = `${expectedDate} ${expectedTime}`;
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');
   const firstRowTimestamp = tableRows[0].querySelector('.timestamp');
 
-  // For log timestamp: 1597686226302
   expect(firstRowTimestamp.textContent).toEqual(expectedTime);
   expect(firstRowTimestamp.title).toEqual(expectedDateTime);
 });
