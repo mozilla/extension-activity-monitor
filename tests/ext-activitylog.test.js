@@ -5,7 +5,7 @@ import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
-import * as ExtListen from '../src/lib/ext-listen';
+import * as Formatters from '../src/lib/formatters';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -302,39 +302,31 @@ test('timestamp is formatted and rendered correctly', () => {
   });
 
   document.body.innerHTML = activityLogBody;
-  const dateTimeFormatFn = jest.spyOn(ExtListen, 'dateTimeFormat');
+
+  // const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
+  // IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
+  //   this.format = (date) =>
+  //     new Intl.DateTimeFormat('en-US', options).format(date);
+  // });
+
+  const timeZone = { timeZone: 'UTC' };
+  const expectedTime = '5:43:46 PM';
+  const expectedDateTime = '17 Aug, 2020';
 
   const { activityLog } = new ActivityLog();
-
   // To have consistant date format, we choose "en-US" formatting
-  let expectedDate;
-  dateTimeFormatFn.mockImplementation((timestamp, options) => {
-    const dateTime = new Date(timestamp);
-    const time = dateTime.toLocaleTimeString();
-
-    if (options?.timeOnly) {
-      return time;
-    }
-
-    const dateFormatOptions = {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    };
-    expectedDate = new Intl.DateTimeFormat('en-US', dateFormatOptions).format(
-      dateTime
-    );
-
-    return `${expectedDate} ${time}`;
+  IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
+    // const newOptions = Object.assign(options, timeZone);
+    this.format = (date) =>
+      new Intl.DateTimeFormat('en-US', options).format(date);
   });
 
   activityLog.handleNewLogs(logs);
 
-  expect(dateTimeFormatFn).toHaveBeenCalled();
+  //expect(dateTimeFormatFn).toHaveBeenCalled();
 
-  const dateTime = new Date(logTimestamp);
-  const expectedTime = dateTime.toLocaleTimeString();
-  const expectedDateTime = `${expectedDate} ${expectedTime}`;
+  // const expectedTime = dateTime.toLocaleTimeString();
+  // const expectedDateTime = `${expectedDate} ${expectedTime}`;
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');

@@ -1,4 +1,4 @@
-import { dateTimeFormat } from '../../ext-listen.js';
+import { dateTimeFormat } from '../../formatters.js';
 
 export class FilterTimestamp extends HTMLElement {
   constructor() {

@@ -31,19 +31,3 @@ export function openActivityLogPage() {
     url: getActivityLogPageURL(),
   });
 }
-
-export function dateTimeFormat(timestamp, options) {
-  const dateTime = new Date(timestamp);
-  const time = dateTime.toLocaleTimeString();
-
-  if (options?.timeOnly) {
-    return time;
-  }
-
-  const dateFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-  const date = new Intl.DateTimeFormat(undefined, dateFormatOptions).format(
-    dateTime
-  );
-
-  return `${date} ${time}`;
-}
