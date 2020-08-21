@@ -43,11 +43,11 @@ The popup page is one part of the frontend that communicates with the background
 
 The Activity Log page is another part of the frontend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options.
 
-The **role of Model** is to store the activity logs from the the background and store the filters. It also contains the funcationalities to match a log with current filters applied.
+- The **role of Model** is to store the activity logs from the the background and store the filters. It also contains the funcationalities to match a log with current filters applied.
 
-The **role of View** is to deal with DOM. It interacts with DOM to make required visual changes. The `View` also deals with the `log-view` web component in order to render the logs.
+- The **role of View** is to deal with DOM. It interacts with DOM to make required visual changes. The `View` also deals with the `log-view` web component in order to render the logs.
 
-The **role of Controller** is to make sure that both Model and View are synchronized. When any changes are made in the Model, the Controller make sure that the View is also affected by it. For example, when a new log is found and background page passes the log, it is actually saved in Model and then the View is updated with rendering the new log.
+- The **role of Controller** is to make sure that both Model and View are synchronized. When any changes are made in the Model, the Controller make sure that the View is also affected by it. For example, when a new log is found and background page passes the log, it is actually saved in Model and then the View is updated with rendering the new log.
 
 When the Activity Log page is opened from the popup, it fetches the existing logs (if logs were collected before) from the background (backend part). The fetched logs are saved in the [**Model**](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L5), then **View** renders the logs with the help of [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component.
 
