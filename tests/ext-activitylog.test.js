@@ -269,3 +269,57 @@ test('clearing logs from activitylog page', async () => {
   expect(activityLog.model.logs).toMatchObject([]);
   expect(getTableRows().length).toBe(0);
 });
+
+test('timestamp is formatted and rendered correctly', () => {
+  const logs = [
+    {
+      /* renders 1st row in table */
+      id: 'id1@test',
+      viewType: 'viewType@test',
+      type: 'type@test',
+      data: [{ test: 'test1@data' }],
+      timeStamp: 1597686226302,
+    },
+  ];
+
+  const addListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+  };
+
+  sendMessage.mockImplementation(() => {
+    return Promise.resolve({ existingLogs: [] });
+  });
+
+  document.body.innerHTML = activityLogBody;
+
+  const originalIntlDateTimeFormat = Intl.DateTimeFormat;
+  const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
+
+  // For log timestamp: 1597686226302
+  const expectedTime = '5:43:46 PM';
+  const expectedDateTime = `Aug 17, 2020, 5:43:46 PM`;
+
+  const { activityLog } = new ActivityLog();
+  // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
+  IntlDateTimeFormatFn.mockImplementation((zone, options) => {
+    options = { ...options, timeZone: 'UTC' };
+    return new originalIntlDateTimeFormat('en-US', options);
+  });
+
+  activityLog.handleNewLogs(logs);
+
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const tableRows = tableBody.querySelectorAll('tr');
+  const firstRowTimestamp = tableRows[0].querySelector('.timestamp');
+
+  expect(firstRowTimestamp.textContent).toEqual(expectedTime);
+  expect(firstRowTimestamp.title).toEqual(expectedDateTime);
+});

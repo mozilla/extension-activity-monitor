@@ -1,3 +1,5 @@
+import { dateTimeFormat } from '../../formatters.js';
+
 export class LogView extends HTMLElement {
   constructor() {
     super();
@@ -39,8 +41,12 @@ export class LogView extends HTMLElement {
       logTableRowInstance.hidden = !this.isFilterMatched(log);
 
       logTableRowInstance.querySelector('.id').textContent = log.id;
-      logTableRowInstance.querySelector('.timestamp').textContent =
-        log.timeStamp;
+
+      const timestamp = logTableRowInstance.querySelector('.timestamp');
+
+      timestamp.textContent = dateTimeFormat(log.timeStamp, { timeOnly: true });
+      timestamp.title = dateTimeFormat(log.timeStamp);
+
       logTableRowInstance.querySelector('.api-type').textContent = log.type;
 
       if (log.type === 'content_script') {

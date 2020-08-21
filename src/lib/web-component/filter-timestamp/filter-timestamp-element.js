@@ -1,3 +1,5 @@
+import { dateTimeFormat } from '../../formatters.js';
+
 export class FilterTimestamp extends HTMLElement {
   constructor() {
     super();
@@ -33,14 +35,15 @@ export class FilterTimestamp extends HTMLElement {
 
     const timeStamp = this.timeStamp || {};
 
-    const chosenTimestamp = selectedRow.querySelector('.timestamp').textContent;
+    const chosenTimestamp = selectedRow._log.timeStamp;
+
     if (info.menuItemId === 'startTime') {
-      timeStamp.start = Date.parse(chosenTimestamp);
-      this.startTimeLabel.textContent = chosenTimestamp;
+      timeStamp.start = chosenTimestamp;
+      this.startTimeLabel.textContent = dateTimeFormat(chosenTimestamp);
       this.clearStartTimeBtn.hidden = false;
     } else if (info.menuItemId === 'stopTime') {
-      timeStamp.stop = Date.parse(chosenTimestamp);
-      this.stopTimeLabel.textContent = chosenTimestamp;
+      timeStamp.stop = chosenTimestamp;
+      this.stopTimeLabel.textContent = dateTimeFormat(chosenTimestamp);
       this.clearStopTimeBtn.hidden = false;
     }
 
