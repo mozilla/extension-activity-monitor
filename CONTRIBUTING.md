@@ -5,25 +5,25 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 ## Table of Contents
 
 - [Project Architecture](#project-architecture)
-  - [Some Important Components](#important-components)
+  - [Some Important Components](#some-important-components)
     - [Background Page](#background-page)
-    - [Popup Page](popup-page)
+    - [Popup Page](#popup-page)
     - [Activity Log Page - Tab](#activity-log-page---tab-extension-page)
     - [Activity Log Page - Devtools](#activity-log-page---devtools-extension-page)
-  - [Some Core Features](#important-components)
+  - [Some Core Features](#some-core-features)
     - [Collecting Logs](#collecting-logs)
       - [Live Logging](#live-logging)
       - [Loading / saving logs](#loading--saving-logs)
     - [Rendering Logs](#rendering-logs)
-    - [Filtering Log Entries](filtering-log-entries)
-- [Pick an issue](#pick-an-issue)
+    - [Filtering Log Entries](#filtering-log-entries)
+- [Picking an issue](#picking-an-issue)
 - [Installation](#installation)
-- [Run Test](#run-test)
-- [Check for Linter](#check-for-linter)
-- [Check for Prettier](#check-for-prettier)
-- [Submit a Bug or Issue or Feature Request](#submit-a-bug-or-issue-or-feature-request)
-- [Create a Pull Request](#create-a-pull-request)
-  - [Write Commit Message](#write-commit-message)
+- [Writing and Running Tests](#writing--running-tests)
+- [Checking for Linter](#checking-for-linter)
+- [Checking for Prettier](#checking-for-prettier)
+- [Submitting a Bug or Issue or Feature Request](#submitting-a-bug-or-issue-or-feature-request)
+- [Creating a Pull Request](#creating-a-pull-request)
+  - [Writing Commit Message](#writing-commit-message)
 
 ## Project Architecture
 
@@ -55,7 +55,7 @@ The extension recevies activity logs in the form of `object` from activityLog AP
 
 - ##### Live Logging
 
-  The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs(details)`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) event and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) event and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
 - ##### Loading / saving logs
 
