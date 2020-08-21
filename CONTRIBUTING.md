@@ -24,7 +24,54 @@ The Activity Log page is using the MVC architecture and [web components](https:/
 
 ### Data Flow
 
-The extension recevies logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). It has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20), which gets triggered everytime an activity is found from any monitored extensions and return a [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76). We store these log objects inside the [`logs` array in background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L7). We also stored the monitored extension in a [`Map` in Background](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L9). When we open the Activity Log page from popup, the page is being rendered with existing logs collected in the background and receives the future logs in real-time via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L235-L247) while it is opened. In Activity Log page, the logs are being rendered in table view with the help of [`log-view` web component](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/log-view-element.js).
+The extension recevies activity logs in the form of `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). It has only one event called [`onExtensionActivity`](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#20), which gets triggered everytime an activity is found from any monitored extensions and returns a [log object](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json#24-76).
+
+### Collecting Logs
+
+#### Live Logging
+
+The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs()`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) and renders the logs in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/)
+
+#### Loading / saving logs
+
+The collected logs can be saved as JSON file. It saves all the collected logs that are available in background. The saving logs operation can be found in the background. The `downloads` API has been used to save logs.
+
+We can also load logs by loading a JSON file. It will read the logs and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). The load log functionality can be found in [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/save-load.js).
+
+### Background Page
+
+The background page is responsible for monitoring extensions, storing activity logs, saving logs to a JSON file and loading logs from JSON file. The logs remains alive in the background unless it is being cleared. It also sends the real-time logs to Activity Log page. It acts as the backend of the extension, which more often communicates with popup and activity log page to make sure extension monitoring is running smoothly.
+
+### Popup Page
+
+The popup page is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page. The popup page communicates with the background to run most of its funcationality.
+
+### Activity Log Page - Tab (Extension Page)
+
+It can be called as the front-end part of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+
+#### Rendering Logs
+
+The logs are being rendered using [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. Along rendering the new logs the filter options also get updated. While filters are being applied, any new logs that doesn't match the filters will be rendered as hidden in `log-view`.
+
+#### Filtering Log Entries
+
+Extension Activity Monitor offers the following filtering options-
+
+- Filter logs with extension id, view type, API name, API type.
+  - These filtering options uses the [`filter-option`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-option) web component.
+- Filter logs with substring.
+  - It uses the [`filter-keyword`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-keyword) web component.
+- Filter logs with range of timestamp.
+  - It uses the [`filter-timestamp`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-timestamp) web component.
+- Filter logs with tab id.
+  - It uses the URL search parameter `filterTabId=tabid` to set the tab id filter. `tabid` should be a number.
+
+The filters are stored in Model of the Activity Log page. Filters are only being changed by [`onFilterChanged` method](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) in controller. A JSDoc about the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38).
+
+### Activity Log Page - Devtools (Extension Page)
+
+The page can be accessed via "Extension Activity" panel in devtools. Inside the Activity Log page has almost all the similar characteristics as "Activity Log Page - Tab" except it filters the activity logs with the tab id where it is opened. The tab id is found with the help of devtools API i.e. `browser.devtools.inspectedWindow.tabId`.
 
 ### Project Directory Structure
 
