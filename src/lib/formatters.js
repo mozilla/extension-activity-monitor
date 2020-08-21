@@ -1,22 +1,11 @@
 export function dateTimeFormat(timestamp, options) {
   const dateTime = new Date(timestamp);
-  const timeFormatOptions = {
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  };
-  const time = new Intl.DateTimeFormat(undefined, timeFormatOptions).format(
-    dateTime
-  );
+  const timeFormatOptions = { timeStyle: 'medium' };
+  const dateFormatOptions = { dateStyle: 'medium' };
 
-  if (options?.timeOnly) {
-    return time;
-  }
+  const chosenOption = options?.timeOnly
+    ? timeFormatOptions
+    : { ...timeFormatOptions, ...dateFormatOptions };
 
-  const dateFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-  const date = new Intl.DateTimeFormat(undefined, dateFormatOptions).format(
-    dateTime
-  );
-
-  return `${date} ${time}`;
+  return new Intl.DateTimeFormat(undefined, chosenOption).format(dateTime);
 }

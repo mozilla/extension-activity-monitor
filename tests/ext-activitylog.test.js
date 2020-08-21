@@ -306,14 +306,13 @@ test('timestamp is formatted and rendered correctly', () => {
   const timeZone = { timeZone: 'UTC' };
   // For log timestamp: 1597686226302
   const expectedTime = '5:43:46 PM';
-  const expectedDateTime = `Aug 17, 2020 5:43:46 PM`;
+  const expectedDateTime = `Aug 17, 2020, 5:43:46 PM`;
 
   const { activityLog } = new ActivityLog();
   // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
   IntlDateTimeFormatFn.mockImplementation(function (zone, options) {
     Object.assign(options, timeZone);
-    this.format = (date) =>
-      new originalIntlDateTimeFormat('en-US', options).format(date);
+    return new originalIntlDateTimeFormat('en-US', options);
   });
 
   activityLog.handleNewLogs(logs);
