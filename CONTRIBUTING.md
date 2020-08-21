@@ -37,11 +37,11 @@ The background page is responsible for monitoring extensions, storing activity l
 
 #### Popup Page
 
-The popup page is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page. The popup page communicates with the background to run most of its funcationality.
+The popup page is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page. The popup page communicates with the background to run most of its functionality.
 
 #### Activity Log Page - Tab (Extension Page)
 
-The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be called as the front-end part of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
 
 #### Activity Log Page - Devtools (Extension Page)
 
@@ -55,7 +55,7 @@ The extension recevies activity logs in the form of `object` from activityLog AP
 
 - ##### Live Logging
 
-  The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs(details)`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage` event](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are being collected in the background and send to Activity Log page while it is opened. The extension used `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs(details)`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-activitylog.js#L253-L265) event and renders those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
 - ##### Loading / saving logs
 
