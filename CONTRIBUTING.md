@@ -10,7 +10,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
     - [Popup Page](#popup-page)
     - [Activity Log Page - Tab](#activity-log-page---tab-extension-page)
     - [Activity Log Page - Devtools](#activity-log-page---devtools-extension-page)
-  - [Some Core Features](#some-core-features)
+  - [Core Features](#core-features)
     - [Collecting Logs](#collecting-logs)
       - [Live Logging](#live-logging)
       - [Loading / saving logs](#loading--saving-logs)
@@ -47,7 +47,7 @@ The Activity Log page is using the MVC architecture and [web components](https:/
 
 This page can be accessed via "Extension Activity" panel in devtools. The "Extension Activity" panel contains the Activity Log page. It has almost all the similar characteristics as "Activity Log Page - Tab" except it filters the activity logs with the tab id where it (devtool panel) is opened. The tab id is found with the help of devtools API i.e. `browser.devtools.inspectedWindow.tabId`.
 
-### Some Core Features
+### Core Features
 
 #### Collecting Logs
 
