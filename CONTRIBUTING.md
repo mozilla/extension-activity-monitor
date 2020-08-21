@@ -41,11 +41,11 @@ The popup page is responsible for "start monitoring" and "stop monitoring" other
 
 #### Activity Log Page - Tab (Extension Page)
 
-The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is open from the popup, it renders the existing logs (if logs were collected in background before) and recevies real-time logs from background while it is opened. Activity Log page allows to communicate with other parts of the extension to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
+The Activity Log page is using the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options. It can be termed as the "front-end part" of the extension. When the Activity Log page is opened from the popup, it renders the existing logs (if logs were collected in background before) and receives future logs real-time from background while it is opened. Activity Log page communicates with the background to save logs to a JSON file, load logs from JSON file, clear activity logs. It also provides the functionality to filter out the unncessary logs by log identities, substring searching and with tab id. These filtering options are made with a couple of [web components](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component).
 
 #### Activity Log Page - Devtools (Extension Page)
 
-The page can be accessed via "Extension Activity" panel in devtools. Inside the Activity Log page has almost all the similar characteristics as "Activity Log Page - Tab" except it filters the activity logs with the tab id where it is opened. The tab id is found with the help of devtools API i.e. `browser.devtools.inspectedWindow.tabId`.
+This page can be accessed via "Extension Activity" panel in devtools. The "Extension Activity" panel contains the Activity Log page. It has almost all the similar characteristics as "Activity Log Page - Tab" except it filters the activity logs with the tab id where it (devtool panel) is opened. The tab id is found with the help of devtools API i.e. `browser.devtools.inspectedWindow.tabId`.
 
 ### Some Core Features
 
@@ -65,7 +65,7 @@ The extension recevies activity logs in the form of `object` from activityLog AP
 
 #### Rendering Logs
 
-The logs are being rendered using [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. Along rendering the new logs the filter options also get updated. While filters are being applied, any new logs that doesn't match the filters will be rendered as hidden in `log-view`.
+The logs are being rendered using [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) web component. Along rendering the new logs the filter options also get updated. While filters are being applied, any new log that doesn't match the filters will be rendered as hidden in `log-view`.
 
 #### Filtering Log Entries
 
@@ -80,7 +80,7 @@ Extension Activity Monitor offers the following filtering options-
 - Filter logs with tab id.
   - It uses the URL search parameter `filterTabId=tabid` to set the tab id filter. Here, `tabid` should be a number.
 
-The filters are stored in Model of the Activity Log page. Filters are only being changed by [`onFilterChanged`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) method in Controller. A JSDoc explaining the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38).
+The filters are stored in Model of the Activity Log page. A JSDoc explaining the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38). Filters are only being changed by [`onFilterChanged`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) method in Controller.
 
 ## Picking an issue
 
