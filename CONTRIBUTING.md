@@ -43,7 +43,7 @@ The popup page is one part of the frontend that communicates with the background
 
 The Activity Log page is another part of the frontend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options.
 
-- The **role of Model** is to store the activity logs from the the background and store the filters. It also contains the funcationalities to match a log with current filters applied.
+- The **role of Model** is to store the activity logs from background and store the filters. It also contains the functionalities to match a log with current filters applied.
 
 - The **role of View** is to deal with DOM. It interacts with DOM to make required visual changes. The `View` also deals with the `log-view` web component in order to render the logs.
 
@@ -126,13 +126,13 @@ Here, `ext-monitor.test.js` is the name of the test suit.
 To run all the tests continously, run the following command:
 
 ```
-$ npm test:watch
+$ npm run test:watch
 ```
 
 To get the coverage report of all the tests, run the following command:
 
 ```
-$ npm test:coverage
+$ npm run test:coverage
 ```
 
 ## Checking for Linter
