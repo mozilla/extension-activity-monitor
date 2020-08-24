@@ -71,6 +71,7 @@ The extension receives each activity log in the form of an `object` from activit
 - ##### Loading / saving logs
 
   It can save all the collected logs that are collected in the background to a JSON file. To save logs, the `saveLogs` instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) is sent to the background where the save operation occurs. The [`downloads` API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/downloads) is used to save logs.
+
   The saved logs can be viewed by loading the JSON file. It will read the logs and create a new tab. The tab id along with the loaded logs are [saved in the Background](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L6). The Activity Log page initializes in the new tab by fetching logs from background with it's tab id and render them in a [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). When the tab is closed, the loaded logs along with the tab id will be removed from Background.
 
 #### Rendering Logs
