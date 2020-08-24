@@ -16,6 +16,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
       - [Loading / saving logs](#loading--saving-logs)
     - [Rendering Logs](#rendering-logs)
     - [Filtering Log Entries](#filtering-log-entries)
+      - [Data Flow](#data-flow)
 - [Picking an issue](#picking-an-issue)
 - [Installation](#installation)
 - [Writing and Running Tests](#writing--running-tests)
@@ -81,7 +82,7 @@ The logs are being rendered using [`log-view`](https://github.com/mozilla/extens
 
 Extension Activity Monitor offers the following filtering options-
 
-- Filter logs with extension id, view type, API name, API type. Whenever any new unknown identities are found with new logs, that is being added as a checkbox (checked by default) in the View.
+- Filter logs with extension id, view type, API name, API type. Whenever a new unknown identity is found in new logs, that is being added as a checkbox (checked by default) in the **View**.
   - These filtering options use the [`filter-option`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-option) web component.
 - Filter logs with substring.
   - It uses the [`filter-keyword`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-keyword) web component.
@@ -92,7 +93,9 @@ Extension Activity Monitor offers the following filtering options-
 
 The filters are stored in **Model** of the Activity Log page. A JSDoc explaining the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38). Filters are only being changed by [`onFilterChanged`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) method in **Controller**.
 
+##### Data Flow
 
+Whenever any filter is applied from **View**, the [filter object](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L6-L14) in **Model** gets updated. On the **View** side, the [`log-view` hides](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/web-component/log-view/log-view-element.js#L28-L34) the table rows which didn't match the applied filters.
 
 ## Picking an issue
 
