@@ -40,39 +40,41 @@ The logs remain alive in the background unless it receives the [`clearlogs`](htt
 
 #### Popup Page
 
-The popup page is one part of the frontend that communicates with the background page (backend part) to run most of its functionality. It is responsible for "start monitoring" and "stop monitoring" other installed extensions. It also helps to access the Activity Log page.
+The popup page is one part of the frontend that communicates with the background page (backend part) to run most of its functionality. It triggers "start monitoring" and "stop monitoring" functionalities and helps to access the Activity Log page.
 
 #### Activity Log Page - Tab (Extension Page)
 
 The Activity Log page is another part of the frontend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options.
 
-- The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide a method that is being used to check if a particular log entry does match the filters.
+- The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide the [`matchLogWithFilterObj` method](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) to check if a particular log entry does match the filters.
 
-- The **View** class manages the `log-view` and [filters web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component). The log-view webcomponent is responsible for rendering the logs collected (currently in a table form) and managing the log-view context menu. The filters web componenrs are responsible for the UI elements related to the log filters.
+- The **View** class manages the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) and [filters web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component). The log-view webcomponent is responsible for rendering the logs collected (currently in a table form) and managing the log-view context menu. The filters web componenrs are responsible for the UI elements related to the log filters.
 
-- The **Controller** class make sure that the data flow in Model and View are synchronized. Whenever the Model updates with new logs or filter options, the Controller make sure that the View also updates accordingly. It also communicates with the background via `runtime.sendMessage` API.
+- The **Controller** class makes sure that the data flow in Model and View are synchronized. Whenever a filter change is triggered from the View, the Controller makes sure it updates the Model and the View accordingly. It also updates the Model and View while receiving real-time logs from the Background. It communicates with the background via `runtime.sendMessage` API.
 
 When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from background and render them. It can send instructions to the background via `runtime.sendMessage` API sto save logs to a JSON file, load logs from JSON file and clear logs.
 
 #### Activity Log Page - Devtools (Extension Page)
 
-This page can be accessed via "Extension Activity" panel in devtools. The "Extension Activity" devtools panel contains an instance of the Activity Log page where every real time activity log collected is automatically filtered by tab id. The devtools panel retrieves the tab id filter from the devtools panel url search params, set by the devtools page by retrieving it using `browser.devtools.inspectedWindow.tabId` when the devtools panel is being registered.
+This page can be accessed via "Extension Activity" panel in devtools. The "Extension Activity" devtools panel contains an instance of the Activity Log page where every real-time activity log collected is automatically filtered by the **current** tab id. The devtools panel retrieves the tab id filter from the devtools panel url search params, set by the devtools page by retrieving it using `browser.devtools.inspectedWindow.tabId` when the devtools panel is being registered.
 
 ### Core Features
 
 #### Collecting Logs
 
-The extension receives each activity log in the form of an `object` from activityLog API. The activityLog API schema can been found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). The background page (backend part) subscribes the `browser.activityLog.onExtensionActivity` API event listener, which gets triggered with an activity log object passed as a parameter everytime an activity is found from any monitored extension. While monitoring other extensions, any newly installed extension is monitored automatically.
+The extension receives each activity log in the form of an `object` from activityLog API. The activityLog API schema can be found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json). The background page (backend part) subscribes the `browser.activityLog.onExtensionActivity` API event listener, which gets triggered with an activity log object passed as a parameter everytime an activity is found from any monitored extension. While monitoring other extensions, any newly installed extension is being monitored automatically.
 
 - ##### Live Logging
 
-  The real-time logs are collected in the background and send to Activity Log page while it is opened. The extension uses `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are collected in the background and sent to Activity Log page while it is opened. The extension uses `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
 - ##### Loading / saving logs
 
   It can save all the collected logs that are collected in the background to a JSON file. To save logs, the `saveLogs` instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) is sent to the background where the save operation occurs.
 
-  The saved logs can be viewed by loading the JSON file. It will read the logs and create a new tab. The tab id along with the loaded logs are [saved in the Background](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L6). The Activity Log page initializes in the new tab by fetching logs from background with it's tab id and render them in a [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). When the tab is closed, the loaded logs along with the tab id will be removed from Background.
+  The saved logs can be viewed by loading the JSON file. It will read the logs and create a new tab. The tab id along with the loaded logs are saved in the Background since we want to keep the loaded logs accessible on the same tab (where the logs were initially loaded) and delete the logs once that tab is closed, we temporarily store the [loaded logs by the tab id](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L6) in Background.
+
+  The Activity Log page initializes in the new tab by fetching logs from background with it's tab id and render them in a [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). When the tab is closed, the loaded logs along with the tab id will be removed from Background.
 
 #### Rendering Logs
 
