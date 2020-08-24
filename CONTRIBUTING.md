@@ -74,7 +74,7 @@ The extension receives each activity log in the form of an `object` from activit
 
   The saved logs can be viewed by loading the JSON file. It will read the logs and create a new tab. The tab id along with the loaded logs are saved in the Background since we want to keep the loaded logs accessible on the same tab (where the logs were initially loaded) and delete the logs once that tab is closed, we temporarily store the [loaded logs by the tab id](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L6) in Background.
 
-  The Activity Log page initializes in the new tab by fetching logs from background with it's tab id and render them in a [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). When the tab is closed, the loaded logs along with the tab id will be removed from Background.
+  The Activity Log page initializes in the new tab by fetching the loaded logs from the Background with it's tab id and render them in a [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/). When the tab is closed, the loaded logs along with the tab id will be removed from Background.
 
 #### Rendering Logs
 
