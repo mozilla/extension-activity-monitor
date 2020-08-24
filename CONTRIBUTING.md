@@ -46,13 +46,13 @@ The popup page is one part of the frontend that communicates with the background
 
 The Activity Log page is another part of the frontend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for table view and filtering options.
 
-- The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide the [`matchLogWithFilterObj` method](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) to check if a particular log entry does match the filters.
+- The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide the [`matchLogWithFilterObj`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) method to check if a particular log entry does match the filters.
 
 - The **View** class manages the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) and [filters web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component). The log-view webcomponent is responsible for rendering the logs collected (currently in a table form) and managing the log-view context menu. The filters web componenrs are responsible for the UI elements related to the log filters.
 
 - The **Controller** class makes sure that the data flow in Model and View are synchronized. Whenever a filter change is triggered from the View, the Controller makes sure it updates the Model and the View accordingly. It also updates the Model and View while receiving real-time logs from the Background. It communicates with the background via `runtime.sendMessage` API.
 
-When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from background and render them. It can send instructions to the background via `runtime.sendMessage` API sto save logs to a JSON file, load logs from JSON file and clear logs.
+When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from background and render them. It can send instructions to the background via `runtime.sendMessage` API to save logs to a JSON file, load logs from JSON file and clear logs.
 
 #### Activity Log Page - Devtools (Extension Page)
 
