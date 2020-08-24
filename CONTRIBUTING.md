@@ -91,11 +91,7 @@ Extension Activity Monitor offers the following filtering options-
 - Filter logs with tab id.
   - When Activity Log page is opened through devtools panel, logs will be filtered by that tab's id.
 
-The filters are stored in **Model** of the Activity Log page. A JSDoc explaining the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38). Filters are only being changed by [`onFilterChanged`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) method in **Controller**.
-
-##### Data Flow
-
-Whenever any filter is applied from **View**, the [filter object](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L6-L14) in **Model** gets updated. On the **View** side, the [`log-view` hides](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/web-component/log-view/log-view-element.js#L28-L34) the table rows which didn't match the applied filters.
+The filters are stored in **Model** of the Activity Log page. A JSDoc explaining the filter object can be found [here](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L21-L38). Filters are only being changed by [`onFilterChanged`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L338-L347) method in **Controller**. Whenever any filter is applied from **View**, the [filter object](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L6-L14) in **Model** gets updated. On the **View** side, the [`log-view` hides](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/web-component/log-view/log-view-element.js#L28-L34) the table rows that didn't match the applied filters.
 
 ## Picking an issue
 
