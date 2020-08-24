@@ -19,6 +19,7 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
 - [Picking an issue](#picking-an-issue)
 - [Installation](#installation)
 - [Writing and Running Tests](#writing--running-tests)
+  - [Writing a test](#writing-a-test)
 - [Checking for Linter](#checking-for-linter)
 - [Checking for Prettier](#checking-for-prettier)
 - [Submitting a Bug or Issue or Feature Request](#submitting-a-bug-or-issue-or-feature-request)
