@@ -16,7 +16,7 @@ export default class ExtensionMonitor {
     return extensions.filter((extension) => {
       return (
         extension.type === 'extension' && extension.id !== browser.runtime.id
-      );
+      );  
     });
   }
 
