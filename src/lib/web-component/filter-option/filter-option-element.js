@@ -6,10 +6,8 @@ export class FilterOption extends HTMLElement {
     super();
 
     this.viewCheckboxLabels = new Set();
-    // It contains the checked checkboxes
-    this.activeCheckboxLabels = new Set();
-    // When any new unknown filter option is found, it is enabled by default.
-    this.isCheckboxChecked = () => true;
+    // It contains the unchecked checkboxes
+    this.inActiveCheckboxLabels = new Set();
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -23,6 +21,7 @@ export class FilterOption extends HTMLElement {
 
     this.toggleBtn = filterContainer.querySelector('.toggle-btn');
     this.toggleBtn.classList.add(this.filterKey);
+    this.searchParamLabels = new Set();
 
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
@@ -42,15 +41,11 @@ export class FilterOption extends HTMLElement {
     }
 
     this.dispatchFilterChangeEvent();
-
-    // When any new unknown filter option is found, it is enabled by default.
-    this.isCheckboxChecked = () => true;
   }
 
   setFilterFromURL(searchParamLabels) {
-    if (searchParamLabels.size > 0) {
-      this.isCheckboxChecked = (checkboxLabel) =>
-        searchParamLabels.has(checkboxLabel);
+    for (const label of searchParamLabels) {
+      this.inActiveCheckboxLabels.add(label);
     }
   }
 
@@ -61,18 +56,9 @@ export class FilterOption extends HTMLElement {
 
     const inputCheckbox = newCheckbox.querySelector('input');
     inputCheckbox.value = checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
-    inputCheckbox.checked = true;
-
-    const checkboxChecked = this.isCheckboxChecked(checkboxLabel);
-    inputCheckbox.checked = checkboxChecked;
+    inputCheckbox.checked = !this.inActiveCheckboxLabels.has(checkboxLabel);
 
     this.viewCheckboxLabels.add(checkboxLabel);
-
-    if (checkboxChecked) {
-      // if the checkbox is checked, adding the label to the activeCheckboxLabels list
-      this.activeCheckboxLabels.add(checkboxLabel);
-    }
-
     this.checkboxList.appendChild(newCheckbox);
   }
 
@@ -100,9 +86,9 @@ export class FilterOption extends HTMLElement {
       const isChecked = event.target.checked;
 
       if (isChecked) {
-        this.activeCheckboxLabels.add(checkboxLabel);
+        this.inActiveCheckboxLabels.delete(checkboxLabel);
       } else {
-        this.activeCheckboxLabels.delete(checkboxLabel);
+        this.inActiveCheckboxLabels.add(checkboxLabel);
       }
 
       this.dispatchFilterChangeEvent();
@@ -119,7 +105,9 @@ export class FilterOption extends HTMLElement {
   dispatchFilterChangeEvent() {
     const filterDetail = {
       updateFilter: {
-        [this.filterKey]: new Set(this.activeCheckboxLabels),
+        [this.filterKey]: {
+          exclude: new Set(this.inActiveCheckboxLabels),
+        },
       },
     };
 

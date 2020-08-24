@@ -1,13 +1,14 @@
 import { save } from './save-load.js';
+import { serializeFilters, deSerializeFilters } from './formatters.js';
 
 class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: new Set(),
-      viewType: new Set(),
-      type: new Set(),
-      name: new Set(),
+      id: { exclude: new Set() },
+      viewType: { exclude: new Set() },
+      type: { exclude: new Set() },
+      name: { exclude: new Set() },
       tabId: null,
       keyword: '',
       timeStamp: null,
@@ -53,7 +54,7 @@ class Model {
   }
 
   matchFilterId(id) {
-    return this.filter.id.has(id);
+    return !this.filter.id.exclude.has(id);
   }
 
   matchFilterViewType({ type, viewType }) {
@@ -62,11 +63,11 @@ class Model {
       // undefined in viewType Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.viewType.has(viewType);
+    return !this.filter.viewType.exclude.has(viewType);
   }
 
   matchFilterType(type) {
-    return this.filter.type.has(type);
+    return !this.filter.type.exclude.has(type);
   }
 
   matchFilterApiName({ name, type }) {
@@ -75,7 +76,7 @@ class Model {
       // store content script urls in API name Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.name.has(name);
+    return !this.filter.name.exclude.has(name);
   }
 
   matchFilterKeyword(data) {
@@ -234,14 +235,13 @@ class Controller {
     );
 
     const loadedFileName = searchParams.get('file');
+    const filterTabId = searchParams.get('filterTabId');
 
-    const filterIds = searchParams.get('ids');
-    const filterViewTypes = searchParams.get('viewTypes');
-    const filterTypes = searchParams.get('types');
-    const filterNames = searchParams.get('names');
-    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
-    const filterKeyword = searchParams.get('keyword');
-    const filterTimestamp = searchParams.get('timestamp');
+    if (document.location.search) {
+      const updateFilter = deSerializeFilters(searchParams);
+      this.model.setFilter(updateFilter);
+      this.view.setFilterOptionsFromURL(updateFilter);
+    }
 
     if (loadedFileName) {
       this.view.menuContainer.hidden = true;
@@ -282,37 +282,6 @@ class Controller {
           throw new Error(`wrong request type found - ${requestType}`);
         }
       });
-
-      const ids = filterIds?.split(',');
-
-      const viewTypes = filterViewTypes?.split(',');
-      // converting empty string to undefined
-      if (viewTypes?.length) {
-        const undefinedIndex = viewTypes.indexOf('');
-        if (undefinedIndex !== -1) {
-          viewTypes[undefinedIndex] = undefined;
-        }
-      }
-
-      const types = filterTypes?.split(',');
-      const names = filterNames?.split(',');
-      const timestamps = filterTimestamp?.split(',').map((timestamp) => {
-        return isNaN(timestamp) ? null : Number(timestamp);
-      });
-
-      // when we open activitylog.html having search parameters
-      if (document.location.search) {
-        const updateFilter = {
-          id: new Set(ids),
-          viewType: new Set(viewTypes),
-          type: new Set(types),
-          name: new Set(names),
-          keyword: filterKeyword,
-          timeStamp: timestamps,
-        };
-
-        this.view.setFilterOptionsFromURL(updateFilter);
-      }
 
       const existingLogs = await this.getExistingLogs();
 
@@ -389,29 +358,8 @@ class Controller {
     const { updateFilter } = filterDetail;
 
     this.model.setFilter(updateFilter);
-    this.setFilterSearchParams(this.model.filter);
+    serializeFilters(updateFilter);
     this.view.setLogFilter((log) => this.isFilterMatched(log));
-  }
-
-  setFilterSearchParams(filterObj) {
-    const { id, viewType, type, name, tabId, keyword, timeStamp } = filterObj;
-
-    const startTime = timeStamp?.start ? timeStamp.start : null;
-    const stopTime = timeStamp?.stop ? timeStamp.stop : null;
-
-    const idsQuery = `ids=${[...id].toString()}`;
-    const viewTypesQuery = `viewTypes=${[...viewType].toString()}`;
-    const typesQuery = `types=${[...type].toString()}`;
-    const namesQuery = `names=${[...name].toString()}`;
-    const timestampsQuery = `timestamp=${startTime},${stopTime}`;
-    const keywordQuery = `keyword=${keyword}`;
-    const tabIdQuery = `filterTabId=${tabId}`;
-
-    history.replaceState(
-      null,
-      null,
-      `?${idsQuery}&${viewTypesQuery}&${typesQuery}&${namesQuery}&${keywordQuery}&${tabIdQuery}&${timestampsQuery}`
-    );
   }
 
   isFilterMatched(log) {
