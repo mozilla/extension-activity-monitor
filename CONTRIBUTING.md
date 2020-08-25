@@ -42,7 +42,7 @@ The browserAction popup is a control panel to trigger "start monitoring" and "st
 
 #### Activity Log Page - Tab
 
-TThe Activity Log page is the frontend tasked with rendering the log information from the backend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for the table view and filtering options.
+The Activity Log page is the frontend tasked with rendering the log information from the backend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for the table view and filtering options.
 
 - The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide the [`matchLogWithFilterObj`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) method to check if a particular log entry does match the filters.
 
