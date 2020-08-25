@@ -34,7 +34,7 @@ The Extension Activity Monitor is composed of a backend responsible for the coll
 
 #### Background Page
 
-The background page acts as the backend of the extension. The core part of the background page is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). The Popup and Activity Log page communicates with the background page via `runtime.onMessage` event and instruct to start/stop monitoring, save logs to a JSON file or load logs from a JSON file. It keeps track of the monitored extensions via [`extensionMapList`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L9) and opened Activity Log pages via [`activityLogPorts`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L12).
+The background page acts as the backend of the extension. The core part of the background page is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). The Popup and the Activity Log page communicates with the background page via `runtime.onMessage` event and instruct to start/stop monitoring, save logs to a JSON file or load logs from a JSON file. It keeps track of the monitored extensions via [`extensionMapList`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L9) and opened Activity Log pages via [`activityLogPorts`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L12).
 
 #### BrowserAction Popup Page
 
