@@ -84,7 +84,7 @@ Individual log items can be hidden by user-defined filters. These filters are st
 
 - [`filter-option`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-option) provides the UI to filter by individual properties of log entries (such as extension id, view type, API name, API type). The available filter values are derived from the logs collected so far. During live logging, new unknown filter values may appear and be appended to the filter UI.
 - [`filter-keyword`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-keyword) provides the UI to filter by substring. It searches the provided substring inside the `data` property of the log object.
-- [`filter-timestamp`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-timestamp) provides the UI to filter by timestamps. The timestamps filter can be applied by choosing "start time" or "stop time" or both (from the context menu) to hide the logs that don't fall in the chosen timestamp range.
+- [`filter-timestamp`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-timestamp) provides the UI to filter by timestamps. The timestamps filter can be applied by choosing "start time" or "stop time" or both (from the context menu) to hide the logs that don't fall under the chosen timestamp range.
 
 When Activity Log page is opened through devtools panel, logs will be filtered by that tab's id. This filter cannot be changed through the UI.
 
