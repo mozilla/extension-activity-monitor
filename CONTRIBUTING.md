@@ -60,7 +60,7 @@ This page can be accessed via "Extension Activity" panel in devtools. The "Exten
 
 The extension receives each activity log in the form of an `object` from activityLog API. The activityLog API schema can be found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json).
 
-When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from background and render them. It can send instructions to the background via `runtime.sendMessage` API to save logs to a JSON file, load logs from JSON file and clear logs.
+When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from the background and render them. It can send instructions to the background via `runtime.sendMessage` API to save logs to a JSON file, load logs from JSON file and clear logs.
 
 - ##### Live Logging
 
@@ -72,9 +72,7 @@ When the Activity Log page is opened via popup, it fetches the existing logs (if
 
 - ##### Loading / saving logs
 
-  Live logs can be saved by exporting the collected logs as JSON, via [`saveLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js).
-
-  Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that, this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` event listener to receive real-time logs).
+  Live logs can be saved by exporting the collected logs as JSON, via [`saveLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js). Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that, this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` event listener to receive real-time logs).
 
 #### Rendering Logs
 
