@@ -38,7 +38,7 @@ The background page acts as the backend of the extension. The core part of the b
 
 #### BrowserAction Popup Page
 
-The browserAction popup is a control panel to trigger "start monitoring" and "stop monitoring" extensions and helps to access the Activity Log page. It mostly communicates with the background page (backend part) to run its functionality.
+The browserAction popup is a control panel to trigger "start monitoring" and "stop monitoring" extensions and helps to access the Activity Log page. It mostly communicates with the background page (backend part) to run its functionalities.
 
 #### Activity Log Page - Tab
 
