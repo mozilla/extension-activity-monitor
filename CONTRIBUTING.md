@@ -64,16 +64,17 @@ When the Activity Log page is opened via popup, it fetches the existing logs (if
 
 - ##### Live Logging
 
-The backend subscribes to the `browser.activityLog.onExtensionActivity` API event to receive objects that describe the activity of the monitored extensions. While the monitor is active, any newly installed extension will be monitored automatically.
+  The backend subscribes to the `browser.activityLog.onExtensionActivity` API event to receive objects that describe the activity of the monitored extensions. While the monitor is active, any newly installed extension will be monitored automatically.
 
-The real-time logs are collected in the background and sent to Activity Log page while it is opened. The extension uses `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are collected in the background and sent to Activity Log page while it is opened. The extension uses `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
-The logs remain alive in the background unless it receives the [`clearlogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L106) instruction from Activity Log page(frontend part). The background page also [sends the real-time logs](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25) to Activity Log page.
+  The logs remain alive in the background unless it receives the [`clearlogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L106) instruction from Activity Log page(frontend part). The background page also [sends the real-time logs](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25) to Activity Log page.
 
 - ##### Loading / saving logs
 
-Live logs can be saved by exporting the collected logs as JSON, via `saveLogs` instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27).
-Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that, this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` listener to listen for real-time logs).
+  Live logs can be saved by exporting the collected logs as JSON, via [`saveLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js).
+
+  Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that, this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` event listener to receive real-time logs).
 
 #### Rendering Logs
 
