@@ -34,7 +34,7 @@ The Extension Activity Monitor is composed of a backend responsible for the coll
 
 #### Background Page
 
-The background page acts as the backend of the extension, and the core of it is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). This part is responsible for keeping track of activity logs and monitored extensions on behalf of the frontend. The background subscribes to the `runtime.onMessage` event to listen for messages from the Popup and Activity Log pages.
+The background page acts as the backend of the extension, and the core of it is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). This part is responsible for keeping track of activity logs and monitored extensions on behalf of the frontend. The background page subscribes to the `runtime.onMessage` event to listen for messages from the Popup and Activity Log pages.
 
 #### BrowserAction Popup Page
 
