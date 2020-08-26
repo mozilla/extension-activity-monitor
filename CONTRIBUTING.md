@@ -8,8 +8,8 @@ Firstly, thank you for your interest in contributing to Extension Activity Monit
   - [The Extension Pages](#the-extension-pages)
     - [Background Page](#background-page)
     - [BrowserAction Popup Page](#browserAction-popup-page)
-    - [Activity Log Page - Tab](#activity-log-page---tab-extension-page)
-    - [Activity Log Page - Devtools](#activity-log-page---devtools-extension-page)
+    - [Activity Log Page - Tab](#activity-log-page---tab)
+    - [Activity Log Page - Devtools](#activity-log-page---devtools)
   - [Core Features](#core-features)
     - [Collecting Logs](#collecting-logs)
       - [Live Logging](#live-logging)
@@ -34,21 +34,21 @@ The Extension Activity Monitor is composed of a backend responsible for the coll
 
 #### Background Page
 
-The background page acts as the backend of the extension. The core part of the background page is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). The Popup and the Activity Log page communicates with the background page via `runtime.onMessage` event and instruct to start/stop monitoring, save logs to a JSON file or load logs from a JSON file. It keeps track of the monitored extensions via [`extensionMapList`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L9) and opened Activity Log pages via [`activityLogPorts`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L12).
+The background page acts as the backend of the extension, and the core of it is implemented in [`ext-monitor.js`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/ext-monitor.js). This part is responsible for keeping track of activity logs and monitored extensions on behalf of the frontend. The background subscribes to the `runtime.onMessage` event to listen for messages from the Popup and Activity Log pages.
 
 #### BrowserAction Popup Page
 
-The browserAction popup is a control panel to trigger "start monitoring" and "stop monitoring" extensions and helps to access the Activity Log page. It mostly communicates with the background page (backend part) to run its functionalities.
+The browserAction popup is a control panel to trigger "start monitoring" and "stop monitoring" (of extensions) and opening the Activity Log page.
 
 #### Activity Log Page - Tab
 
 The Activity Log page is the frontend tasked with rendering the log information from the backend. It uses the MVC architecture and [web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component) for the table view and filtering options.
 
-- The **Model** class does store activity logs being rendered in the activity log page and the data representation of the log filters. The Model class does also provide the [`matchLogWithFilterObj`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) method to check if a particular log entry does match the filters.
+- The **Model** class stores activity logs being rendered in the activity log page and the data representation of the log filters. The Model class also provides the [`matchLogWithFilterObj`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L43) method to check if a particular log entry does match the filters.
 
-- The **View** class manages the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) and [filters web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component). The log-view webcomponent is responsible for rendering the collected logs (currently in a table form) and managing the log-view context menu. The filters web componenrs are responsible for the UI elements related to the log filters.
+- The **View** class manages the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/) and [filters web components](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component). The log-view webcomponent is responsible for rendering the collected logs (currently in a table form) and managing the log-view context menu. The filters web components are responsible for the UI elements related to the log filters.
 
-- The **Controller** class makes sure that the data flow in Model and View are synchronized. Whenever a filter change is triggered from the View, the Controller makes sure it updates the Model and the View accordingly. It also updates the Model and View while receiving real-time logs from the Background. It communicates with the background via `runtime.sendMessage` API.
+- The **Controller** class interacts with the backend and ensures that the Model and View are synchronized.
 
 #### Activity Log Page - Devtools
 
@@ -60,19 +60,19 @@ This page can be accessed via "Extension Activity" panel in devtools. The "Exten
 
 The extension receives each activity log in the form of an `object` from activityLog API. The activityLog API schema can be found [here](https://searchfox.org/mozilla-central/source/toolkit/components/extensions/schemas/activity_log.json).
 
-When the Activity Log page is opened via popup, it fetches the existing logs (if logs were collected before) from the background. While the Activity Log page is opened, it receives real-time logs from the background and render them. It can send instructions to the background via `runtime.sendMessage` API to save logs to a JSON file, load logs from JSON file and clear logs.
+When the Activity Log page is opened via the popup, it fetches the existing logs (if logs were collected before) from the backend. While the Activity Log page is opened, it receives real-time logs from the backend and renders them. It can send instructions to the background page via `runtime.sendMessage` API to save logs to a JSON file, load logs from JSON file and clear logs.
 
 - ##### Live Logging
 
   The backend subscribes to the `browser.activityLog.onExtensionActivity` API event to receive objects that describe the activity of the monitored extensions. While the monitor is active, any newly installed extension will be monitored automatically.
 
-  The real-time logs are collected in the background and sent to Activity Log page while it is opened. The extension uses `runtime.sendMessage` API to communicate between background and Activity Log page. The [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method is responsible for sending logs to Activity Log page. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
+  The real-time logs are collected in the background page and sent to Activity Log page while it is opened. Activity logs are sent from the backend via the [`sendLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25-L33) method. The Activity Log page listens for logs via [`runtime.onMessage`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-activitylog.js#L253-L265) event and render those in the [`log-view`](https://github.com/mozilla/extension-activity-monitor/blob/master/src/lib/web-component/log-view/).
 
-  The logs remain alive in the background unless it receives the [`clearlogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L106) instruction from Activity Log page(frontend part). The background page also [sends the real-time logs](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25) to Activity Log page.
+  The logs are kept in the background page unless it receives the [`clearlogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L106) instruction from Activity Log page. The background page also [sends the real-time logs](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/ext-monitor.js#L25) to Activity Log page.
 
 - ##### Loading / saving logs
 
-  Live logs can be saved by exporting the collected logs as JSON, via [`saveLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js). Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that, this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` event listener to receive real-time logs).
+  Live logs can be saved by exporting the collected logs as JSON, via [`saveLogs`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js#L22-L27) instruction from [`save-load.js`](https://github.com/mozilla/extension-activity-monitor/blob/68d51940f1db397a0972658622bbdd39041436a7/src/lib/save-load.js). Previously saved logs can be loaded via loading a JSON file, which opens an instance of Activity Log page in a new tab loaded with logs from the JSON file. Note that this instance of Activity Log page doesn't receive real-time logs (as it doesn't subscribe to `browser.runtime.onMessage` event listener to receive real-time logs).
 
 #### Rendering Logs
 
@@ -86,7 +86,7 @@ Individual log items can be hidden by user-defined filters. These filters are st
 - [`filter-keyword`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-keyword) provides the UI to filter by substring. It searches the provided substring inside the `data` property of the log object.
 - [`filter-timestamp`](https://github.com/mozilla/extension-activity-monitor/tree/master/src/lib/web-component/filter-timestamp) provides the UI to filter by timestamps. The timestamps filter can be applied by choosing "start time" or "stop time" or both (from the context menu) to hide the logs that don't fall under the chosen timestamp range.
 
-When Activity Log page is opened through devtools panel, logs will be filtered by that tab's id. This filter cannot be changed through the UI.
+When the Activity Log page is opened through the devtools panel, logs will be filtered by that tab's id. This filter cannot be changed through the UI.
 
 ## Picking an issue
 
@@ -98,11 +98,7 @@ To install Extension Activity Monitor, follow the given instructions [here](http
 
 ## Writing & Running Tests
 
-Unit test is done with [JEST Framework](https://jestjs.io/) in this project.
-
-### Writing a test
-
-To write a test, go to [tests](https://github.com/mozilla/extension-activity-monitor/tree/master/tests) folder and search for a relevent test file to write tests. If you are unable to find any relevent test file, you can make a new one considering this naming convention: `test-file-name.tests.js`. Use a suitable name in `test-file-name` placeholder.
+Tests are stored in the [tests directory](https://github.com/mozilla/extension-activity-monitor/tree/master/tests) and run with the [Jest framework](https://jestjs.io/).
 
 To run all the tests once, run the following command:
 
@@ -116,9 +112,9 @@ To run a single test once, run the following command:
 $ npm test ext-monitor.test.js
 ```
 
-Here, `ext-monitor.test.js` is the name of the test suit.
+Here, `ext-monitor.test.js` is the name of the test file.
 
-To run all the tests continously, run the following command:
+To run all the tests on file changes during development, run the following command:
 
 ```
 $ npm run test:watch
