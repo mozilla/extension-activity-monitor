@@ -54,18 +54,20 @@ export class FilterTimestamp extends HTMLElement {
   };
 
   setFilterFromURL(timestamp) {
-    this.timeStamp = {};
+    if (timestamp?.start || timestamp?.stop) {
+      this.timeStamp = {};
+    }
 
-    if (Number.isInteger(timestamp[0])) {
-      this.timeStamp.start = timestamp[0];
-      this.startTimeLabel.textContent = dateTimeFormat(timestamp[0]);
+    if (timestamp?.start != null) {
+      this.timeStamp.start = timestamp.start;
+      this.startTimeLabel.textContent = timestamp.start;
       this.filterContainer.hidden = false;
       this.clearStartTimeBtn.hidden = false;
     }
 
-    if (Number.isInteger(timestamp[1])) {
-      this.timeStamp.stop = timestamp[1];
-      this.stopTimeLabel.textContent = dateTimeFormat(timestamp[1]);
+    if (timestamp?.stop != null) {
+      this.timeStamp.stop = timestamp.stop;
+      this.stopTimeLabel.textContent = timestamp.stop;
       this.filterContainer.hidden = false;
       this.clearStopTimeBtn.hidden = false;
     }

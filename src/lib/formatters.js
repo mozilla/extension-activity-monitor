@@ -59,7 +59,7 @@ export function deSerializeFilters(searchParams) {
 
   const types = JSON.parse(filterTypes);
   const names = JSON.parse(filterNames);
-  let timestamps = JSON.parse(filterTimestamp);
+  let timestamps = JSON.parse(filterTimestamp) || [];
   timestamps = timestamps?.map((timestamp) =>
     isNaN(timestamp) ? null : Number(timestamp)
   );
@@ -70,7 +70,7 @@ export function deSerializeFilters(searchParams) {
     type: new Set(types),
     name: new Set(names),
     keyword: filterKeyword,
-    timeStamp: timestamps || [],
+    timeStamp: { start: timestamps[0], stop: timestamps[1] },
   };
 
   return updateFilter;

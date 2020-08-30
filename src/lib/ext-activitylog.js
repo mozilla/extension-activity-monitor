@@ -235,13 +235,7 @@ class Controller {
     );
 
     const loadedFileName = searchParams.get('file');
-    const filterTabId = searchParams.get('filterTabId');
-
-    if (document.location.search) {
-      const updateFilter = deSerializeFilters(searchParams);
-      this.model.setFilter(updateFilter);
-      this.view.setFilterOptionsFromURL(updateFilter);
-    }
+    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
     if (loadedFileName) {
       this.view.menuContainer.hidden = true;
@@ -282,6 +276,12 @@ class Controller {
           throw new Error(`wrong request type found - ${requestType}`);
         }
       });
+
+      if (document.location.search) {
+        const updateFilter = deSerializeFilters(searchParams);
+        this.model.setFilter(updateFilter);
+        this.view.setFilterOptionsFromURL(updateFilter);
+      }
 
       const existingLogs = await this.getExistingLogs();
 
