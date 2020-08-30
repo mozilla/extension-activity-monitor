@@ -21,7 +21,6 @@ export class FilterOption extends HTMLElement {
 
     this.toggleBtn = filterContainer.querySelector('.toggle-btn');
     this.toggleBtn.classList.add(this.filterKey);
-    this.searchParamLabels = new Set();
 
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
