@@ -51,15 +51,14 @@ export function deSerializeFilters(searchParams) {
   const filterTabId = parseInt(searchParams.get('tabId'), 10) || null;
 
   const ids = getJSONParseVal(filterIds);
-  let viewTypes = getJSONParseVal(filterViewTypes);
-  // converting empty string to undefined
-  viewTypes = viewTypes?.map((viewType) =>
-    viewType == null ? undefined : viewType
-  );
-
   const types = getJSONParseVal(filterTypes);
   const names = getJSONParseVal(filterNames);
   const timestamps = getJSONParseVal(filterTimestamp);
+
+  let viewTypes = getJSONParseVal(filterViewTypes);
+  viewTypes = viewTypes?.map((viewType) =>
+    viewType == null ? undefined : viewType
+  );
 
   const updateFilter = {
     id: new Set(ids),

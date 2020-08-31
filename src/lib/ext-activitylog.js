@@ -185,7 +185,15 @@ class View {
   }
 
   setExistedFilters(updateFilter) {
-    const { id, viewType, type, name, keyword, timeStamp } = updateFilter;
+    const {
+      id,
+      viewType,
+      type,
+      name,
+      keyword,
+      timeStamp,
+      tabId,
+    } = updateFilter;
 
     this.extFilter.setExistedFilter(id);
     this.viewTypeFilter.setExistedFilter(viewType);
@@ -193,6 +201,15 @@ class View {
     this.apiNameFilter.setExistedFilter(name);
     this.keywordFilter.setExistedFilter(keyword);
     this.timestampFilter.setExistedFilter(timeStamp);
+
+    if (tabId) {
+      this.renderHeading({ tabId });
+      const filterDetail = { updateFilter: { tabId } };
+
+      this.logHeading.dispatchEvent(
+        new CustomEvent('filterchange', { detail: filterDetail })
+      );
+    }
   }
 
   setError(errorMessage) {
@@ -209,8 +226,8 @@ class View {
     this.logView.clearTable();
   }
 
-  renderHeading({ filteredTabId }) {
-    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filteredTabId}`;
+  renderHeading({ tabId }) {
+    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${tabId}`;
   }
 }
 
@@ -229,6 +246,7 @@ class Controller {
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
+    this.view.logHeading.addEventListener('filterchange', this);
 
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
@@ -286,18 +304,6 @@ class Controller {
 
       if (existingLogs.length) {
         this.handleNewLogs(existingLogs);
-      }
-
-      if (this.model.filter.tabId != null) {
-        const filteredTabId = this.model.filter.tabId;
-
-        this.view.renderHeading({ filteredTabId });
-
-        const filterDetail = {
-          updateFilter: { tabId: filteredTabId },
-        };
-
-        this.onFilterChange(filterDetail);
       }
     }
   }
