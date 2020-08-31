@@ -35,7 +35,7 @@ class Model {
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
    * @param {null|number} [updateFilter.tabId] - It's null when search paramter
-   * `filterTabId` is not used.
+   * `tabId` is not used.
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -184,15 +184,15 @@ class View {
     this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
-  setFilterOptionsFromURL(updateFilter) {
+  setExistedFilters(updateFilter) {
     const { id, viewType, type, name, keyword, timeStamp } = updateFilter;
 
-    this.extFilter.setFilterFromURL(id);
-    this.viewTypeFilter.setFilterFromURL(viewType);
-    this.apiTypeFilter.setFilterFromURL(type);
-    this.apiNameFilter.setFilterFromURL(name);
-    this.keywordFilter.setFilterFromURL(keyword);
-    this.timestampFilter.setFilterFromURL(timeStamp);
+    this.extFilter.setExistedFilter(id);
+    this.viewTypeFilter.setExistedFilter(viewType);
+    this.apiTypeFilter.setExistedFilter(type);
+    this.apiNameFilter.setExistedFilter(name);
+    this.keywordFilter.setExistedFilter(keyword);
+    this.timestampFilter.setExistedFilter(timeStamp);
   }
 
   setError(errorMessage) {
@@ -209,8 +209,8 @@ class View {
     this.logView.clearTable();
   }
 
-  renderHeading({ filterTabId }) {
-    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filterTabId}`;
+  renderHeading({ filteredTabId }) {
+    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filteredTabId}`;
   }
 }
 
@@ -235,7 +235,6 @@ class Controller {
     );
 
     const loadedFileName = searchParams.get('file');
-    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
     if (loadedFileName) {
       this.view.menuContainer.hidden = true;
@@ -280,7 +279,7 @@ class Controller {
       if (document.location.search) {
         const updateFilter = deSerializeFilters(searchParams);
         this.model.setFilter(updateFilter);
-        this.view.setFilterOptionsFromURL(updateFilter);
+        this.view.setExistedFilters(updateFilter);
       }
 
       const existingLogs = await this.getExistingLogs();
@@ -289,11 +288,13 @@ class Controller {
         this.handleNewLogs(existingLogs);
       }
 
-      if (filterTabId) {
-        this.view.renderHeading({ filterTabId });
+      if (this.model.filter.tabId != null) {
+        const filteredTabId = this.model.filter.tabId;
+
+        this.view.renderHeading({ filteredTabId });
 
         const filterDetail = {
-          updateFilter: { tabId: filterTabId },
+          updateFilter: { tabId: filteredTabId },
         };
 
         this.onFilterChange(filterDetail);
@@ -358,8 +359,20 @@ class Controller {
     const { updateFilter } = filterDetail;
 
     this.model.setFilter(updateFilter);
-    serializeFilters(updateFilter);
+    this.updateSearchParams(updateFilter);
     this.view.setLogFilter((log) => this.isFilterMatched(log));
+  }
+
+  updateSearchParams(updateFilter) {
+    const currentURL = new URL(document.location.href);
+    const currentSearchParams = new URLSearchParams(currentURL.search.slice(1));
+
+    const updatedSearchParams = serializeFilters(
+      currentSearchParams,
+      updateFilter
+    );
+
+    history.replaceState(null, null, `?${updatedSearchParams}`);
   }
 
   isFilterMatched(log) {

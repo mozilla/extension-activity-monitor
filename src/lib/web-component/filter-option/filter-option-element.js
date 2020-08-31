@@ -7,7 +7,7 @@ export class FilterOption extends HTMLElement {
 
     this.viewCheckboxLabels = new Set();
     // It contains the unchecked checkboxes
-    this.inActiveCheckboxLabels = new Set();
+    this.inactive = new Set();
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -42,9 +42,10 @@ export class FilterOption extends HTMLElement {
     this.dispatchFilterChangeEvent();
   }
 
-  setFilterFromURL(searchParamLabels) {
+  setExistedFilter(searchParamLabels) {
     for (const label of searchParamLabels) {
-      this.inActiveCheckboxLabels.add(label);
+      // the checkboxes with these labels will be in unchecked condition
+      this.inactive.add(label);
     }
   }
 
@@ -55,7 +56,7 @@ export class FilterOption extends HTMLElement {
 
     const inputCheckbox = newCheckbox.querySelector('input');
     inputCheckbox.value = checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
-    inputCheckbox.checked = !this.inActiveCheckboxLabels.has(checkboxLabel);
+    inputCheckbox.checked = !this.inactive.has(checkboxLabel);
 
     this.viewCheckboxLabels.add(checkboxLabel);
     this.checkboxList.appendChild(newCheckbox);
@@ -85,9 +86,9 @@ export class FilterOption extends HTMLElement {
       const isChecked = event.target.checked;
 
       if (isChecked) {
-        this.inActiveCheckboxLabels.delete(checkboxLabel);
+        this.inactive.delete(checkboxLabel);
       } else {
-        this.inActiveCheckboxLabels.add(checkboxLabel);
+        this.inactive.add(checkboxLabel);
       }
 
       this.dispatchFilterChangeEvent();
@@ -105,7 +106,7 @@ export class FilterOption extends HTMLElement {
     const filterDetail = {
       updateFilter: {
         [this.filterKey]: {
-          exclude: new Set(this.inActiveCheckboxLabels),
+          exclude: new Set(this.inactive),
         },
       },
     };

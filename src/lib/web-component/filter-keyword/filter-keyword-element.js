@@ -20,7 +20,7 @@ export class FilterKeyword extends HTMLElement {
     shadow.appendChild(filterContainer);
   }
 
-  setFilterFromURL(keyword) {
+  setExistedFilter(keyword) {
     this.inputBox.value = keyword;
     this.dispatchFilterChanged();
   }

@@ -10,16 +10,7 @@ export function dateTimeFormat(timestamp, options) {
   return new Intl.DateTimeFormat(undefined, chosenOptions).format(dateTime);
 }
 
-function timestampFormat(timeStamp) {
-  const startTime = timeStamp?.start ? timeStamp.start : null;
-  const stopTime = timeStamp?.stop ? timeStamp.stop : null;
-  return JSON.stringify([JSON.stringify(startTime), JSON.stringify(stopTime)]);
-}
-
-export function serializeFilters(updateFilter) {
-  const currentURL = new URL(document.location.href);
-  const searchParams = new URLSearchParams(currentURL.search.slice(1));
-
+export function serializeFilters(searchParams, updateFilter) {
   Object.keys(updateFilter).forEach((key) => {
     let searchParamVal = null;
 
@@ -31,7 +22,7 @@ export function serializeFilters(updateFilter) {
     ) {
       searchParamVal = JSON.stringify([...updateFilter[key].exclude]);
     } else if (key === 'timeStamp') {
-      searchParamVal = timestampFormat(updateFilter[key]);
+      searchParamVal = JSON.stringify(updateFilter[key]);
     } else {
       searchParamVal = updateFilter[key];
     }
@@ -39,7 +30,7 @@ export function serializeFilters(updateFilter) {
     searchParams.set(key, searchParamVal);
   });
 
-  history.replaceState(null, null, `?${searchParams}`);
+  return searchParams;
 }
 
 export function deSerializeFilters(searchParams) {
@@ -49,6 +40,7 @@ export function deSerializeFilters(searchParams) {
   const filterNames = searchParams.get('name');
   const filterKeyword = searchParams.get('keyword');
   const filterTimestamp = searchParams.get('timeStamp');
+  const filterTabId = parseInt(searchParams.get('tabId'), 10) || null;
 
   const ids = JSON.parse(filterIds);
   let viewTypes = JSON.parse(filterViewTypes);
@@ -59,10 +51,7 @@ export function deSerializeFilters(searchParams) {
 
   const types = JSON.parse(filterTypes);
   const names = JSON.parse(filterNames);
-  let timestamps = JSON.parse(filterTimestamp) || [];
-  timestamps = timestamps?.map((timestamp) =>
-    isNaN(timestamp) ? null : Number(timestamp)
-  );
+  const timestamps = JSON.parse(filterTimestamp);
 
   const updateFilter = {
     id: new Set(ids),
@@ -70,7 +59,8 @@ export function deSerializeFilters(searchParams) {
     type: new Set(types),
     name: new Set(names),
     keyword: filterKeyword,
-    timeStamp: { start: timestamps[0], stop: timestamps[1] },
+    timeStamp: timestamps,
+    tabId: filterTabId,
   };
 
   return updateFilter;
