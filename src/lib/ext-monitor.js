@@ -1,4 +1,4 @@
-import { getActivityLogPageURL } from './ext-listen.js';
+import { openActivityLogPage } from './ext-listen.js';
 import { load } from './save-load.js';
 
 export default class ExtensionMonitor {
@@ -115,12 +115,8 @@ export default class ExtensionMonitor {
 
   async loadLogs({ file }) {
     const loadedLogs = await load.loadLogAsJSON(file);
-
     const searchParams = `file=${file.name}`;
-    const tab = await browser.tabs.create({
-      url: getActivityLogPageURL(searchParams),
-    });
-
+    const tab = await openActivityLogPage(searchParams);
     this.loadedLogsByTabId.set(tab.id, loadedLogs);
   }
 

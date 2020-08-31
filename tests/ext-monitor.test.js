@@ -1,4 +1,5 @@
 import ExtensionMonitor from '../src/lib/ext-monitor';
+import * as ExtListen from '../src/lib/ext-listen.js';
 
 test('getAllExtensions should return all extensions but themes and self', async () => {
   const selfExt = { id: 'ext4', type: 'extension' };
@@ -361,6 +362,58 @@ describe('messageListeners functionalities test', () => {
 
     expect(messageListenerFn).toHaveReturnedWith(undefined);
   });
+
+  test("loadLogs method should store the logs by newly opend tab's id", async () => {
+    const logs = [{ prop: 'log' }];
+    const logsFile = JSON.stringify(logs);
+    const blob = new Blob([logsFile], {
+      type: 'application/json',
+    });
+    Object.assign(blob, { name: 'activitylogs-test.json' });
+    const tabId = 1098;
+
+    const openActivityLogPageFn = jest.spyOn(ExtListen, 'openActivityLogPage');
+    const extMonitor = new ExtensionMonitor();
+
+    openActivityLogPageFn.mockResolvedValue({ id: tabId });
+
+    const loadLogsPromise = extMonitor.messageListener({
+      requestType: 'loadLogs',
+      requestTo: 'ext-monitor',
+      requestParams: { file: blob },
+    });
+
+    await expect(loadLogsPromise).resolves.toBeUndefined();
+    expect(extMonitor.loadedLogsByTabId.get(tabId)).toMatchObject(logs);
+  });
+
+  test('getLoadedLogs method should return logs if logs are found with given tab id otherwise throw error', async () => {
+    const loadedLogs = [{ prop: 'log' }];
+    const tabId = 1099;
+
+    const extMonitor = new ExtensionMonitor();
+
+    extMonitor.loadedLogsByTabId.set(tabId, loadedLogs);
+
+    const getLoadedLogsPromise = extMonitor.messageListener({
+      requestType: 'getLoadedLogs',
+      requestTo: 'ext-monitor',
+      requestParams: { tabId },
+    });
+
+    await expect(getLoadedLogsPromise).resolves.toMatchObject(loadedLogs);
+
+    const wrongTabId = 212;
+    const getLogsWithWrongTabIdPromise = extMonitor.messageListener({
+      requestType: 'getLoadedLogs',
+      requestTo: 'ext-monitor',
+      requestParams: { tabId: wrongTabId },
+    });
+
+    await expect(getLogsWithWrongTabIdPromise).rejects.toThrowError(
+      `No loaded logs found for tab id: ${wrongTabId}`
+    );
+  });
 });
 
 test('listeners are registered at initialization', () => {
@@ -527,4 +580,51 @@ test('saveLogs function should return error message if error is encountered', as
   expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
 
   saveLogsFn.mockRestore();
+});
+
+test('onConnectListener should save the port of activityLog page', () => {
+  const addListener = jest.fn();
+  const wrongNamedPort = {
+    portProp: 'test@port',
+    name: 'wrong-name',
+  };
+  const dummyPort = {
+    portProp: 'test@port',
+    name: 'monitor-realtime-logs',
+    onDisconnect: { addListener },
+  };
+
+  const extMonitor = new ExtensionMonitor();
+
+  let onDisconnectedCallback;
+  addListener.mockImplementation((callback) => {
+    onDisconnectedCallback = callback;
+  });
+
+  extMonitor.onConnectListener(wrongNamedPort);
+  // with wrong port name, it will not be saved
+  expect(extMonitor.activityLogPorts.size).toBe(0);
+
+  extMonitor.onConnectListener(dummyPort);
+  expect(extMonitor.activityLogPorts.size).toBe(1);
+  // When the activity log page is closed, the port is removed
+  onDisconnectedCallback(dummyPort);
+  expect(extMonitor.activityLogPorts.size).toBe(0);
+});
+
+test('onRemovedListener should remove loaded logs along with tabId when tab is closed', () => {
+  const loadedLogs = [{ prop: 'test@log' }];
+  const tabId = 20;
+  const extMonitor = new ExtensionMonitor();
+
+  extMonitor.loadedLogsByTabId.set(tabId, loadedLogs);
+  expect(extMonitor.loadedLogsByTabId.size).toBe(1);
+
+  const wrongTabId = 31;
+  // If tab id doesn't exist in loadedLogsByTabId Map list, it will do nothing
+  extMonitor.onRemovedListener(wrongTabId);
+  expect(extMonitor.loadedLogsByTabId.size).toBe(1);
+
+  extMonitor.onRemovedListener(tabId);
+  expect(extMonitor.loadedLogsByTabId.size).toBe(0);
 });

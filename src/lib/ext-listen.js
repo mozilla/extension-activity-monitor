@@ -26,8 +26,8 @@ export function stopMonitor() {
   });
 }
 
-export function openActivityLogPage() {
-  browser.tabs.create({
-    url: getActivityLogPageURL(),
+export function openActivityLogPage(searchParams) {
+  return browser.tabs.create({
+    url: getActivityLogPageURL(searchParams),
   });
 }

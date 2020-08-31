@@ -18,6 +18,7 @@ test('getMonitorStatus should have requestType "getMonitorStatus" and resolves w
 
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'getMonitorStatus',
+    requestTo: 'ext-monitor',
   });
   expect(sendMessage).toHaveBeenCalled();
 });
@@ -38,6 +39,7 @@ test('startMonitor and stopMonitor should have their respective requestType', as
   await ExtListen.startMonitor();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'startMonitor',
+    requestTo: 'ext-monitor',
   });
 
   sendMessage.mockClear();
@@ -45,10 +47,11 @@ test('startMonitor and stopMonitor should have their respective requestType', as
   await ExtListen.stopMonitor();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'stopMonitor',
+    requestTo: 'ext-monitor',
   });
 });
 
-test('openActivityLogPage should create tab with ActivityLogPageURL', async () => {
+test('openActivityLogPage should create tab with ActivityLogPageURL and apply search params if it is passed as argument', async () => {
   const getURL = jest.fn();
   const create = jest.fn();
 
@@ -58,6 +61,23 @@ test('openActivityLogPage should create tab with ActivityLogPageURL', async () =
   };
 
   ExtListen.openActivityLogPage();
+
   expect(create).toHaveBeenCalled();
   expect(getURL).toHaveBeenCalled();
+  expect(getURL.mock.calls[0][0]).toBe('/activitylog/activitylog.html');
+
+  ExtListen.openActivityLogPage('test=123');
+  expect(getURL.mock.calls[1][0]).toBe(
+    '/activitylog/activitylog.html?test=123'
+  );
+});
+
+test('ActivityLogPageURL method should return url with search params if search params are available', () => {
+  const getURL = jest.fn();
+  const create = jest.fn();
+
+  window.browser = {
+    runtime: { getURL },
+    tabs: { create },
+  };
 });
