@@ -41,7 +41,7 @@ export class FilterOption extends HTMLElement {
     this.dispatchFilterChangeEvent();
   }
 
-  setExistedFilter(searchParamLabels) {
+  setInitialFilter(searchParamLabels) {
     for (const label of searchParamLabels) {
       // the checkboxes with these labels will be in unchecked condition
       this.uncheckedCheckboxLabels.add(label);

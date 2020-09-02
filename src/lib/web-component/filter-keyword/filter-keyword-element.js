@@ -20,9 +20,8 @@ export class FilterKeyword extends HTMLElement {
     shadow.appendChild(filterContainer);
   }
 
-  setExistedFilter(keyword) {
+  setInitialFilter(keyword) {
     this.inputBox.value = keyword;
-    this.dispatchFilterChanged();
   }
 
   dispatchFilterChanged() {

@@ -53,7 +53,7 @@ export class FilterTimestamp extends HTMLElement {
     this.dispatchFilterChange();
   };
 
-  setExistedFilter(timestamp) {
+  setInitialFilter(timestamp) {
     if (timestamp == null) {
       return;
     }
@@ -73,8 +73,6 @@ export class FilterTimestamp extends HTMLElement {
       this.filterContainer.hidden = false;
       this.clearStopTimeBtn.hidden = false;
     }
-
-    this.dispatchFilterChange();
   }
 
   dispatchFilterChange() {

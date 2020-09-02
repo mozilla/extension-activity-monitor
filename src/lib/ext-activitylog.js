@@ -184,7 +184,7 @@ class View {
     this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
-  setExistedFilters(updateFilter) {
+  setInitialFilters(updateFilter) {
     const {
       id,
       viewType,
@@ -195,12 +195,12 @@ class View {
       tabId,
     } = updateFilter;
 
-    this.extFilter.setExistedFilter(id);
-    this.viewTypeFilter.setExistedFilter(viewType);
-    this.apiTypeFilter.setExistedFilter(type);
-    this.apiNameFilter.setExistedFilter(name);
-    this.keywordFilter.setExistedFilter(keyword);
-    this.timestampFilter.setExistedFilter(timeStamp);
+    this.extFilter.setInitialFilter(id.exclude);
+    this.viewTypeFilter.setInitialFilter(viewType.exclude);
+    this.apiTypeFilter.setInitialFilter(type.exclude);
+    this.apiNameFilter.setInitialFilter(name.exclude);
+    this.keywordFilter.setInitialFilter(keyword);
+    this.timestampFilter.setInitialFilter(timeStamp);
 
     if (tabId) {
       this.renderHeading({ tabId });
@@ -297,7 +297,7 @@ class Controller {
       if (document.location.search) {
         const updateFilter = deSerializeFilters(searchParams);
         this.model.setFilter(updateFilter);
-        this.view.setExistedFilters(updateFilter);
+        this.view.setInitialFilters(updateFilter);
       }
 
       const existingLogs = await this.getExistingLogs();
