@@ -115,12 +115,14 @@ class Model {
 class View {
   constructor() {
     this.logView = document.querySelector('log-view');
-    this.menuContainer = document.querySelector('.menu-container');
+    this.optionsBtn = document.querySelector('.options-btn');
     this.clearLogBtn = document.querySelector('#clearLogBtn');
+    this.menuDetails = document.querySelector('.menu-details');
     this.saveLogBtn = document.querySelector('#saveLogBtn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
-    this.logHeading = document.querySelector('.log-heading');
+    this.filterIdTxt = document.querySelector('.filter-tabid');
+    this.pageType = document.querySelector('.page-type');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -135,6 +137,7 @@ class View {
     this.keywordFilter = document.querySelector('filter-keyword');
     this.timestampFilter = document.querySelector('filter-timestamp');
 
+    this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
@@ -146,15 +149,14 @@ class View {
 
   handleEvent(event) {
     if (event.type === 'click') {
-      switch (event.target) {
-        case this.saveLogBtn:
-          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-          break;
-        case this.clearLogBtn:
-          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-          break;
-        default:
-          throw new Error(`wrong event target - ${event.target.tagName}`);
+      if (event.target === this.clearLogBtn) {
+        this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
+      } else if (event.currentTarget === this.optionsBtn) {
+        this.menuDetails.hidden = !this.menuDetails.hidden;
+      } else if (event.currentTarget === this.saveLogBtn) {
+        this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+      } else {
+        throw new Error(`wrong event target - ${event.target.tagName}`);
       }
     } else if (event.type === 'change' && event.target === this.loadLogFile) {
       const logFile = event.target.files[0];
@@ -203,10 +205,11 @@ class View {
     this.timestampFilter.setInitialFilter(timeStamp);
 
     if (tabId) {
-      this.renderHeading({ tabId });
+      this.filterIdTxt.textContent = `Filtered By Tab Id: ${tabId}`;
+      this.timestampFilter.hidden = true;
       const filterDetail = { updateFilter: { tabId } };
 
-      this.logHeading.dispatchEvent(
+      this.filterIdTxt.dispatchEvent(
         new CustomEvent('filterchange', { detail: filterDetail })
       );
     }
@@ -226,8 +229,15 @@ class View {
     this.logView.clearTable();
   }
 
-  renderHeading({ tabId }) {
-    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${tabId}`;
+  updatePageType(heading) {
+    this.pageType.textContent = heading;
+  }
+
+  updateMenus({ pageType }) {
+    if (pageType === 'load-logs') {
+      this.clearLogBtn.hidden = true;
+      this.optionsBtn.hidden = true;
+    }
   }
 }
 
@@ -246,7 +256,7 @@ class Controller {
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
-    this.view.logHeading.addEventListener('filterchange', this);
+    this.view.filterIdTxt.addEventListener('filterchange', this);
 
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
@@ -255,8 +265,10 @@ class Controller {
     const loadedFileName = searchParams.get('file');
 
     if (loadedFileName) {
-      this.view.menuContainer.hidden = true;
-      document.title = `Loaded Logs - ${loadedFileName}`;
+      const loadedLogsTxt = `Loaded Logs - ${loadedFileName}`;
+      document.title = loadedLogsTxt;
+      this.view.updatePageType(loadedLogsTxt);
+      this.view.updateMenus({ pageType: 'load-logs' });
 
       const currentTab = await browser.tabs.getCurrent();
       let logs;

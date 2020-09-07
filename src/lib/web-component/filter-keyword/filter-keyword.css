@@ -8,5 +8,9 @@
 
 .filter-container input[name='keyword'] {
   height: 100%;
+  width: 100%;
+  min-width: 90px;
+  max-height: 35px;
   font-size: 15px;
+  border: 1px solid #dfdfdf;
 }

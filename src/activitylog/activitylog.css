@@ -6,31 +6,150 @@
   box-sizing: border-box;
 }
 
-.activity-log-wrapper {
-  position: relative;
-}
-
-.container {
-  width: 100%;
-  padding: 0 10px;
-}
-
-#saveLogBtn {
-  margin: 20px 0;
-}
-
 .failure {
   background-color: #961616;
   padding: 10px;
   color: #ffffff;
 }
 
-.filter-boxes {
-  display: flex;
-  margin: 10px 0;
-}
-
 .filter-wrapper filter-option:not(:last-child),
 .filter-wrapper filter-keyword {
-  margin-right: 10px;
+  margin: 0 5px;
+}
+
+.filter-wrapper filter-timestamp {
+  margin-left: 5px;
+}
+
+.menu-wrapper {
+  padding: 5px 10px;
+}
+input[type='file'] {
+  display: none;
+}
+
+.content-wrapper {
+  display: grid;
+}
+
+.separator {
+  border-right: 2px solid #dfdfdf;
+  height: 100%;
+  max-height: 40px;
+}
+
+.menu-wrapper {
+  display: grid;
+  grid-template-columns: 25px 2px auto 2px 25px;
+  grid-column-gap: 10px;
+  align-items: center;
+}
+
+.menu-details {
+  background: #fff;
+  border: 1px solid #dfdfdf;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 6px;
+  width: 150px;
+  z-index: 10001;
+  margin-top: 15px;
+}
+
+.menu-details > * {
+  display: flex;
+  align-items: center;
+}
+
+.clear-logs,
+.options-btn,
+.save-logs,
+.load-file {
+  cursor: pointer;
+}
+
+.clear-logs img,
+.options-btn img {
+  vertical-align: middle;
+}
+
+.menu-details > *:nth-child(odd) {
+  padding: 10px 10px 5px;
+}
+
+.menu-details > *:nth-child(even) {
+  padding: 5px 10px 10px;
+}
+
+.menu-details img {
+  width: 24px;
+  height: auto;
+  padding-right: 8px;
+}
+
+.menu-details:after,
+.menu-details:before {
+  bottom: 100%;
+  right: 5px;
+  border: solid transparent;
+  content: ' ';
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.menu-details:after {
+  border-color: rgba(194, 225, 245, 0);
+  border-bottom-color: #fff;
+  border-width: 9px;
+  margin-right: 1px;
+}
+.menu-details:before {
+  border-color: rgba(194, 225, 245, 0);
+  border-bottom-color: #dfdfdf;
+  border-width: 10px;
+  margin-right: 0px;
+}
+
+.filter-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.filter-by-label {
+  align-self: center;
+}
+
+.footer-wrapper {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  height: 30px;
+  align-items: center;
+  padding: 0 15px;
+  background: #15bfbd;
+  color: #ffffff;
+}
+
+.logs-counter {
+  display: flex;
+}
+
+.logs-counter span {
+  margin: 0 8px;
+}
+
+.logs-counter .separator {
+  height: auto;
+}
+
+.filter-tabid {
+  justify-self: center;
+}
+
+.page-type {
+  justify-self: right;
 }

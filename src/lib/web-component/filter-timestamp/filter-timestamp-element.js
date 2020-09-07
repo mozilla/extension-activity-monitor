@@ -15,12 +15,27 @@ export class FilterTimestamp extends HTMLElement {
       '.timestamp-filter-container'
     );
 
-    this.startTimeLabel = filterWrapper.querySelector('#startTimeLabel');
-    this.stopTimeLabel = filterWrapper.querySelector('#stopTimeLabel');
+    this.filterToggleBar = filterWrapper.querySelector('.filter-toggle-bar');
+
+    this.timestampFilterOptions = filterWrapper.querySelector(
+      '.timestamp-filter-options'
+    );
+
+    this.startTimeLabel = this.timestampFilterOptions.querySelector(
+      '#startTimeLabel'
+    );
+    this.stopTimeLabel = this.timestampFilterOptions.querySelector(
+      '#stopTimeLabel'
+    );
 
     this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
-    this.clearStartTimeBtn = filterWrapper.querySelector('#clearStart');
-    this.clearStopTimeBtn = filterWrapper.querySelector('#clearStop');
+    this.clearStartTimeBtn = this.timestampFilterOptions.querySelector(
+      '#clearStart'
+    );
+
+    this.clearStopTimeBtn = this.timestampFilterOptions.querySelector(
+      '#clearStop'
+    );
 
     shadow.appendChild(filterWrapper);
   }
@@ -50,6 +65,7 @@ export class FilterTimestamp extends HTMLElement {
     this.timeStamp = timeStamp;
     this.filterContainer.hidden = false;
 
+    this.setTimestampStatus();
     this.dispatchFilterChange();
   };
 
@@ -72,6 +88,13 @@ export class FilterTimestamp extends HTMLElement {
       this.stopTimeLabel.textContent = dateTimeFormat(timestamp.stop);
       this.filterContainer.hidden = false;
       this.clearStopTimeBtn.hidden = false;
+    }
+  }
+
+  setTimestampStatus() {
+    if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
+      this.timestampFilterOptions.hidden = false;
+      this.filterToggleBar.classList.add('expanded');
     }
   }
 
@@ -105,7 +128,8 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     if (!this.timeStamp) {
-      this.filterContainer.hidden = true;
+      this.timestampFilterOptions.hidden = true;
+      this.filterToggleBar.classList.remove('expanded');
     }
 
     this.dispatchFilterChange();
@@ -120,15 +144,23 @@ export class FilterTimestamp extends HTMLElement {
       switch (event.target) {
         case this.clearFilterBtn:
           this.onClearFilter();
-          break;
+          return;
         case this.clearStartTimeBtn:
           this.onClearFilter(true, false);
-          break;
+          return;
         case this.clearStopTimeBtn:
           this.onClearFilter(false, true);
-          break;
+          return;
+      }
+      if (event.currentTarget === this.filterContainer) {
+        this.toggleFilterDetailView();
       }
     }
+  }
+
+  toggleFilterDetailView() {
+    this.timestampFilterOptions.hidden = !this.timestampFilterOptions.hidden;
+    this.filterToggleBar.classList.toggle('expanded');
   }
 
   connectedCallback() {
@@ -141,12 +173,14 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterContainer.addEventListener('click', this);
+    this.timestampFilterOptions.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.filterContainer.removeEventListener('click', this);
+    this.timestampFilterOptions.addEventListener('click', this);
   }
 }
 

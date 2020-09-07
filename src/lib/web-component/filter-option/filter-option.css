@@ -2,13 +2,16 @@
   box-sizing: border-box;
 }
 
+.filter-container {
+  width: auto;
+}
+
 .filter-checkbox {
   display: block;
   position: relative;
-  padding-left: 30px;
+  padding: 8px 0 0 25px;
   cursor: pointer;
-  font-size: 18px;
-  margin: 10px 0;
+  font-size: 16px;
   -moz-user-select: none;
   -webkit-user-select: none;
 }
@@ -19,10 +22,10 @@
 }
 .select-indicator {
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 20px;
-  width: 20px;
+  top: 10px;
+  left: 5px;
+  height: 15px;
+  width: 15px;
   background: #e6e6e6;
 }
 
@@ -31,11 +34,11 @@
   background: #ccc;
 }
 .filter-checkbox input:checked ~ .select-indicator {
-  background: #2aa1c0;
+  background: #15bfbd;
 }
 .filter-checkbox:hover input:not([disabled]):checked ~ .select-indicator,
 .filter-checkbox input:checked:focus ~ .select-indicator {
-  background: #0e647d;
+  background: #0f918e;
 }
 .filter-checkbox input:disabled ~ .select-indicator {
   background: #e6e6e6;
@@ -51,10 +54,10 @@
   display: block;
 }
 .filter-checkbox .select-indicator:after {
-  left: 8px;
-  top: 5px;
-  width: 5px;
-  height: 8px;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 7px;
   border: solid #fff;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
@@ -69,16 +72,20 @@
 
 .toggle-btn {
   cursor: pointer;
-  background: #66c8e0 url(/icons/chevron-right.svg) no-repeat center right /
-    auto;
-  padding: 10px;
-  position: relative;
+  background: url(/icons/chevron-right.svg) no-repeat center right / auto;
+  border: 1px solid #dfdfdf;
   -moz-user-select: none;
   -webkit-user-select: none;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  position: relative;
 }
 
 .toggle-btn.expanded {
-  background: #66c8e0 url(/icons/chevron-down.svg) no-repeat center right / auto;
+  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
+  border: 1px solid #dfdfdf;
 }
 
 .checkbox-list {
@@ -87,8 +94,19 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   width: auto;
   min-width: 100%;
-  padding: 5px 10px;
   z-index: 1001;
-  margin-top: 10px;
-  left: 0;
+  top: 35px;
+  left: -1px;
+  right: -1px;
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.checkbox-list .filter-checkbox:last-child {
+  padding-bottom: 8px;
+}
+
+.filter-checkbox span {
+  word-wrap: break-word;
 }

@@ -1,19 +1,46 @@
-.timestamp-filter-container .label {
-  width: max-content;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:host {
+  width: auto;
+  position: relative;
+}
+
+.timestamp-filter-container {
+  cursor: pointer;
+  position: relative;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+.filter-toggle-bar {
   display: flex;
-  background: #000;
-  padding: 10px 20px;
-  color: #ffffff;
+  justify-content: space-between;
+  background: url(/icons/chevron-right.svg) no-repeat center right / auto;
+  -moz-user-select: none;
   align-items: center;
+  height: 35px;
+  border: 1px solid #dfdfdf;
+}
+
+.filter-toggle-bar .title {
+  margin: 0 15px;
+}
+
+.filter-toggle-bar.expanded {
+  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
 }
 
 .timestamp-filter-options {
-  display: flex;
-  justify-content: space-evenly;
   padding: 5px;
-  border-top: 2px solid #000000;
-  border-left: 2px solid #000000;
-  border-right: 2px solid #000000;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  z-index: 10001;
+  background: #fff;
+  width: 100%;
 }
 
 .timestamp-filter-options .title {
@@ -50,6 +77,7 @@
 .stop-time-container {
   display: flex;
   align-items: center;
+  padding: 5px 0;
 }
 
 /* hidden attribute is not being applied to the elements inside the shadow DOM */
