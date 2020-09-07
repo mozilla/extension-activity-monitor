@@ -33,9 +33,18 @@ export function serializeFilters(searchParams, updateFilter) {
   return searchParams;
 }
 
-function getJSONParseVal(str) {
+function getJSONParseVal(str, options) {
+  if (typeof str !== 'string') {
+    return null;
+  }
+
   try {
-    return JSON.parse(str);
+    const parsedData = JSON.parse(str);
+    if (options?.returnArray) {
+      return Array.isArray(parsedData) ? parsedData : [];
+    } else if (options?.returnObject) {
+      return typeof parsedData === 'object' ? parsedData : null;
+    }
   } catch (error) {
     return null;
   }
@@ -50,18 +59,13 @@ export function deSerializeFilters(searchParams) {
   const filterTimestamp = searchParams.get('timeStamp');
   const filterTabId = parseInt(searchParams.get('tabId'), 10) || null;
 
-  const ids = getJSONParseVal(filterIds);
-  const types = getJSONParseVal(filterTypes);
-  const names = getJSONParseVal(filterNames);
-  const timestamps =
-    typeof getJSONParseVal(filterTimestamp) === 'object'
-      ? getJSONParseVal(filterTimestamp)
-      : null;
+  const ids = getJSONParseVal(filterIds, { returnArray: true });
+  const types = getJSONParseVal(filterTypes, { returnArray: true });
+  const names = getJSONParseVal(filterNames, { returnArray: true });
+  const timestamps = getJSONParseVal(filterTimestamp, { returnObject: true });
 
-  let viewTypes = getJSONParseVal(filterViewTypes);
-  viewTypes = Array.isArray(viewTypes)
-    ? viewTypes.map((viewType) => (viewType == null ? undefined : viewType))
-    : null;
+  let viewTypes = getJSONParseVal(filterViewTypes, { returnArray: true });
+  viewTypes = viewTypes?.map((vt) => (vt == null ? undefined : vt));
 
   const updateFilter = {
     id: { exclude: new Set(ids) },

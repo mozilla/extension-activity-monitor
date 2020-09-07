@@ -27,11 +27,17 @@ test('serializeFilters method should return the updated search params', () => {
     updateFilter
   );
 
-  expect(serializedFormat.get('id')).toEqual(JSON.stringify(extIds));
-  expect(serializedFormat.get('viewType')).toEqual(JSON.stringify(viewTypes));
-  expect(serializedFormat.get('type')).toEqual(JSON.stringify(types));
-  expect(serializedFormat.get('name')).toEqual(JSON.stringify(names));
-  expect(serializedFormat.get('tabId')).toEqual(JSON.stringify(tabId));
+  const expectedExtIds = '["addon1@test.com","addon2@test.com"]';
+  const expectedViewTypes = '["popup",null]';
+  const expectedTypes = '["api_call","content_script"]';
+  const expectedNames = '["test@api"]';
+  const expectedTabId = '22';
+
+  expect(serializedFormat.get('id')).toEqual(expectedExtIds);
+  expect(serializedFormat.get('viewType')).toEqual(expectedViewTypes);
+  expect(serializedFormat.get('type')).toEqual(expectedTypes);
+  expect(serializedFormat.get('name')).toEqual(expectedNames);
+  expect(serializedFormat.get('tabId')).toEqual(expectedTabId);
   expect(serializedFormat.get('keyword')).toEqual(keyword);
   expect(serializedFormat.get('timeStamp')).toEqual(JSON.stringify(timeStamp));
 });
@@ -57,15 +63,16 @@ test('deSerializeFilters method should return valid filter object', () => {
   expect(filterObject).toMatchObject(expectedFilterObject);
 });
 
-test('deSerializeFilters method should return the default filter object if there are no valid filters', () => {
+test('deSerializeFilters method should return the filter object with valid filter properties, ignoring the invalid filter properties', () => {
+  // only "type" is valid here
   const testUrl = new URL(
-    'http://test.html?invalidParam="wrongValue"&id=null&viewType="wrong-type"&timeStamp="wrong-type"&tabId=undefined'
+    'http://test.html?invalidParam="wrongValue"&id=null&viewType="wrong-type"&type={}&name=["tabs.executeScript"]&timeStamp=wrong-type&tabId=undefined'
   );
-  const defaultFilterObject = {
+  const expectedFilterObject = {
     id: { exclude: new Set() },
     viewType: { exclude: new Set() },
     type: { exclude: new Set() },
-    name: { exclude: new Set() },
+    name: { exclude: new Set(['tabs.executeScript']) },
     tabId: null,
     keyword: '',
     timeStamp: null,
@@ -74,5 +81,5 @@ test('deSerializeFilters method should return the default filter object if there
   const searchParams = new URLSearchParams(testUrl.search.slice(1));
   const filterObject = formatters.deSerializeFilters(searchParams);
 
-  expect(filterObject).toMatchObject(defaultFilterObject);
+  expect(filterObject).toMatchObject(expectedFilterObject);
 });
