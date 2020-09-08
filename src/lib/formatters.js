@@ -44,6 +44,8 @@ function getJSONParseVal(str, options) {
       return Array.isArray(parsedData) ? parsedData : [];
     } else if (options?.returnObject) {
       return typeof parsedData === 'object' ? parsedData : null;
+    } else {
+      return parsedData;
     }
   } catch (error) {
     return null;

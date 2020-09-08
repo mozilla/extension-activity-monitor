@@ -31,15 +31,18 @@ test('serializeFilters method should return the updated search params', () => {
   const expectedViewTypes = '["popup",null]';
   const expectedTypes = '["api_call","content_script"]';
   const expectedNames = '["test@api"]';
-  const expectedTabId = '22';
+  const expectedTabId = 22;
+  const expectedTimestamp = '{"start":1597686226302,"stop":1597686226302}';
 
-  expect(serializedFormat.get('id')).toEqual(expectedExtIds);
-  expect(serializedFormat.get('viewType')).toEqual(expectedViewTypes);
-  expect(serializedFormat.get('type')).toEqual(expectedTypes);
-  expect(serializedFormat.get('name')).toEqual(expectedNames);
-  expect(serializedFormat.get('tabId')).toEqual(expectedTabId);
-  expect(serializedFormat.get('keyword')).toEqual(keyword);
-  expect(serializedFormat.get('timeStamp')).toEqual(JSON.stringify(timeStamp));
+  const fetchedTabId = parseInt(searchParams.get('tabId'), 10) || null;
+
+  expect(serializedFormat.get('id')).toStrictEqual(expectedExtIds);
+  expect(serializedFormat.get('viewType')).toStrictEqual(expectedViewTypes);
+  expect(serializedFormat.get('type')).toStrictEqual(expectedTypes);
+  expect(serializedFormat.get('name')).toStrictEqual(expectedNames);
+  expect(fetchedTabId).toStrictEqual(expectedTabId);
+  expect(serializedFormat.get('keyword')).toStrictEqual(keyword);
+  expect(serializedFormat.get('timeStamp')).toStrictEqual(expectedTimestamp);
 });
 
 test('deSerializeFilters method should return valid filter object', () => {
