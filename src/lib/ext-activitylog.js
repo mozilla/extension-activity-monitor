@@ -1,13 +1,14 @@
 import { save } from './save-load.js';
+import { serializeFilters, deSerializeFilters } from './formatters.js';
 
 class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: new Set(),
-      viewType: new Set(),
-      type: new Set(),
-      name: new Set(),
+      id: { exclude: new Set() },
+      viewType: { exclude: new Set() },
+      type: { exclude: new Set() },
+      name: { exclude: new Set() },
       tabId: null,
       keyword: '',
       timeStamp: null,
@@ -34,7 +35,7 @@ class Model {
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
    * @param {null|number} [updateFilter.tabId] - It's null when search paramter
-   * `filterTabId` is not used.
+   * `tabId` is not used.
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -53,7 +54,7 @@ class Model {
   }
 
   matchFilterId(id) {
-    return this.filter.id.has(id);
+    return !this.filter.id.exclude.has(id);
   }
 
   matchFilterViewType({ type, viewType }) {
@@ -62,11 +63,11 @@ class Model {
       // undefined in viewType Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.viewType.has(viewType);
+    return !this.filter.viewType.exclude.has(viewType);
   }
 
   matchFilterType(type) {
-    return this.filter.type.has(type);
+    return !this.filter.type.exclude.has(type);
   }
 
   matchFilterApiName({ name, type }) {
@@ -75,7 +76,7 @@ class Model {
       // store content script urls in API name Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.name.has(name);
+    return !this.filter.name.exclude.has(name);
   }
 
   matchFilterKeyword(data) {
@@ -183,6 +184,34 @@ class View {
     this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
   }
 
+  setInitialFilters(updateFilter) {
+    const {
+      id,
+      viewType,
+      type,
+      name,
+      keyword,
+      timeStamp,
+      tabId,
+    } = updateFilter;
+
+    this.extFilter.setInitialFilter(id.exclude);
+    this.viewTypeFilter.setInitialFilter(viewType.exclude);
+    this.apiTypeFilter.setInitialFilter(type.exclude);
+    this.apiNameFilter.setInitialFilter(name.exclude);
+    this.keywordFilter.setInitialFilter(keyword);
+    this.timestampFilter.setInitialFilter(timeStamp);
+
+    if (tabId) {
+      this.renderHeading({ tabId });
+      const filterDetail = { updateFilter: { tabId } };
+
+      this.logHeading.dispatchEvent(
+        new CustomEvent('filterchange', { detail: filterDetail })
+      );
+    }
+  }
+
   setError(errorMessage) {
     if (errorMessage) {
       this.notice.textContent = errorMessage;
@@ -197,8 +226,8 @@ class View {
     this.logView.clearTable();
   }
 
-  renderHeading({ filterTabId }) {
-    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${filterTabId}`;
+  renderHeading({ tabId }) {
+    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${tabId}`;
   }
 }
 
@@ -217,16 +246,17 @@ class Controller {
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
+    this.view.logHeading.addEventListener('filterchange', this);
 
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
     );
-    const fileName = searchParams.get('file');
-    const filterTabId = parseInt(searchParams.get('filterTabId'), 10);
 
-    if (fileName) {
+    const loadedFileName = searchParams.get('file');
+
+    if (loadedFileName) {
       this.view.menuContainer.hidden = true;
-      document.title = `Loaded Logs - ${fileName}`;
+      document.title = `Loaded Logs - ${loadedFileName}`;
 
       const currentTab = await browser.tabs.getCurrent();
       let logs;
@@ -264,20 +294,16 @@ class Controller {
         }
       });
 
+      if (document.location.search) {
+        const updateFilter = deSerializeFilters(searchParams);
+        this.model.setFilter(updateFilter);
+        this.view.setInitialFilters(updateFilter);
+      }
+
       const existingLogs = await this.getExistingLogs();
 
       if (existingLogs.length) {
         this.handleNewLogs(existingLogs);
-      }
-
-      if (filterTabId) {
-        this.view.renderHeading({ filterTabId });
-
-        const filterDetail = {
-          updateFilter: { tabId: filterTabId },
-        };
-
-        this.onFilterChange(filterDetail);
       }
     }
   }
@@ -336,14 +362,23 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { updateFilter, isNewFilterAdded } = filterDetail;
+    const { updateFilter } = filterDetail;
 
     this.model.setFilter(updateFilter);
-    // When new filter checkbox is added, it is in checked condition by default
-    // No need to re-render the rows then.
-    if (!isNewFilterAdded) {
-      this.view.setLogFilter((log) => this.isFilterMatched(log));
-    }
+    this.updateSearchParams(updateFilter);
+    this.view.setLogFilter((log) => this.isFilterMatched(log));
+  }
+
+  updateSearchParams(updateFilter) {
+    const currentURL = new URL(document.location.href);
+    const currentSearchParams = new URLSearchParams(currentURL.search.slice(1));
+
+    const updatedSearchParams = serializeFilters(
+      currentSearchParams,
+      updateFilter
+    );
+
+    history.replaceState(null, null, `?${updatedSearchParams}`);
   }
 
   isFilterMatched(log) {

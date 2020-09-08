@@ -6,8 +6,7 @@ export class FilterOption extends HTMLElement {
     super();
 
     this.viewCheckboxLabels = new Set();
-    // It contains the checked checkboxes
-    this.activeCheckboxLabels = new Set();
+    this.uncheckedCheckboxLabels = new Set();
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -35,10 +34,17 @@ export class FilterOption extends HTMLElement {
     for (const log of logs) {
       const checkboxLabel = log[this.filterKey];
       if (!this.viewCheckboxLabels.has(checkboxLabel)) {
-        this.viewCheckboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
-        this.dispatchFilterChangeEvent({ isNewFilterAdded: true });
       }
+    }
+
+    this.dispatchFilterChangeEvent();
+  }
+
+  setInitialFilter(searchParamLabels) {
+    for (const label of searchParamLabels) {
+      // the checkboxes with these labels will be in unchecked condition
+      this.uncheckedCheckboxLabels.add(label);
     }
   }
 
@@ -49,11 +55,9 @@ export class FilterOption extends HTMLElement {
 
     const inputCheckbox = newCheckbox.querySelector('input');
     inputCheckbox.value = checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
-    inputCheckbox.checked = true;
+    inputCheckbox.checked = !this.uncheckedCheckboxLabels.has(checkboxLabel);
 
-    // adding to activeCheckboxLabels list since checkbox is checked
-    this.activeCheckboxLabels.add(checkboxLabel);
-
+    this.viewCheckboxLabels.add(checkboxLabel);
     this.checkboxList.appendChild(newCheckbox);
   }
 
@@ -81,12 +85,12 @@ export class FilterOption extends HTMLElement {
       const isChecked = event.target.checked;
 
       if (isChecked) {
-        this.activeCheckboxLabels.add(checkboxLabel);
+        this.uncheckedCheckboxLabels.delete(checkboxLabel);
       } else {
-        this.activeCheckboxLabels.delete(checkboxLabel);
+        this.uncheckedCheckboxLabels.add(checkboxLabel);
       }
 
-      this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
+      this.dispatchFilterChangeEvent();
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
@@ -97,12 +101,13 @@ export class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  dispatchFilterChangeEvent({ isNewFilterAdded }) {
+  dispatchFilterChangeEvent() {
     const filterDetail = {
       updateFilter: {
-        [this.filterKey]: new Set(this.activeCheckboxLabels),
+        [this.filterKey]: {
+          exclude: new Set(this.uncheckedCheckboxLabels),
+        },
       },
-      isNewFilterAdded,
     };
 
     this.dispatchEvent(

@@ -53,6 +53,28 @@ export class FilterTimestamp extends HTMLElement {
     this.dispatchFilterChange();
   };
 
+  setInitialFilter(timestamp) {
+    if (timestamp == null) {
+      return;
+    }
+
+    this.timeStamp = {};
+
+    if (timestamp?.start != null) {
+      this.timeStamp.start = timestamp.start;
+      this.startTimeLabel.textContent = dateTimeFormat(timestamp.start);
+      this.filterContainer.hidden = false;
+      this.clearStartTimeBtn.hidden = false;
+    }
+
+    if (timestamp?.stop != null) {
+      this.timeStamp.stop = timestamp.stop;
+      this.stopTimeLabel.textContent = dateTimeFormat(timestamp.stop);
+      this.filterContainer.hidden = false;
+      this.clearStopTimeBtn.hidden = false;
+    }
+  }
+
   dispatchFilterChange() {
     const filterDetail = {
       updateFilter: {
