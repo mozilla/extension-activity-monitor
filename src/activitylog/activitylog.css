@@ -48,7 +48,7 @@ input[type='file'] {
 .menu-details {
   background: #fff;
   border: 1px solid #dfdfdf;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
   right: 6px;
   width: 150px;

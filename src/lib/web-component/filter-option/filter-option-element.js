@@ -27,6 +27,8 @@ export class FilterOption extends HTMLElement {
     this.checkboxList = filterContainer.querySelector('.checkbox-list');
     this.checkboxList.classList.add(this.filterKey);
 
+    this.emptyFilterLabel = this.checkboxList.firstElementChild;
+
     shadow.appendChild(filterContainer);
   }
 
@@ -49,6 +51,8 @@ export class FilterOption extends HTMLElement {
   }
 
   addNewCheckbox(checkboxLabel) {
+    this.emptyFilterLabel.hidden = true;
+
     const newCheckbox = this.checkboxTemplate.cloneNode(true);
     newCheckbox.querySelector('label span').textContent =
       checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
@@ -68,11 +72,12 @@ export class FilterOption extends HTMLElement {
   connectedCallback() {
     this.toggleBtn.addEventListener('click', this);
     this.checkboxList.addEventListener('change', this);
+    this.addEventListener('hidedropdown', this);
   }
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.toggleFilterListDisplay(this.checkboxList);
+      this.toggleFilterListDisplay();
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
@@ -91,13 +96,16 @@ export class FilterOption extends HTMLElement {
       }
 
       this.dispatchFilterChangeEvent();
+    } else if (event.type === 'hidedropdown') {
+      this.checkboxList.hidden = true;
+      this.toggleBtn.classList.remove('expanded');
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
   }
 
-  toggleFilterListDisplay(checkboxList) {
-    checkboxList.hidden = !checkboxList.hidden;
+  toggleFilterListDisplay() {
+    this.checkboxList.hidden = !this.checkboxList.hidden;
     this.toggleBtn.classList.toggle('expanded');
   }
 
@@ -119,6 +127,7 @@ export class FilterOption extends HTMLElement {
   disconnectedCallback() {
     this.toggleBtn.addEventListener('click', this);
     this.checkboxList.addEventListener('change', this);
+    this.removeEventListener('hidedropdown', this);
   }
 }
 

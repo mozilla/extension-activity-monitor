@@ -137,6 +137,15 @@ class View {
     this.keywordFilter = document.querySelector('filter-keyword');
     this.timestampFilter = document.querySelector('filter-timestamp');
 
+    this.filterOptionsSet = new Set([
+      this.extFilter,
+      this.viewTypeFilter,
+      this.apiTypeFilter,
+      this.apiNameFilter,
+      this.timestampFilter,
+    ]);
+
+    document.addEventListener('click', this);
     this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
@@ -156,7 +165,7 @@ class View {
       } else if (event.currentTarget === this.saveLogBtn) {
         this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
       } else {
-        throw new Error(`wrong event target - ${event.target.tagName}`);
+        this.hideDropdowns(event.target);
       }
     } else if (event.type === 'change' && event.target === this.loadLogFile) {
       const logFile = event.target.files[0];
@@ -166,6 +175,23 @@ class View {
       );
     } else {
       throw new Error(`wrong event type - ${event.type}`);
+    }
+  }
+
+  hideDropdowns(eventTarget) {
+    if (this.filterOptionsSet.has(eventTarget)) {
+      this.menuDetails.hidden = true;
+      return;
+    }
+
+    this.extFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+    this.viewTypeFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+    this.apiTypeFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+    this.apiNameFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+    this.timestampFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+
+    if (eventTarget?.closest('div') !== this.optionsBtn) {
+      this.menuDetails.hidden = true;
     }
   }
 

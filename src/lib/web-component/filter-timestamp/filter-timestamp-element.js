@@ -155,6 +155,9 @@ export class FilterTimestamp extends HTMLElement {
       if (event.currentTarget === this.filterContainer) {
         this.toggleFilterDetailView();
       }
+    } else if (event.type === 'hidedropdown') {
+      this.timestampFilterOptions.hidden = true;
+      this.filterToggleBar.classList.remove('expanded');
     }
   }
 
@@ -174,6 +177,7 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterContainer.addEventListener('click', this);
     this.timestampFilterOptions.addEventListener('click', this);
+    this.addEventListener('hidedropdown', this);
   }
 
   disconnectedCallback() {
@@ -181,6 +185,7 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.filterContainer.removeEventListener('click', this);
     this.timestampFilterOptions.addEventListener('click', this);
+    this.removeEventListener('hidedropdown', this);
   }
 }
 

@@ -32,11 +32,12 @@
 
 .filter-toggle-bar.expanded {
   background: url(/icons/chevron-down.svg) no-repeat center right / auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.15);
 }
 
 .timestamp-filter-options {
   padding: 5px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
   z-index: 10001;
   background: #fff;
