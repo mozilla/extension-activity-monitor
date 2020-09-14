@@ -72,12 +72,11 @@ export class FilterOption extends HTMLElement {
   connectedCallback() {
     this.toggleBtn.addEventListener('click', this);
     this.checkboxList.addEventListener('change', this);
-    this.addEventListener('hidedropdown', this);
   }
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.toggleFilterListDisplay();
+      this.toggleDropdown({ displayPref: 'toggle' });
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
@@ -96,17 +95,26 @@ export class FilterOption extends HTMLElement {
       }
 
       this.dispatchFilterChangeEvent();
-    } else if (event.type === 'hidedropdown') {
-      this.checkboxList.hidden = true;
-      this.toggleBtn.classList.remove('expanded');
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
   }
 
-  toggleFilterListDisplay() {
-    this.checkboxList.hidden = !this.checkboxList.hidden;
-    this.toggleBtn.classList.toggle('expanded');
+  toggleDropdown({ displayPref }) {
+    switch (displayPref) {
+      case 'show':
+        this.checkboxList.hidden = false;
+        this.toggleBtn.classList.add('expanded');
+        break;
+      case 'toggle':
+        this.checkboxList.hidden = !this.checkboxList.hidden;
+        this.toggleBtn.classList.toggle('expanded');
+        break;
+      case 'hide':
+        this.checkboxList.hidden = true;
+        this.toggleBtn.classList.remove('expanded');
+        break;
+    }
   }
 
   dispatchFilterChangeEvent(options) {
@@ -125,9 +133,8 @@ export class FilterOption extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.toggleBtn.addEventListener('click', this);
-    this.checkboxList.addEventListener('change', this);
-    this.removeEventListener('hidedropdown', this);
+    this.toggleBtn.removeEventListener('click', this);
+    this.checkboxList.removeEventListener('change', this);
   }
 }
 

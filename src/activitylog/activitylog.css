@@ -47,38 +47,53 @@ input[type='file'] {
 
 .menu-details {
   background: #fff;
-  border: 1px solid #dfdfdf;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
-  right: 6px;
+  right: 8px;
   width: 150px;
   z-index: 10001;
   margin-top: 15px;
 }
 
-.menu-details > * {
-  display: flex;
-  align-items: center;
+.menu-details > *:hover {
+  background-color: #a2eee3;
 }
 
-.clear-logs,
+.clear-logs-btn,
 .options-btn,
-.save-logs,
+.save-log-btn,
 .load-file {
   cursor: pointer;
 }
 
-.clear-logs img,
-.options-btn img {
-  vertical-align: middle;
+.options-btn,
+.clear-logs-btn {
+  height: 24px;
+  width: 24px;
 }
 
-.menu-details > *:nth-child(odd) {
-  padding: 10px 10px 5px;
+.options-btn {
+  background: url('/icons/settings.svg');
 }
 
-.menu-details > *:nth-child(even) {
-  padding: 5px 10px 10px;
+.clear-logs-btn {
+  background: url('/icons/clear.svg');
+}
+
+.save-log-btn {
+  background: url('/icons/save.svg') no-repeat 5px center / auto;
+}
+
+.load-file-btn {
+  background: url('/icons/upload.svg') no-repeat 5px center / auto;
+}
+.menu-details > * {
+  padding-left: 35px;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
 .menu-details img {
@@ -119,6 +134,7 @@ input[type='file'] {
 
 .filter-by-label {
   align-self: center;
+  margin-right: 5px;
 }
 
 .footer-wrapper {

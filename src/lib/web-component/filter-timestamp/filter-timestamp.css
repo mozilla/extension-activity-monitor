@@ -42,6 +42,7 @@
   z-index: 10001;
   background: #fff;
   width: 100%;
+  font-size: 15px;
 }
 
 .timestamp-filter-options .title {
@@ -50,8 +51,8 @@
 
 .clear-btn {
   cursor: pointer;
-  min-width: 20px;
-  height: 20px;
+  min-width: 15px;
+  height: 15px;
   display: inline-block;
   margin-left: 10px;
 }
@@ -81,7 +82,7 @@
   padding: 5px 0;
 }
 
-/* hidden attribute is not being applied to the elements inside the shadow DOM */
+/* since display property is changed through another selector, it's overriding the rule of hidden attribute */
 [hidden] {
   display: none;
 }

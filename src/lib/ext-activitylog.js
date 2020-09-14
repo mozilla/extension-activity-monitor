@@ -116,9 +116,9 @@ class View {
   constructor() {
     this.logView = document.querySelector('log-view');
     this.optionsBtn = document.querySelector('.options-btn');
-    this.clearLogBtn = document.querySelector('#clearLogBtn');
+    this.clearLogBtn = document.querySelector('.clear-logs-btn');
     this.menuDetails = document.querySelector('.menu-details');
-    this.saveLogBtn = document.querySelector('#saveLogBtn');
+    this.saveLogBtn = document.querySelector('.save-log-btn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
     this.filterIdTxt = document.querySelector('.filter-tabid');
@@ -146,7 +146,6 @@ class View {
     ]);
 
     document.addEventListener('click', this);
-    this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
@@ -158,15 +157,19 @@ class View {
 
   handleEvent(event) {
     if (event.type === 'click') {
-      if (event.target === this.clearLogBtn) {
-        this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-      } else if (event.currentTarget === this.optionsBtn) {
-        this.menuDetails.hidden = !this.menuDetails.hidden;
-      } else if (event.currentTarget === this.saveLogBtn) {
-        this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-      } else {
-        this.hideDropdowns(event.target);
+      switch (event.target) {
+        case this.clearLogBtn:
+          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
+          break;
+        case this.optionsBtn:
+          this.menuDetails.hidden = !this.menuDetails.hidden;
+          break;
+        case this.saveLogBtn:
+          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
       }
+
+      this.hideDropdowns(event.target);
     } else if (event.type === 'change' && event.target === this.loadLogFile) {
       const logFile = event.target.files[0];
       this.loadLogFile.value = '';
@@ -179,19 +182,17 @@ class View {
   }
 
   hideDropdowns(eventTarget) {
-    if (this.filterOptionsSet.has(eventTarget)) {
+    const filterOptionsSet = new Set(this.filterOptionsSet);
+    if (eventTarget !== this.optionsBtn) {
       this.menuDetails.hidden = true;
-      return;
     }
 
-    this.extFilter.dispatchEvent(new CustomEvent('hidedropdown'));
-    this.viewTypeFilter.dispatchEvent(new CustomEvent('hidedropdown'));
-    this.apiTypeFilter.dispatchEvent(new CustomEvent('hidedropdown'));
-    this.apiNameFilter.dispatchEvent(new CustomEvent('hidedropdown'));
-    this.timestampFilter.dispatchEvent(new CustomEvent('hidedropdown'));
+    if (filterOptionsSet.has(eventTarget)) {
+      filterOptionsSet.delete(eventTarget);
+    }
 
-    if (eventTarget?.closest('div') !== this.optionsBtn) {
-      this.menuDetails.hidden = true;
+    for (const filterOption of filterOptionsSet) {
+      filterOption?.toggleDropdown({ displayPref: 'hide' });
     }
   }
 

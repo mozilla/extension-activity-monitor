@@ -151,19 +151,28 @@ export class FilterTimestamp extends HTMLElement {
         case this.clearStopTimeBtn:
           this.onClearFilter(false, true);
           return;
+        default:
+          this.toggleDropdown({ displayPref: 'toggle' });
       }
-      if (event.currentTarget === this.filterContainer) {
-        this.toggleFilterDetailView();
-      }
-    } else if (event.type === 'hidedropdown') {
-      this.timestampFilterOptions.hidden = true;
-      this.filterToggleBar.classList.remove('expanded');
     }
   }
 
-  toggleFilterDetailView() {
-    this.timestampFilterOptions.hidden = !this.timestampFilterOptions.hidden;
-    this.filterToggleBar.classList.toggle('expanded');
+  toggleDropdown({ displayPref }) {
+    switch (displayPref) {
+      case 'show':
+        this.timestampFilterOptions.hidden = false;
+        this.filterToggleBar.classList.add('expanded');
+        break;
+      case 'toggle':
+        this.timestampFilterOptions.hidden = !this.timestampFilterOptions
+          .hidden;
+        this.filterToggleBar.classList.toggle('expanded');
+        break;
+      case 'hide':
+        this.timestampFilterOptions.hidden = true;
+        this.filterToggleBar.classList.remove('expanded');
+        break;
+    }
   }
 
   connectedCallback() {
@@ -177,15 +186,13 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterContainer.addEventListener('click', this);
     this.timestampFilterOptions.addEventListener('click', this);
-    this.addEventListener('hidedropdown', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.filterContainer.removeEventListener('click', this);
-    this.timestampFilterOptions.addEventListener('click', this);
-    this.removeEventListener('hidedropdown', this);
+    this.timestampFilterOptions.removeEventListener('click', this);
   }
 }
 
