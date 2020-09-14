@@ -144,15 +144,17 @@ export class FilterTimestamp extends HTMLElement {
       switch (event.target) {
         case this.clearFilterBtn:
           this.onClearFilter();
-          return;
+          break;
         case this.clearStartTimeBtn:
           this.onClearFilter(true, false);
-          return;
+          break;
         case this.clearStopTimeBtn:
           this.onClearFilter(false, true);
-          return;
-        default:
-          this.toggleDropdown({ displayPref: 'toggle' });
+          break;
+      }
+
+      if (event.currentTarget === this.filterToggleBar) {
+        this.toggleDropdown({ displayPref: 'toggle' });
       }
     }
   }
@@ -184,14 +186,14 @@ export class FilterTimestamp extends HTMLElement {
 
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
-    this.filterContainer.addEventListener('click', this);
+    this.filterToggleBar.addEventListener('click', this);
     this.timestampFilterOptions.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
-    this.filterContainer.removeEventListener('click', this);
+    this.filterToggleBar.removeEventListener('click', this);
     this.timestampFilterOptions.removeEventListener('click', this);
   }
 }
