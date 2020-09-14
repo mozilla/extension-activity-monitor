@@ -117,12 +117,13 @@ class View {
     this.logView = document.querySelector('log-view');
     this.optionsBtn = document.querySelector('.options-btn');
     this.clearLogBtn = document.querySelector('.clear-logs-btn');
-    this.menuDetails = document.querySelector('.menu-details');
+    this.optionsDropdown = document.querySelector('.options-dropdown');
     this.saveLogBtn = document.querySelector('.save-log-btn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
     this.filterIdTxt = document.querySelector('.filter-tabid');
     this.pageType = document.querySelector('.page-type');
+    this.menuWrapper = document.querySelector('.menu-wrapper');
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -162,7 +163,7 @@ class View {
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         case this.optionsBtn:
-          this.menuDetails.hidden = !this.menuDetails.hidden;
+          this.optionsDropdown.hidden = !this.optionsDropdown.hidden;
           break;
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
@@ -184,7 +185,7 @@ class View {
   hideDropdowns(eventTarget) {
     const filterOptionsSet = new Set(this.filterOptionsSet);
     if (eventTarget !== this.optionsBtn) {
-      this.menuDetails.hidden = true;
+      this.optionsDropdown.hidden = true;
     }
 
     if (filterOptionsSet.has(eventTarget)) {
@@ -264,6 +265,10 @@ class View {
     if (pageType === 'load-logs') {
       this.clearLogBtn.hidden = true;
       this.optionsBtn.hidden = true;
+      this.menuWrapper
+        .querySelectorAll('.separator')
+        .forEach((eachSeparator) => (eachSeparator.hidden = true));
+      this.menuWrapper.classList.add('load-logs');
     }
   }
 }

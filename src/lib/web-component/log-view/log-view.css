@@ -19,12 +19,15 @@
   width: 30px;
   height: 30px;
   top: 5px;
-  right: 5px;
+  right: 20px;
   cursor: pointer;
 }
 
 .log-details {
   white-space: pre-wrap;
+  overflow-y: auto;
+  height: inherit;
+  padding: 15px 10px 0 25px;
 }
 
 .width-60 {
@@ -40,8 +43,6 @@
   word-wrap: anywhere;
   background-color: #ffffff;
   border: 1px solid #dfdfdf;
-  overflow-y: auto;
-  padding: 10px 10px 10px 20px;
 }
 
 table {

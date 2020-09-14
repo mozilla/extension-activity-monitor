@@ -45,7 +45,7 @@ input[type='file'] {
   align-items: center;
 }
 
-.menu-details {
+.options-dropdown {
   background: #fff;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
@@ -55,7 +55,11 @@ input[type='file'] {
   margin-top: 15px;
 }
 
-.menu-details > *:hover {
+.menu-wrapper.load-logs {
+  grid-template-columns: auto;
+}
+
+.options-dropdown > *:hover {
   background-color: #a2eee3;
 }
 
@@ -87,7 +91,7 @@ input[type='file'] {
 .load-file-btn {
   background: url('/icons/upload.svg') no-repeat 5px center / auto;
 }
-.menu-details > * {
+.options-dropdown > * {
   padding-left: 35px;
   width: 100%;
   height: 40px;
@@ -96,14 +100,14 @@ input[type='file'] {
   cursor: pointer;
 }
 
-.menu-details img {
+.options-dropdown img {
   width: 24px;
   height: auto;
   padding-right: 8px;
 }
 
-.menu-details:after,
-.menu-details:before {
+.options-dropdown:after,
+.options-dropdown:before {
   bottom: 100%;
   right: 5px;
   border: solid transparent;
@@ -114,13 +118,13 @@ input[type='file'] {
   pointer-events: none;
 }
 
-.menu-details:after {
+.options-dropdown:after {
   border-color: rgba(194, 225, 245, 0);
   border-bottom-color: #fff;
   border-width: 9px;
   margin-right: 1px;
 }
-.menu-details:before {
+.options-dropdown:before {
   border-color: rgba(194, 225, 245, 0);
   border-bottom-color: #dfdfdf;
   border-width: 10px;
