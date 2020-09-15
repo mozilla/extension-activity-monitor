@@ -38,7 +38,7 @@ export class FilterOption extends HTMLElement {
       }
     }
 
-    this.dispatchFilterChangeEvent();
+    this.dispatchFilterChangeEvent({ newFilterOption: true });
   }
 
   setInitialFilter(searchParamLabels) {
@@ -101,13 +101,14 @@ export class FilterOption extends HTMLElement {
     this.toggleBtn.classList.toggle('expanded');
   }
 
-  dispatchFilterChangeEvent() {
+  dispatchFilterChangeEvent(options) {
     const filterDetail = {
       updateFilter: {
         [this.filterKey]: {
           exclude: new Set(this.uncheckedCheckboxLabels),
         },
       },
+      newFilterOption: options?.newFilterOption || false,
     };
 
     this.dispatchEvent(

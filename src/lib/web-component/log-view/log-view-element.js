@@ -3,6 +3,8 @@ import { dateTimeFormat } from '../../formatters.js';
 export class LogView extends HTMLElement {
   constructor() {
     super();
+
+    this.totalLogs = 0;
     this.isFilterMatched = () => true;
 
     const shadow = this.attachShadow({ mode: 'open' });
@@ -27,10 +29,19 @@ export class LogView extends HTMLElement {
 
   setLogFilter(filterFunc) {
     this.isFilterMatched = filterFunc;
+    let filteredLogs = 0;
 
     for (const row of this.tableBody.rows) {
       row.hidden = !this.isFilterMatched(row._log);
+
+      if (!row.hidden) {
+        filteredLogs++;
+      }
     }
+
+    this.dispatchEvent(
+      new CustomEvent('logcounter', { detail: { filteredLogs } })
+    );
   }
 
   addNewRows(logs) {
@@ -64,6 +75,11 @@ export class LogView extends HTMLElement {
       rowsFragment.appendChild(logTableRowInstance);
     }
     this.tableBody.appendChild(rowsFragment);
+
+    this.totalLogs += logs.length;
+    this.dispatchEvent(
+      new CustomEvent('logcounter', { detail: { totalLogs: this.totalLogs } })
+    );
   }
 
   handleEvent(event) {
