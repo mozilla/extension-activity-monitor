@@ -34,10 +34,10 @@ export class LogView extends HTMLElement {
       row.hidden = !this.isFilterMatched(row._log);
     }
 
-    this.updateFilteredRowsCount();
+    this.updateRowCountAndStyle();
   }
 
-  updateFilteredRowsCount() {
+  updateRowCountAndStyle() {
     let visibleRows = 0;
     for (const row of this.tableBody.rows) {
       if (!row.hidden) {
@@ -47,7 +47,7 @@ export class LogView extends HTMLElement {
 
     this.dispatchEvent(
       new CustomEvent('logcountchange', {
-        detail: { filteredLogs: visibleRows },
+        detail: { visibleRows, totalLogs: this.totalLogs },
       })
     );
   }
@@ -84,14 +84,8 @@ export class LogView extends HTMLElement {
     }
     this.tableBody.appendChild(rowsFragment);
 
-    this.updateFilteredRowsCount();
-
     this.totalLogs += logs.length;
-    this.dispatchEvent(
-      new CustomEvent('logcountchange', {
-        detail: { totalLogs: this.totalLogs },
-      })
-    );
+    this.updateRowCountAndStyle();
   }
 
   handleEvent(event) {
