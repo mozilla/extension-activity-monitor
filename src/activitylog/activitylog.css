@@ -18,9 +18,12 @@
   color: #ffffff;
 }
 
-.filter-wrapper filter-option:not(:last-child),
-.filter-wrapper filter-keyword {
+.filter-wrapper filter-option:not(:last-child) {
   margin: 0 5px;
+}
+
+.filter-wrapper filter-keyword {
+  margin-right: 5px;
 }
 
 .filter-wrapper filter-timestamp {
@@ -139,12 +142,7 @@ input[type='file'] {
 
 .filter-wrapper {
   display: grid;
-  grid-template-columns: auto 1fr 1fr 1fr 1fr 1fr 1fr;
-}
-
-.filter-by-label {
-  align-self: center;
-  margin-right: 5px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 .footer-wrapper {

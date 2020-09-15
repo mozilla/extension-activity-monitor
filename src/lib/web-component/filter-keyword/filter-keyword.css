@@ -4,6 +4,7 @@
 
 .filter-container {
   height: 100%;
+  position: relative;
 }
 
 .filter-container input[name='keyword'] {
@@ -13,4 +14,13 @@
   max-height: 35px;
   font-size: 15px;
   border: 1px solid #dfdfdf;
+  padding-left: 25px;
+}
+
+.search-icon {
+  position: absolute;
+  height: 15px;
+  width: 15px;
+  top: 10px;
+  left: 5px;
 }

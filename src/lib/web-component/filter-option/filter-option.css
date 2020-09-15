@@ -79,7 +79,6 @@
   height: 35px;
   display: flex;
   align-items: center;
-  padding-left: 10px;
   position: relative;
 }
 
@@ -113,4 +112,10 @@
 
 .filter-empty-label {
   padding: 10px;
+}
+
+.filter-icon {
+  height: 15px;
+  width: 15px;
+  margin: 0 5px;
 }

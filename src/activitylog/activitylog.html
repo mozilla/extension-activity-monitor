@@ -29,7 +29,6 @@
         <div class="clear-logs-btn" title="Clear all logs"></div>
         <div class="separator"></div>
         <div class="filter-wrapper">
-          <div class="filter-by-label">Filter By</div>
           <filter-keyword></filter-keyword>
           <filter-option filter-key="id">
             Extension Ids
@@ -136,6 +135,7 @@
         href="/lib/web-component/filter-option/filter-option.css"
       />
       <div class="filter-container toggle-btn">
+        <img class="filter-icon" src="/icons/filter.svg" />
         <div class="title"></div>
         <div class="checkbox-list" hidden>
           <div class="filter-empty-label">No Filter Options.</div>
@@ -149,6 +149,7 @@
         href="/lib/web-component/filter-keyword/filter-keyword.css"
       />
       <div class="filter-container">
+        <img class="search-icon" src="/icons/search.svg" />
         <input type="text" name="keyword" placeholder="Keywords" />
       </div>
     </template>
@@ -164,6 +165,7 @@
       title="Apply timestamp filter from context menu inside log view"
     >
       <div class="filter-toggle-bar">
+        <img class="filter-icon" src="/icons/filter.svg" />
         <div class="title">
           Timestamps
         </div>

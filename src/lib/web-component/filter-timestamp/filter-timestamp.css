@@ -18,16 +18,11 @@
 
 .filter-toggle-bar {
   display: flex;
-  justify-content: space-between;
   background: url(/icons/chevron-right.svg) no-repeat center right / auto;
   -moz-user-select: none;
   align-items: center;
   height: 35px;
   border: 1px solid #dfdfdf;
-}
-
-.filter-toggle-bar .title {
-  margin: 0 15px;
 }
 
 .filter-toggle-bar.expanded {
@@ -80,6 +75,12 @@
   display: flex;
   align-items: center;
   padding: 5px 0;
+}
+
+.filter-icon {
+  height: 15px;
+  width: 15px;
+  margin: 0 5px;
 }
 
 /* since display property is changed through another selector, it's overriding the rule of hidden attribute */
