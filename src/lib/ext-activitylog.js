@@ -362,11 +362,13 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { updateFilter } = filterDetail;
-
+    const { updateFilter, newFilterOption } = filterDetail;
     this.model.setFilter(updateFilter);
     this.updateSearchParams(updateFilter);
-    this.view.setLogFilter((log) => this.isFilterMatched(log));
+
+    if (!newFilterOption) {
+      this.view.setLogFilter((log) => this.isFilterMatched(log));
+    }
   }
 
   updateSearchParams(updateFilter) {

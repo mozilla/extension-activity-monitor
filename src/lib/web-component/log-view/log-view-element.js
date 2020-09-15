@@ -31,6 +31,25 @@ export class LogView extends HTMLElement {
     for (const row of this.tableBody.rows) {
       row.hidden = !this.isFilterMatched(row._log);
     }
+
+    this.triggerLogCountChange();
+  }
+
+  triggerLogCountChange() {
+    let visibleRows = 0;
+    const totalLogs = this.tableBody.rows.length;
+
+    for (const row of this.tableBody.rows) {
+      if (!row.hidden) {
+        visibleRows++;
+      }
+    }
+
+    this.dispatchEvent(
+      new CustomEvent('logcountchange', {
+        detail: { visibleRows, totalLogs },
+      })
+    );
   }
 
   addNewRows(logs) {
@@ -63,7 +82,9 @@ export class LogView extends HTMLElement {
 
       rowsFragment.appendChild(logTableRowInstance);
     }
+
     this.tableBody.appendChild(rowsFragment);
+    this.triggerLogCountChange();
   }
 
   handleEvent(event) {
