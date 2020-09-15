@@ -1,10 +1,10 @@
 import { dateTimeFormat } from '../../formatters.js';
 
+let totalLogs = 0;
+
 export class LogView extends HTMLElement {
   constructor() {
     super();
-
-    this.totalLogs = 0;
     this.isFilterMatched = () => true;
 
     const shadow = this.attachShadow({ mode: 'open' });
@@ -34,10 +34,10 @@ export class LogView extends HTMLElement {
       row.hidden = !this.isFilterMatched(row._log);
     }
 
-    this.updateRowCountAndStyle();
+    this.triggerLogCountChange();
   }
 
-  updateRowCountAndStyle() {
+  triggerLogCountChange() {
     let visibleRows = 0;
     for (const row of this.tableBody.rows) {
       if (!row.hidden) {
@@ -47,7 +47,7 @@ export class LogView extends HTMLElement {
 
     this.dispatchEvent(
       new CustomEvent('logcountchange', {
-        detail: { visibleRows, totalLogs: this.totalLogs },
+        detail: { visibleRows, totalLogs },
       })
     );
   }
@@ -84,8 +84,8 @@ export class LogView extends HTMLElement {
     }
     this.tableBody.appendChild(rowsFragment);
 
-    this.totalLogs += logs.length;
-    this.updateRowCountAndStyle();
+    totalLogs += logs.length;
+    this.triggerLogCountChange();
   }
 
   handleEvent(event) {
