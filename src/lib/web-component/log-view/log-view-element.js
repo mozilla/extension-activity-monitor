@@ -1,7 +1,5 @@
 import { dateTimeFormat } from '../../formatters.js';
 
-let totalLogs = 0;
-
 export class LogView extends HTMLElement {
   constructor() {
     super();
@@ -39,6 +37,8 @@ export class LogView extends HTMLElement {
 
   triggerLogCountChange() {
     let visibleRows = 0;
+    const totalLogs = this.tableBody.rows.length;
+
     for (const row of this.tableBody.rows) {
       if (!row.hidden) {
         visibleRows++;
@@ -82,9 +82,8 @@ export class LogView extends HTMLElement {
 
       rowsFragment.appendChild(logTableRowInstance);
     }
-    this.tableBody.appendChild(rowsFragment);
 
-    totalLogs += logs.length;
+    this.tableBody.appendChild(rowsFragment);
     this.triggerLogCountChange();
   }
 
