@@ -56,7 +56,7 @@ input[type='file'] {
   font-size: 14px;
 }
 
-.options-dropdown {
+.options.dropdown-list {
   background: #fff;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
   position: absolute;
@@ -66,7 +66,7 @@ input[type='file'] {
   margin-top: 15px;
 }
 
-.options-dropdown > *:hover {
+.options.dropdown-list > *:hover {
   background-color: #ededf0;
 }
 
@@ -79,8 +79,8 @@ input[type='file'] {
 
 .options-btn,
 .clear-logs-btn {
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 24px;
 }
 
 .options-btn {
@@ -98,7 +98,8 @@ input[type='file'] {
 .load-file-btn {
   background: url('/icons/upload.svg') no-repeat 5px center / auto;
 }
-.options-dropdown > * {
+
+.options.dropdown-list > * {
   padding-left: 35px;
   width: 100%;
   height: 40px;
@@ -107,14 +108,14 @@ input[type='file'] {
   cursor: pointer;
 }
 
-.options-dropdown img {
+.options.dropdown-list img {
   width: 24px;
   height: auto;
   padding-right: 8px;
 }
 
-.options-dropdown::after,
-.options-dropdown::before {
+.options.dropdown-list::after,
+.options.dropdown-list::before {
   bottom: 100%;
   right: 5px;
   border: solid transparent;
@@ -125,13 +126,13 @@ input[type='file'] {
   pointer-events: none;
 }
 
-.options-dropdown::after {
+.options.dropdown-list::after {
   border-color: rgba(194, 225, 245, 0);
   border-bottom-color: #fff;
   border-width: 9px;
   margin-right: 1px;
 }
-.options-dropdown::before {
+.options.dropdown-list::before {
   border-color: rgba(194, 225, 245, 0);
   border-bottom-color: #d7d7db;
   border-width: 10px;
@@ -152,8 +153,11 @@ input[type='file'] {
   height: 30px;
   align-items: center;
   padding: 0 15px;
-  background: #00c8d7;
-  color: #ffffff;
+  color: var(--text-color);
+  border-top: 1px solid var(--table-splitter-color);
+  background: var(--table-header-background-color);
+  box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1),
+    0 2px 0px 1px rgba(0, 0, 0, 0.12);
 }
 
 .logs-counter {
@@ -164,8 +168,8 @@ input[type='file'] {
   margin-right: 8px;
 }
 
-.logs-counter .separator {
-  height: auto;
+.logs-counter .slanted-separator {
+  margin: 0 5px;
 }
 
 .page-type {
@@ -190,6 +194,14 @@ input[type='file'] {
 }
 
 .tabid .separator.tabId {
+  display: block;
+}
+
+.dropdown-list {
+  display: none;
+}
+
+.dropdown-list.expanded {
   display: block;
 }
 

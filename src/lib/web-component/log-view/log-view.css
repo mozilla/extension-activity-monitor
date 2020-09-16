@@ -46,15 +46,17 @@
 }
 
 table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 100%;
 }
 
 table thead {
   position: sticky;
   top: 0;
-  background: #00c8d7;
-  color: #ffffff;
+  background: var(--table-header-background-color);
+  color: var(--text-color);
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1), 0 2px 8px 0 rgba(0, 0, 0, 0.12);
 }
 
 table thead th {
@@ -62,24 +64,24 @@ table thead th {
   font-size: 16px;
   position: relative;
   text-align: left;
+  border-top: 1px solid var(--table-splitter-color);
+  border-bottom: 1px solid var(--table-splitter-color);
+}
+
+table thead th:nth-child(odd) {
+  border-left: 1px solid var(--table-splitter-color);
+}
+
+table thead th:nth-child(even) {
+  border-left: 1px solid var(--table-splitter-color);
 }
 
 table tbody {
   font-size: 14px;
 }
 
-table thead th:not(:first-child)::after {
-  content: '';
-  display: block;
-  border: 1px solid #d7d7db;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -1px;
-}
-
 table tbody tr:nth-of-type(odd) {
-  background: #ededf0;
+  background: var(--table-odd-rows);
 }
 
 table tbody tr {
@@ -92,20 +94,17 @@ table td {
 }
 
 table td:not(:first-child) {
-  border-left: 1px solid #d7d7db;
-}
-
-table td:not(:last-child) {
-  border-right: 1px solid #d7d7db;
+  border-left: 1px solid var(--table-splitter-color);
 }
 
 .row-highlight {
-  background-color: #96eaf0 !important;
+  background-color: var(--selection-background) !important;
+  color: var(--selection-color);
 }
 
 .table-empty-label {
   width: 100%;
-  height: calc(100% - 120px);
+  height: calc(100% - 80px);
   display: flex;
   align-items: center;
   justify-content: center;

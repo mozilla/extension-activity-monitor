@@ -37,12 +37,12 @@
 }
 
 .filter-checkbox input:checked ~ .select-indicator {
-  background: #00c8d7;
+  background: var(--checkbox-color);
 }
 
 .filter-checkbox:hover input:not([disabled]):checked ~ .select-indicator,
 .filter-checkbox input:checked:focus ~ .select-indicator {
-  background: #008ea4;
+  background: var(--checkbox-focused-color);
 }
 
 .select-indicator:after {
@@ -103,6 +103,22 @@
   max-height: 300px;
   overflow-y: auto;
   overflow-x: hidden;
+  display: none;
+}
+
+.dropdown-list {
+  display: none;
+}
+
+.toggle-btn.expanded .dropdown-list {
+  display: block;
+}
+
+.dropdown-list:empty::before {
+  content: 'No Filter Options.';
+  display: block;
+  width: 100%;
+  margin: 8px 10px;
 }
 
 .checkbox-list .filter-checkbox:last-child {

@@ -1,3 +1,4 @@
+import dropDownController from '../../DropDownController.js';
 import { dateTimeFormat } from '../../formatters.js';
 
 export class FilterTimestamp extends HTMLElement {
@@ -17,25 +18,17 @@ export class FilterTimestamp extends HTMLElement {
 
     this.filterToggleBar = filterWrapper.querySelector('.filter-toggle-bar');
 
-    this.timestampFilterOptions = filterWrapper.querySelector(
-      '.timestamp-filter-options'
+    this.dropDownList = filterWrapper.querySelector(
+      '.timestamp-filter-options.dropdown-list'
     );
 
-    this.startTimeLabel = this.timestampFilterOptions.querySelector(
-      '#startTimeLabel'
-    );
-    this.stopTimeLabel = this.timestampFilterOptions.querySelector(
-      '#stopTimeLabel'
-    );
+    this.startTimeLabel = this.dropDownList.querySelector('#startTimeLabel');
+    this.stopTimeLabel = this.dropDownList.querySelector('#stopTimeLabel');
 
     this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
-    this.clearStartTimeBtn = this.timestampFilterOptions.querySelector(
-      '#clearStart'
-    );
+    this.clearStartTimeBtn = this.dropDownList.querySelector('#clearStart');
 
-    this.clearStopTimeBtn = this.timestampFilterOptions.querySelector(
-      '#clearStop'
-    );
+    this.clearStopTimeBtn = this.dropDownList.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
   }
@@ -93,8 +86,7 @@ export class FilterTimestamp extends HTMLElement {
 
   setTimestampStatus() {
     if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
-      this.timestampFilterOptions.hidden = false;
-      this.filterToggleBar.classList.add('expanded');
+      this.filterContainer.classList.add('expanded');
     }
   }
 
@@ -128,8 +120,7 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     if (!this.timeStamp) {
-      this.timestampFilterOptions.hidden = true;
-      this.filterToggleBar.classList.remove('expanded');
+      this.filterContainer.classList.remove('expanded');
     }
 
     this.dispatchFilterChange();
@@ -154,22 +145,15 @@ export class FilterTimestamp extends HTMLElement {
       }
 
       if (event.currentTarget === this.filterToggleBar) {
-        this.dispatchEvent(new CustomEvent('triggerdropdown'));
+        dropDownController.triggerDropDown(this);
       }
     }
   }
 
-  toggleDropdown({ displayPref }) {
-    switch (displayPref) {
-      case 'show':
-        this.timestampFilterOptions.hidden = false;
-        this.filterToggleBar.classList.add('expanded');
-        break;
-      case 'hide':
-        this.timestampFilterOptions.hidden = true;
-        this.filterToggleBar.classList.remove('expanded');
-        break;
-    }
+  toggleDropDown(showDropDown) {
+    showDropDown
+      ? this.filterContainer.classList.add('expanded')
+      : this.filterContainer.classList.remove('expanded');
   }
 
   connectedCallback() {
@@ -182,14 +166,14 @@ export class FilterTimestamp extends HTMLElement {
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
     this.filterToggleBar.addEventListener('click', this);
-    this.timestampFilterOptions.addEventListener('click', this);
+    this.dropDownList.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.filterToggleBar.removeEventListener('click', this);
-    this.timestampFilterOptions.removeEventListener('click', this);
+    this.dropDownList.removeEventListener('click', this);
   }
 }
 

@@ -1,3 +1,5 @@
+import dropDownController from '../../DropDownController.js';
+
 // When viewtype is undefined for API calls
 const FILTER_OPTION_UNDEFINED_LABEL = 'other';
 
@@ -24,10 +26,10 @@ export class FilterOption extends HTMLElement {
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
 
-    this.checkboxList = filterContainer.querySelector('.checkbox-list');
-    this.checkboxList.classList.add(this.filterKey);
-
-    this.emptyFilterLabel = this.checkboxList.firstElementChild;
+    this.dropDownList = filterContainer.querySelector(
+      '.checkbox-list.dropdown-list'
+    );
+    this.dropDownList.classList.add(this.filterKey);
 
     shadow.appendChild(filterContainer);
   }
@@ -51,8 +53,6 @@ export class FilterOption extends HTMLElement {
   }
 
   addNewCheckbox(checkboxLabel) {
-    this.emptyFilterLabel.hidden = true;
-
     const newCheckbox = this.checkboxTemplate.cloneNode(true);
     newCheckbox.querySelector('label span').textContent =
       checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
@@ -62,7 +62,7 @@ export class FilterOption extends HTMLElement {
     inputCheckbox.checked = !this.uncheckedCheckboxLabels.has(checkboxLabel);
 
     this.viewCheckboxLabels.add(checkboxLabel);
-    this.checkboxList.appendChild(newCheckbox);
+    this.dropDownList.appendChild(newCheckbox);
   }
 
   get filterKey() {
@@ -71,15 +71,15 @@ export class FilterOption extends HTMLElement {
 
   connectedCallback() {
     this.toggleBtn.addEventListener('click', this);
-    this.checkboxList.addEventListener('change', this);
+    this.dropDownList.addEventListener('change', this);
   }
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.dispatchEvent(new CustomEvent('triggerdropdown'));
+      dropDownController.triggerDropDown(this);
     } else if (
       event.type === 'change' &&
-      event.currentTarget === this.checkboxList
+      event.currentTarget === this.dropDownList
     ) {
       // when viewType is undefined, we display it as "other" in filter option.
       const checkboxLabel =
@@ -100,17 +100,10 @@ export class FilterOption extends HTMLElement {
     }
   }
 
-  toggleDropdown({ displayPref }) {
-    switch (displayPref) {
-      case 'show':
-        this.checkboxList.hidden = false;
-        this.toggleBtn.classList.add('expanded');
-        break;
-      case 'hide':
-        this.checkboxList.hidden = true;
-        this.toggleBtn.classList.remove('expanded');
-        break;
-    }
+  toggleDropDown(showDropDown) {
+    showDropDown
+      ? this.toggleBtn.classList.add('expanded')
+      : this.toggleBtn.classList.remove('expanded');
   }
 
   dispatchFilterChangeEvent(options) {
@@ -130,7 +123,7 @@ export class FilterOption extends HTMLElement {
 
   disconnectedCallback() {
     this.toggleBtn.removeEventListener('click', this);
-    this.checkboxList.removeEventListener('change', this);
+    this.dropDownList.removeEventListener('change', this);
   }
 }
 

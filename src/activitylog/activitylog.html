@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Extension Activity Monitor</title>
+    <link rel="stylesheet" href="./colors.css" />
     <link rel="stylesheet" href="./activitylog.css" />
     <script src="activitylog.js" type="module"></script>
     <script
@@ -53,7 +54,7 @@
         <div class="separator options"></div>
         <div class="option-menu">
           <div class="options-btn"></div>
-          <div class="options-dropdown" hidden>
+          <div class="options dropdown-list">
             <label class="load-file-btn">
               <input
                 type="file"
@@ -77,7 +78,7 @@
       <div class="footer-wrapper">
         <div class="logs-counter">
           <span title="Visible Logs">0</span>
-          <div class="separator"></div>
+          <span class="slanted-separator">/</span>
           <span title="Total Collected Logs">0</span>
           Logs
         </div>
@@ -90,6 +91,7 @@
     </div>
 
     <template id="logTableTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link rel="stylesheet" href="/lib/web-component/log-view/log-view.css" />
       <div class="activity-log-container">
         <div class="log-table-wrapper">
@@ -131,6 +133,7 @@
     </template>
 
     <template id="filterContainerTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link
         rel="stylesheet"
         href="/lib/web-component/filter-option/filter-option.css"
@@ -138,13 +141,12 @@
       <div class="filter-container toggle-btn">
         <img class="filter-icon" src="/icons/filter.svg" />
         <div class="title"></div>
-        <div class="checkbox-list" hidden>
-          <div class="filter-empty-label">No Filter Options.</div>
-        </div>
+        <div class="checkbox-list dropdown-list"></div>
       </div>
     </template>
 
     <template id="filterKeywordTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link
         rel="stylesheet"
         href="/lib/web-component/filter-keyword/filter-keyword.css"
@@ -166,22 +168,24 @@
       title="Apply timestamp filter from context menu inside log view"
     >
       <div class="filter-toggle-bar">
-        <img class="filter-icon" src="/icons/filter.svg" />
-        <div class="title">
-          Timestamps
+        <div class="toggle-btn">
+          <img class="filter-icon" src="/icons/filter.svg" />
+          <div class="title">
+            Timestamps
+          </div>
         </div>
       </div>
-    </div>
-    <div class="timestamp-filter-options" hidden>
-      <div class="start-time-container">
-        <div class="title">Start Time:</div>
-        <div id="startTimeLabel">From beginning</div>
-        <div id="clearStart" class="clear-btn black" hidden></div>
-      </div>
-      <div class="stop-time-container">
-        <div class="title">Stop Time:</div>
-        <div id="stopTimeLabel">Up to End</div>
-        <div id="clearStop" class="clear-btn black" hidden></div>
+      <div class="timestamp-filter-options dropdown-list">
+        <div class="start-time-container">
+          <div class="title">Start Time:</div>
+          <div id="startTimeLabel">From beginning</div>
+          <div id="clearStart" class="clear-btn black" hidden></div>
+        </div>
+        <div class="stop-time-container">
+          <div class="title">Stop Time:</div>
+          <div id="stopTimeLabel">Up to End</div>
+          <div id="clearStop" class="clear-btn black" hidden></div>
+        </div>
       </div>
     </div>
   </template>

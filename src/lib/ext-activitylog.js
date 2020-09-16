@@ -1,38 +1,6 @@
+import dropDownController from './DropDownController.js';
 import { save } from './save-load.js';
 import { serializeFilters, deSerializeFilters } from './formatters.js';
-
-class DropdownController {
-  handleEvent(event) {
-    if (event.type === 'click' && !event.target?.toggleDropdown) {
-      this.hideDropdown();
-    }
-  }
-
-  triggerDropdown(elem) {
-    if (this.elem === elem) {
-      this.elem = null;
-      elem.toggleDropdown({ displayPref: 'hide' });
-      return;
-    }
-
-    this.hideDropdown();
-    this.elem = elem;
-    document.addEventListener('click', this);
-    elem.toggleDropdown({ displayPref: 'show' });
-  }
-
-  hideDropdown() {
-    const { elem } = this;
-
-    if (!elem) {
-      return;
-    }
-
-    this.elem = null;
-    document.removeEventListener('click', this);
-    elem.toggleDropdown({ displayPref: 'hide' });
-  }
-}
 
 class Model {
   constructor() {
@@ -180,26 +148,6 @@ class View {
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
     this.logView.addEventListener('logcountchange', this);
-
-    this.extFilter.addEventListener('triggerdropdown', this);
-    this.viewTypeFilter.addEventListener('triggerdropdown', this);
-    this.apiTypeFilter.addEventListener('triggerdropdown', this);
-    this.apiNameFilter.addEventListener('triggerdropdown', this);
-    this.timestampFilter.addEventListener('triggerdropdown', this);
-    this.optionsBtn.addEventListener('triggerdropdown', this);
-
-    this.optionsBtn.toggleDropdown = ({ displayPref }) => {
-      switch (displayPref) {
-        case 'show':
-          this.optionsDropdown.hidden = false;
-          break;
-        case 'hide':
-          this.optionsDropdown.hidden = true;
-          break;
-      }
-    };
-
-    this.dropdownController = new DropdownController();
   }
 
   setLogFilter(filterFunc) {
@@ -213,7 +161,7 @@ class View {
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         case this.optionsBtn:
-          this.optionsBtn.dispatchEvent(new CustomEvent('triggerdropdown'));
+          dropDownController.triggerDropDown(this.optionsBtn);
           break;
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
@@ -227,8 +175,6 @@ class View {
       );
     } else if (event.type === 'logcountchange') {
       this.updateLogCounter(event.detail);
-    } else if (event.type === 'triggerdropdown') {
-      this.dropdownController.triggerDropdown(event.target);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
