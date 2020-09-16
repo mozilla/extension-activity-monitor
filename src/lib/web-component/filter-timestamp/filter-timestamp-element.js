@@ -154,7 +154,7 @@ export class FilterTimestamp extends HTMLElement {
       }
 
       if (event.currentTarget === this.filterToggleBar) {
-        this.toggleDropdown({ displayPref: 'toggle' });
+        this.dispatchEvent(new CustomEvent('triggerdropdown'));
       }
     }
   }
@@ -164,11 +164,6 @@ export class FilterTimestamp extends HTMLElement {
       case 'show':
         this.timestampFilterOptions.hidden = false;
         this.filterToggleBar.classList.add('expanded');
-        break;
-      case 'toggle':
-        this.timestampFilterOptions.hidden = !this.timestampFilterOptions
-          .hidden;
-        this.filterToggleBar.classList.toggle('expanded');
         break;
       case 'hide':
         this.timestampFilterOptions.hidden = true;

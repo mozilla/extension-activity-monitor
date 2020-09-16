@@ -10,6 +10,7 @@
   margin: 0;
   box-sizing: border-box;
   font-family: source-sans;
+  font-size: 14px;
 }
 
 .failure {
@@ -42,7 +43,7 @@ input[type='file'] {
 }
 
 .separator {
-  border-right: 2px solid #dfdfdf;
+  border-right: 2px solid #d7d7db;
   height: 100%;
   max-height: 40px;
 }
@@ -52,6 +53,7 @@ input[type='file'] {
   grid-template-columns: 25px 2px auto 2px 25px;
   grid-column-gap: 10px;
   align-items: center;
+  font-size: 14px;
 }
 
 .options-dropdown {
@@ -64,12 +66,8 @@ input[type='file'] {
   margin-top: 15px;
 }
 
-.menu-wrapper.load-logs {
-  grid-template-columns: auto;
-}
-
 .options-dropdown > *:hover {
-  background-color: #a2eee3;
+  background-color: #ededf0;
 }
 
 .clear-logs-btn,
@@ -81,16 +79,16 @@ input[type='file'] {
 
 .options-btn,
 .clear-logs-btn {
-  height: 24px;
-  width: 24px;
+  height: 20px;
+  width: 20px;
 }
 
 .options-btn {
-  background: url('/icons/settings.svg');
+  background: url('/icons/settings.svg') no-repeat center center / cover;
 }
 
 .clear-logs-btn {
-  background: url('/icons/clear.svg');
+  background: url('/icons/clear.svg') no-repeat center center / cover;
 }
 
 .save-log-btn {
@@ -115,8 +113,8 @@ input[type='file'] {
   padding-right: 8px;
 }
 
-.options-dropdown:after,
-.options-dropdown:before {
+.options-dropdown::after,
+.options-dropdown::before {
   bottom: 100%;
   right: 5px;
   border: solid transparent;
@@ -127,34 +125,34 @@ input[type='file'] {
   pointer-events: none;
 }
 
-.options-dropdown:after {
+.options-dropdown::after {
   border-color: rgba(194, 225, 245, 0);
   border-bottom-color: #fff;
   border-width: 9px;
   margin-right: 1px;
 }
-.options-dropdown:before {
+.options-dropdown::before {
   border-color: rgba(194, 225, 245, 0);
-  border-bottom-color: #dfdfdf;
+  border-bottom-color: #d7d7db;
   border-width: 10px;
   margin-right: 0px;
 }
 
 .filter-wrapper {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 4fr 6fr 4fr 4fr 7fr 8fr;
+  font-size: 14px;
 }
 
 .footer-wrapper {
   width: 100%;
   position: absolute;
   bottom: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
   height: 30px;
   align-items: center;
   padding: 0 15px;
-  background: #15bfbd;
+  background: #00c8d7;
   color: #ffffff;
 }
 
@@ -162,18 +160,40 @@ input[type='file'] {
   display: flex;
 }
 
-.logs-counter span {
-  margin: 0 8px;
+.logs-counter span:last-child {
+  margin-right: 8px;
 }
 
 .logs-counter .separator {
   height: auto;
 }
 
-.filter-tabid {
-  justify-self: center;
+.page-type {
+  margin-left: auto;
 }
 
-.page-type {
-  justify-self: right;
+.footer-wrapper .separator {
+  margin: 0 10px;
+  background-color: #ffffff;
+}
+
+.load-logs .save-log-btn,
+.load-logs .clear-logs-btn,
+.load-logs .separator.clear-logs,
+.tabid filter-timestamp,
+.separator.tabId {
+  display: none;
+}
+
+.load-logs .menu-wrapper {
+  grid-template-columns: auto 2px 25px;
+}
+
+.tabid .separator.tabId {
+  display: block;
+}
+
+/* when display property is set to flex, it's overriding the rule of hidden attribute */
+[hidden] {
+  display: none !important;
 }

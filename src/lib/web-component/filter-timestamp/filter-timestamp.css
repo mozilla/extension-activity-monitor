@@ -22,7 +22,7 @@
   -moz-user-select: none;
   align-items: center;
   height: 35px;
-  border: 1px solid #dfdfdf;
+  border: 1px solid #d7d7db;
 }
 
 .filter-toggle-bar.expanded {
@@ -46,8 +46,8 @@
 
 .clear-btn {
   cursor: pointer;
-  min-width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   margin-left: 10px;
 }
@@ -83,7 +83,7 @@
   margin: 0 5px;
 }
 
-/* since display property is changed through another selector, it's overriding the rule of hidden attribute */
+/* when display property is set to flex, it's overriding the rule of hidden attribute */
 [hidden] {
-  display: none;
+  display: none !important;
 }

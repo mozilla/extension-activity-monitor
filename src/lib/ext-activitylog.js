@@ -1,6 +1,39 @@
 import { save } from './save-load.js';
 import { serializeFilters, deSerializeFilters } from './formatters.js';
 
+class DropdownController {
+  handleEvent(event) {
+    if (event.type === 'click' && !event.target?.toggleDropdown) {
+      this.hideDropdown();
+    }
+  }
+
+  triggerDropdown(elem) {
+    if (this.elem === elem) {
+      this.elem = null;
+      elem.toggleDropdown({ displayPref: 'hide' });
+      return;
+    }
+
+    this.hideDropdown();
+    this.elem = elem;
+    document.addEventListener('click', this);
+    elem.toggleDropdown({ displayPref: 'show' });
+  }
+
+  hideDropdown() {
+    const { elem } = this;
+
+    if (!elem) {
+      return;
+    }
+
+    this.elem = null;
+    document.removeEventListener('click', this);
+    elem.toggleDropdown({ displayPref: 'hide' });
+  }
+}
+
 class Model {
   constructor() {
     this.logs = [];
@@ -114,6 +147,7 @@ class Model {
 
 class View {
   constructor() {
+    this.contentWrapper = document.querySelector('.content-wrapper');
     this.logView = document.querySelector('log-view');
     this.optionsBtn = document.querySelector('.options-btn');
     this.clearLogBtn = document.querySelector('.clear-logs-btn');
@@ -124,6 +158,9 @@ class View {
     this.filterIdTxt = document.querySelector('.filter-tabid');
     this.pageType = document.querySelector('.page-type');
     this.menuWrapper = document.querySelector('.menu-wrapper');
+    this.logCounter = document.querySelector('.logs-counter');
+    this.visibleRows = this.logCounter.firstElementChild;
+    this.totalLogs = this.logCounter.lastElementChild;
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -138,18 +175,31 @@ class View {
     this.keywordFilter = document.querySelector('filter-keyword');
     this.timestampFilter = document.querySelector('filter-timestamp');
 
-    this.filterOptionsSet = new Set([
-      this.extFilter,
-      this.viewTypeFilter,
-      this.apiTypeFilter,
-      this.apiNameFilter,
-      this.timestampFilter,
-    ]);
-
-    document.addEventListener('click', this);
+    this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
+    this.logView.addEventListener('logcountchange', this);
+
+    this.extFilter.addEventListener('triggerdropdown', this);
+    this.viewTypeFilter.addEventListener('triggerdropdown', this);
+    this.apiTypeFilter.addEventListener('triggerdropdown', this);
+    this.apiNameFilter.addEventListener('triggerdropdown', this);
+    this.timestampFilter.addEventListener('triggerdropdown', this);
+    this.optionsBtn.addEventListener('triggerdropdown', this);
+
+    this.optionsBtn.toggleDropdown = ({ displayPref }) => {
+      switch (displayPref) {
+        case 'show':
+          this.optionsDropdown.hidden = false;
+          break;
+        case 'hide':
+          this.optionsDropdown.hidden = true;
+          break;
+      }
+    };
+
+    this.dropdownController = new DropdownController();
   }
 
   setLogFilter(filterFunc) {
@@ -163,38 +213,30 @@ class View {
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         case this.optionsBtn:
-          this.optionsDropdown.hidden = !this.optionsDropdown.hidden;
+          this.optionsBtn.dispatchEvent(new CustomEvent('triggerdropdown'));
           break;
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
           break;
       }
-
-      this.hideDropdowns(event.target);
     } else if (event.type === 'change' && event.target === this.loadLogFile) {
       const logFile = event.target.files[0];
       this.loadLogFile.value = '';
       this.loadLogFile.dispatchEvent(
         new CustomEvent('loadlog', { detail: logFile })
       );
+    } else if (event.type === 'logcountchange') {
+      this.updateLogCounter(event.detail);
+    } else if (event.type === 'triggerdropdown') {
+      this.dropdownController.triggerDropdown(event.target);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
   }
 
-  hideDropdowns(eventTarget) {
-    const filterOptionsSet = new Set(this.filterOptionsSet);
-    if (eventTarget !== this.optionsBtn) {
-      this.optionsDropdown.hidden = true;
-    }
-
-    if (filterOptionsSet.has(eventTarget)) {
-      filterOptionsSet.delete(eventTarget);
-    }
-
-    for (const filterOption of filterOptionsSet) {
-      filterOption?.toggleDropdown({ displayPref: 'hide' });
-    }
+  updateLogCounter({ visibleRows, totalLogs }) {
+    this.visibleRows.textContent = visibleRows;
+    this.totalLogs.textContent = totalLogs;
   }
 
   handleNewLogs(logs) {
@@ -234,7 +276,7 @@ class View {
 
     if (tabId) {
       this.filterIdTxt.textContent = `Filtered By Tab Id: ${tabId}`;
-      this.timestampFilter.hidden = true;
+      this.contentWrapper.classList.add('tabid');
       const filterDetail = { updateFilter: { tabId } };
 
       this.filterIdTxt.dispatchEvent(
@@ -263,12 +305,7 @@ class View {
 
   updateMenus({ pageType }) {
     if (pageType === 'load-logs') {
-      this.clearLogBtn.hidden = true;
-      this.optionsBtn.hidden = true;
-      this.menuWrapper
-        .querySelectorAll('.separator')
-        .forEach((eachSeparator) => (eachSeparator.hidden = true));
-      this.menuWrapper.classList.add('load-logs');
+      this.contentWrapper.classList.add('load-logs');
     }
   }
 }
@@ -289,6 +326,7 @@ class Controller {
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
     this.view.filterIdTxt.addEventListener('filterchange', this);
+    this.view.loadLogFile.addEventListener('loadlog', this);
 
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
@@ -319,7 +357,6 @@ class Controller {
         this.handleNewLogs(logs);
       }
     } else {
-      this.view.loadLogFile.addEventListener('loadlog', this);
       this.view.clearLogBtn.addEventListener('clearlog', this);
       this.view.saveLogBtn.addEventListener('savelog', this);
 
@@ -435,6 +472,7 @@ class Controller {
     this.clearBackgroundLogs();
     this.model.clearLogs();
     this.view.clearTable();
+    this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
   }
 
   async clearBackgroundLogs() {

@@ -27,7 +27,7 @@
     <div class="content-wrapper">
       <div class="menu-wrapper">
         <div class="clear-logs-btn" title="Clear all logs"></div>
-        <div class="separator"></div>
+        <div class="separator clear-logs"></div>
         <div class="filter-wrapper">
           <filter-keyword></filter-keyword>
           <filter-option filter-key="id">
@@ -50,7 +50,7 @@
           </filter-option>
           <filter-timestamp></filter-timestamp>
         </div>
-        <div class="separator"></div>
+        <div class="separator options"></div>
         <div class="option-menu">
           <div class="options-btn"></div>
           <div class="options-dropdown" hidden>
@@ -76,11 +76,12 @@
       </div>
       <div class="footer-wrapper">
         <div class="logs-counter">
-          Collected Logs:
-          <span title="Total Collected Logs"></span>
+          <span title="Visible Logs">0</span>
           <div class="separator"></div>
-          <span title="Filtered Logs"></span>
+          <span title="Total Collected Logs">0</span>
+          Logs
         </div>
+        <div class="separator tabId"></div>
         <div class="filter-tabid"></div>
         <div class="page-type">
           Real-Time Logs

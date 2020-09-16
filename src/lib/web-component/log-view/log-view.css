@@ -42,29 +42,44 @@
   width: 40%;
   word-wrap: anywhere;
   background-color: #ffffff;
-  border: 1px solid #dfdfdf;
+  border: 1px solid #ededf0;
 }
 
 table {
   border-collapse: collapse;
-  table-layout: fixed;
   width: 100%;
 }
 
 table thead {
   position: sticky;
   top: 0;
-  background: #15bfbd;
+  background: #00c8d7;
   color: #ffffff;
 }
 
 table thead th {
   padding: 10px;
-  font-size: 18px;
+  font-size: 16px;
+  position: relative;
+  text-align: left;
+}
+
+table tbody {
+  font-size: 14px;
+}
+
+table thead th:not(:first-child)::after {
+  content: '';
+  display: block;
+  border: 1px solid #d7d7db;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
 }
 
 table tbody tr:nth-of-type(odd) {
-  background: #eeeeee;
+  background: #ededf0;
 }
 
 table tbody tr {
@@ -73,12 +88,19 @@ table tbody tr {
 
 table td {
   word-wrap: anywhere;
-  text-align: center;
-  padding: 10px 5px;
+  padding: 10px;
+}
+
+table td:not(:first-child) {
+  border-left: 1px solid #d7d7db;
+}
+
+table td:not(:last-child) {
+  border-right: 1px solid #d7d7db;
 }
 
 .row-highlight {
-  background-color: #a2eee3 !important;
+  background-color: #96eaf0 !important;
 }
 
 .table-empty-label {
@@ -91,7 +113,7 @@ table td {
   font-weight: 700;
 }
 
-/* since display property is changed through another selector, it's overriding the rule of hidden attribute */
+/* when display property is set to flex, it's overriding the rule of hidden attribute */
 [hidden] {
-  display: none;
+  display: none !important;
 }

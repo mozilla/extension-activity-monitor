@@ -76,7 +76,7 @@ export class FilterOption extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.toggleDropdown({ displayPref: 'toggle' });
+      this.dispatchEvent(new CustomEvent('triggerdropdown'));
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
@@ -105,10 +105,6 @@ export class FilterOption extends HTMLElement {
       case 'show':
         this.checkboxList.hidden = false;
         this.toggleBtn.classList.add('expanded');
-        break;
-      case 'toggle':
-        this.checkboxList.hidden = !this.checkboxList.hidden;
-        this.toggleBtn.classList.toggle('expanded');
         break;
       case 'hide':
         this.checkboxList.hidden = true;
