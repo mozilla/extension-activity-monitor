@@ -56,7 +56,7 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     this.timeStamp = timeStamp;
-    this.filterContainer.hidden = false;
+    this.dropDownList.hidden = false;
 
     this.setTimestampStatus();
     this.dispatchFilterChange();
@@ -86,7 +86,7 @@ export class FilterTimestamp extends HTMLElement {
 
   setTimestampStatus() {
     if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
-      this.filterContainer.classList.add('expanded');
+      this.classList.add('expanded');
     }
   }
 
@@ -120,7 +120,7 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     if (!this.timeStamp) {
-      this.filterContainer.classList.remove('expanded');
+      this.classList.remove('expanded');
     }
 
     this.dispatchFilterChange();
@@ -148,12 +148,6 @@ export class FilterTimestamp extends HTMLElement {
         dropDownController.triggerDropDown(this);
       }
     }
-  }
-
-  toggleDropDown(showDropDown) {
-    showDropDown
-      ? this.filterContainer.classList.add('expanded')
-      : this.filterContainer.classList.remove('expanded');
   }
 
   connectedCallback() {

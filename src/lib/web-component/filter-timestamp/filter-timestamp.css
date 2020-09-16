@@ -9,6 +9,15 @@
   position: relative;
 }
 
+:host(.expanded) .dropdown-list {
+  display: block;
+}
+
+:host(.expanded) .toggle-btn {
+  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+}
+
 .timestamp-filter-container {
   cursor: pointer;
   position: relative;
@@ -23,11 +32,6 @@
   align-items: center;
   height: 35px;
   border: 1px solid #d7d7db;
-}
-
-.timestamp-filter-container.expanded .toggle-btn {
-  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.15);
 }
 
 .timestamp-filter-options {
@@ -46,10 +50,6 @@
 
 .dropdown-list {
   display: none;
-}
-
-.timestamp-filter-container.expanded .dropdown-list {
-  display: block;
 }
 
 .clear-btn {

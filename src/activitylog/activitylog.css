@@ -201,7 +201,7 @@ input[type='file'] {
   display: none;
 }
 
-.dropdown-list.expanded {
+.options-btn.expanded ~ .dropdown-list {
   display: block;
 }
 

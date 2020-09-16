@@ -26,10 +26,10 @@ export class FilterOption extends HTMLElement {
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
 
-    this.dropDownList = filterContainer.querySelector(
+    this.checkboxList = filterContainer.querySelector(
       '.checkbox-list.dropdown-list'
     );
-    this.dropDownList.classList.add(this.filterKey);
+    this.checkboxList.classList.add(this.filterKey);
 
     shadow.appendChild(filterContainer);
   }
@@ -62,7 +62,7 @@ export class FilterOption extends HTMLElement {
     inputCheckbox.checked = !this.uncheckedCheckboxLabels.has(checkboxLabel);
 
     this.viewCheckboxLabels.add(checkboxLabel);
-    this.dropDownList.appendChild(newCheckbox);
+    this.checkboxList.appendChild(newCheckbox);
   }
 
   get filterKey() {
@@ -71,7 +71,7 @@ export class FilterOption extends HTMLElement {
 
   connectedCallback() {
     this.toggleBtn.addEventListener('click', this);
-    this.dropDownList.addEventListener('change', this);
+    this.checkboxList.addEventListener('change', this);
   }
 
   handleEvent(event) {
@@ -79,7 +79,7 @@ export class FilterOption extends HTMLElement {
       dropDownController.triggerDropDown(this);
     } else if (
       event.type === 'change' &&
-      event.currentTarget === this.dropDownList
+      event.currentTarget === this.checkboxList
     ) {
       // when viewType is undefined, we display it as "other" in filter option.
       const checkboxLabel =
@@ -100,12 +100,6 @@ export class FilterOption extends HTMLElement {
     }
   }
 
-  toggleDropDown(showDropDown) {
-    showDropDown
-      ? this.toggleBtn.classList.add('expanded')
-      : this.toggleBtn.classList.remove('expanded');
-  }
-
   dispatchFilterChangeEvent(options) {
     const filterDetail = {
       updateFilter: {
@@ -123,7 +117,7 @@ export class FilterOption extends HTMLElement {
 
   disconnectedCallback() {
     this.toggleBtn.removeEventListener('click', this);
-    this.dropDownList.removeEventListener('change', this);
+    this.checkboxList.removeEventListener('change', this);
   }
 }
 

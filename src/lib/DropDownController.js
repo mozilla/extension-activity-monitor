@@ -1,23 +1,4 @@
 class DropDownController {
-  constructor() {
-    if (DropDownController.instance instanceof DropDownController) {
-      return DropDownController.instance;
-    }
-
-    DropDownController.instance = this;
-  }
-
-  toggleDropDown(showDropDown) {
-    if (this.elem?.toggleDropDown) {
-      this.elem.toggleDropDown(showDropDown);
-    } else {
-      const dropDown = this.elem.nextElementSibling;
-      showDropDown
-        ? dropDown.classList.add('expanded')
-        : dropDown.classList.remove('expanded');
-    }
-  }
-
   handleEvent(event) {
     if (event.type === 'click' && event.target !== this.elem) {
       this.hideDropDown();
@@ -26,15 +7,15 @@ class DropDownController {
 
   triggerDropDown(elem) {
     if (this.elem === elem) {
-      this.toggleDropDown(false);
       this.elem = null;
+      elem.classList.toggle('expanded', false);
       return;
     }
 
     this.hideDropDown();
     this.elem = elem;
     document.addEventListener('click', this);
-    this.toggleDropDown(true);
+    elem.classList.toggle('expanded', true);
   }
 
   hideDropDown() {
@@ -44,9 +25,9 @@ class DropDownController {
       return;
     }
 
-    document.removeEventListener('click', this);
-    this.toggleDropDown(false);
     this.elem = null;
+    document.removeEventListener('click', this);
+    elem.classList.toggle('expanded', false);
   }
 }
 

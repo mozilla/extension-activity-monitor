@@ -2,6 +2,15 @@
   box-sizing: border-box;
 }
 
+:host(.expanded) .dropdown-list {
+  display: block;
+}
+
+:host(.expanded) .toggle-btn {
+  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.15);
+}
+
 .filter-container {
   width: auto;
 }
@@ -85,11 +94,6 @@
   position: relative;
 }
 
-.toggle-btn.expanded {
-  background: url(/icons/chevron-down.svg) no-repeat center right / auto;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15), 0 2px 8px 0 rgba(0, 0, 0, 0.15);
-}
-
 .checkbox-list {
   position: absolute;
   background-color: #ffffff;
@@ -108,10 +112,6 @@
 
 .dropdown-list {
   display: none;
-}
-
-.toggle-btn.expanded .dropdown-list {
-  display: block;
 }
 
 .dropdown-list:empty::before {
