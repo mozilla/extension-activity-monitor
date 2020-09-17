@@ -87,9 +87,17 @@ test('show/hide logs associated with extension id that is checked/unchecked from
   const getTableRows = () => tableBody.querySelectorAll('tr');
   let tableRows = getTableRows();
 
+  // Initially filter checkbox list is hidden
+  expect(activityLog.view.extFilter.classList.contains('expanded')).toBeFalsy();
+
   const extFilterBtnChanged = observeChange(activityLog.view.extFilter);
   extFilterBtn.click();
   await extFilterBtnChanged;
+
+  // the filter checkbox list dropdown is displayed
+  expect(
+    activityLog.view.extFilter.classList.contains('expanded')
+  ).toBeTruthy();
 
   const firstCheckbox = activityLog.view.extFilter.shadowRoot
     .querySelector('.checkbox-list')
