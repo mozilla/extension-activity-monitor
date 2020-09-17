@@ -56,7 +56,6 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     this.timeStamp = timeStamp;
-    this.dropDownList.hidden = false;
 
     this.setTimestampStatus();
     this.dispatchFilterChange();
@@ -86,7 +85,9 @@ export class FilterTimestamp extends HTMLElement {
 
   setTimestampStatus() {
     if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
-      this.classList.add('expanded');
+      if (!this.classList.contains('expanded')) {
+        this.filterToggleBar.dispatchEvent(new Event('click'));
+      }
     }
   }
 
@@ -120,7 +121,7 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     if (!this.timeStamp) {
-      this.classList.remove('expanded');
+      dropDownController.hideDropDown();
     }
 
     this.dispatchFilterChange();
