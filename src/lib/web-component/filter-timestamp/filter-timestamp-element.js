@@ -1,3 +1,4 @@
+import dropDownController from '../../DropDownController.js';
 import { dateTimeFormat } from '../../formatters.js';
 
 export class FilterTimestamp extends HTMLElement {
@@ -15,12 +16,19 @@ export class FilterTimestamp extends HTMLElement {
       '.timestamp-filter-container'
     );
 
-    this.startTimeLabel = filterWrapper.querySelector('#startTimeLabel');
-    this.stopTimeLabel = filterWrapper.querySelector('#stopTimeLabel');
+    this.filterToggleBar = filterWrapper.querySelector('.filter-toggle-bar');
+
+    this.dropDownList = filterWrapper.querySelector(
+      '.timestamp-filter-options.dropdown-list'
+    );
+
+    this.startTimeLabel = this.dropDownList.querySelector('#startTimeLabel');
+    this.stopTimeLabel = this.dropDownList.querySelector('#stopTimeLabel');
 
     this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
-    this.clearStartTimeBtn = filterWrapper.querySelector('#clearStart');
-    this.clearStopTimeBtn = filterWrapper.querySelector('#clearStop');
+    this.clearStartTimeBtn = this.dropDownList.querySelector('#clearStart');
+
+    this.clearStopTimeBtn = this.dropDownList.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
   }
@@ -48,8 +56,8 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     this.timeStamp = timeStamp;
-    this.filterContainer.hidden = false;
 
+    this.setTimestampStatus();
     this.dispatchFilterChange();
   };
 
@@ -72,6 +80,12 @@ export class FilterTimestamp extends HTMLElement {
       this.stopTimeLabel.textContent = dateTimeFormat(timestamp.stop);
       this.filterContainer.hidden = false;
       this.clearStopTimeBtn.hidden = false;
+    }
+  }
+
+  setTimestampStatus() {
+    if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
+      dropDownController.showDropDown(this);
     }
   }
 
@@ -105,7 +119,7 @@ export class FilterTimestamp extends HTMLElement {
     }
 
     if (!this.timeStamp) {
-      this.filterContainer.hidden = true;
+      dropDownController.hideDropDown();
     }
 
     this.dispatchFilterChange();
@@ -128,6 +142,10 @@ export class FilterTimestamp extends HTMLElement {
           this.onClearFilter(false, true);
           break;
       }
+
+      if (event.currentTarget === this.filterToggleBar) {
+        dropDownController.toggleDropDown(this);
+      }
     }
   }
 
@@ -140,13 +158,15 @@ export class FilterTimestamp extends HTMLElement {
 
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
-    this.filterContainer.addEventListener('click', this);
+    this.filterToggleBar.addEventListener('click', this);
+    this.dropDownList.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
-    this.filterContainer.removeEventListener('click', this);
+    this.filterToggleBar.removeEventListener('click', this);
+    this.dropDownList.removeEventListener('click', this);
   }
 }
 

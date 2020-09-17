@@ -1,3 +1,4 @@
+import dropDownController from './DropDownController.js';
 import { save } from './save-load.js';
 import { serializeFilters, deSerializeFilters } from './formatters.js';
 
@@ -114,13 +115,21 @@ class Model {
 
 class View {
   constructor() {
+    this.contentWrapper = document.querySelector('.content-wrapper');
     this.logView = document.querySelector('log-view');
-    this.menuContainer = document.querySelector('.menu-container');
-    this.clearLogBtn = document.querySelector('#clearLogBtn');
-    this.saveLogBtn = document.querySelector('#saveLogBtn');
+    this.optionsBtn = document.querySelector('.options-btn');
+    this.clearLogBtn = document.querySelector('.clear-logs-btn');
+    this.optionsDropdown = document.querySelector('.options-dropdown');
+    this.saveLogBtn = document.querySelector('.save-log-btn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
-    this.logHeading = document.querySelector('.log-heading');
+    this.filterIdTxt = document.querySelector('.filter-tabid');
+    this.pageType = document.querySelector('.page-type');
+    this.menuWrapper = document.querySelector('.menu-wrapper');
+
+    const logCounter = document.querySelector('.logs-counter');
+    this.visibleRows = logCounter.firstElementChild;
+    this.totalLogs = logCounter.lastElementChild;
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -135,9 +144,11 @@ class View {
     this.keywordFilter = document.querySelector('filter-keyword');
     this.timestampFilter = document.querySelector('filter-timestamp');
 
+    this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
     this.loadLogFile.addEventListener('change', this);
+    this.logView.addEventListener('logcountchange', this);
   }
 
   setLogFilter(filterFunc) {
@@ -147,14 +158,15 @@ class View {
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
-        case this.saveLogBtn:
-          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-          break;
         case this.clearLogBtn:
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
-        default:
-          throw new Error(`wrong event target - ${event.target.tagName}`);
+        case this.optionsBtn:
+          dropDownController.toggleDropDown(this.optionsBtn);
+          break;
+        case this.saveLogBtn:
+          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
       }
     } else if (event.type === 'change' && event.target === this.loadLogFile) {
       const logFile = event.target.files[0];
@@ -162,9 +174,16 @@ class View {
       this.loadLogFile.dispatchEvent(
         new CustomEvent('loadlog', { detail: logFile })
       );
+    } else if (event.type === 'logcountchange') {
+      this.updateLogCounter(event.detail);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
+  }
+
+  updateLogCounter({ visibleRows, totalLogs }) {
+    this.visibleRows.textContent = visibleRows;
+    this.totalLogs.textContent = totalLogs;
   }
 
   handleNewLogs(logs) {
@@ -203,10 +222,11 @@ class View {
     this.timestampFilter.setInitialFilter(timeStamp);
 
     if (tabId) {
-      this.renderHeading({ tabId });
+      this.filterIdTxt.textContent = `Filtered By Tab Id: ${tabId}`;
+      this.contentWrapper.classList.add('tabid');
       const filterDetail = { updateFilter: { tabId } };
 
-      this.logHeading.dispatchEvent(
+      this.filterIdTxt.dispatchEvent(
         new CustomEvent('filterchange', { detail: filterDetail })
       );
     }
@@ -225,10 +245,6 @@ class View {
   clearTable() {
     this.logView.clearTable();
   }
-
-  renderHeading({ tabId }) {
-    this.logHeading.textContent = `Activity Logs Filtered By Tab Id: ${tabId}`;
-  }
 }
 
 class Controller {
@@ -246,7 +262,8 @@ class Controller {
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
-    this.view.logHeading.addEventListener('filterchange', this);
+    this.view.filterIdTxt.addEventListener('filterchange', this);
+    this.view.loadLogFile.addEventListener('loadlog', this);
 
     const searchParams = new URLSearchParams(
       document.location.search.substring(1)
@@ -255,8 +272,11 @@ class Controller {
     const loadedFileName = searchParams.get('file');
 
     if (loadedFileName) {
-      this.view.menuContainer.hidden = true;
-      document.title = `Loaded Logs - ${loadedFileName}`;
+      const loadedLogsTxt = `Loaded Logs - ${loadedFileName}`;
+      document.title = loadedLogsTxt;
+
+      this.view.pageType.textContent = loadedLogsTxt;
+      this.view.contentWrapper.classList.add('load-logs');
 
       const currentTab = await browser.tabs.getCurrent();
       let logs;
@@ -275,7 +295,6 @@ class Controller {
         this.handleNewLogs(logs);
       }
     } else {
-      this.view.loadLogFile.addEventListener('loadlog', this);
       this.view.clearLogBtn.addEventListener('clearlog', this);
       this.view.saveLogBtn.addEventListener('savelog', this);
 
@@ -391,6 +410,7 @@ class Controller {
     this.clearBackgroundLogs();
     this.model.clearLogs();
     this.view.clearTable();
+    this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
   }
 
   async clearBackgroundLogs() {

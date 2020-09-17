@@ -1,3 +1,5 @@
+import dropDownController from '../../DropDownController.js';
+
 // When viewtype is undefined for API calls
 const FILTER_OPTION_UNDEFINED_LABEL = 'other';
 
@@ -24,7 +26,9 @@ export class FilterOption extends HTMLElement {
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
 
-    this.checkboxList = filterContainer.querySelector('.checkbox-list');
+    this.checkboxList = filterContainer.querySelector(
+      '.checkbox-list.dropdown-list'
+    );
     this.checkboxList.classList.add(this.filterKey);
 
     shadow.appendChild(filterContainer);
@@ -72,7 +76,7 @@ export class FilterOption extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.toggleFilterListDisplay(this.checkboxList);
+      dropDownController.toggleDropDown(this);
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
@@ -96,11 +100,6 @@ export class FilterOption extends HTMLElement {
     }
   }
 
-  toggleFilterListDisplay(checkboxList) {
-    checkboxList.hidden = !checkboxList.hidden;
-    this.toggleBtn.classList.toggle('expanded');
-  }
-
   dispatchFilterChangeEvent(options) {
     const filterDetail = {
       updateFilter: {
@@ -117,8 +116,8 @@ export class FilterOption extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.toggleBtn.addEventListener('click', this);
-    this.checkboxList.addEventListener('change', this);
+    this.toggleBtn.removeEventListener('click', this);
+    this.checkboxList.removeEventListener('change', this);
   }
 }
 

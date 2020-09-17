@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Extension Activity Monitor</title>
-    <link rel="stylesheet" href="activitylog.css" />
+    <link rel="stylesheet" href="./colors.css" />
+    <link rel="stylesheet" href="./activitylog.css" />
     <script src="activitylog.js" type="module"></script>
     <script
       type="module"
@@ -24,45 +25,73 @@
     ></script>
   </head>
   <body>
-    <div class="container">
-      <h1>Extension Activity Monitor</h1>
-      <div class="menu-container">
-        <input type="file" name="loadLogFile" accept="application/JSON" />
-        <button id="saveLogBtn">Save logs</button>
-        <button id="clearLogBtn">Clear All Logs</button>
-      </div>
-      <div class="notice"></div>
-      <div class="activity-log-wrapper">
-        <h2 class="log-heading">Activity Logs</h2>
+    <div class="content-wrapper">
+      <div class="menu-wrapper">
+        <div class="clear-logs-btn" title="Clear all logs"></div>
+        <div class="separator clear-logs"></div>
         <div class="filter-wrapper">
-          <div class="filter-boxes">
-            <filter-keyword></filter-keyword>
-            <filter-option filter-key="id">
-              Select extensions to filter logs
-            </filter-option>
-            <filter-option
-              filter-key="viewType"
-              title="This filter applies to all log entries except content scripts."
-            >
-              Select view type to filter logs
-            </filter-option>
-            <filter-option filter-key="type">
-              Select api type to filter logs
-            </filter-option>
-            <filter-option
-              filter-key="name"
-              title="This filter only applies to log entries related to API events."
-            >
-              Select api name to filter logs
-            </filter-option>
-          </div>
+          <filter-keyword></filter-keyword>
+          <filter-option filter-key="id">
+            Extension Ids
+          </filter-option>
+          <filter-option
+            filter-key="viewType"
+            title="This filter applies to all log entries except content scripts."
+          >
+            View Types
+          </filter-option>
+          <filter-option filter-key="type">
+            API Types
+          </filter-option>
+          <filter-option
+            filter-key="name"
+            title="This filter only applies to log entries related to API events."
+          >
+            API Names
+          </filter-option>
           <filter-timestamp></filter-timestamp>
         </div>
-        <log-view></log-view>
+        <div class="separator options"></div>
+        <div class="option-menu">
+          <div class="options-btn"></div>
+          <div class="options dropdown-list">
+            <label class="load-file-btn">
+              <input
+                type="file"
+                name="loadLogFile"
+                id="file"
+                class="inputfile"
+                accept="application/JSON"
+              />
+              Load Logs
+            </label>
+            <div class="save-log-btn" id="saveLogBtn">
+              Save All Logs
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notice"></div>
+      <div class="log-view-wrapper">
+        <log-view />
+      </div>
+      <div class="footer-wrapper">
+        <div class="logs-counter">
+          <span title="Visible Logs">0</span>
+          <span class="slanted-separator">/</span>
+          <span title="Total Collected Logs">0</span>
+          Logs
+        </div>
+        <div class="separator tabId"></div>
+        <div class="filter-tabid"></div>
+        <div class="page-type">
+          Real-Time Logs
+        </div>
       </div>
     </div>
 
     <template id="logTableTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link rel="stylesheet" href="/lib/web-component/log-view/log-view.css" />
       <div class="activity-log-container">
         <div class="log-table-wrapper">
@@ -76,6 +105,7 @@
             </thead>
             <tbody></tbody>
           </table>
+          <div class="table-empty-label">No Logs Found.</div>
         </div>
         <div class="log-detail-wrapper" hidden>
           <div class="log-details"></div>
@@ -89,7 +119,7 @@
         <td class="id"></td>
         <td class="timestamp"></td>
         <td class="api-type"></td>
-        <td class="name"></td>
+        <td class="api-name"></td>
         <td class="view-type"></td>
       </tr>
     </template>
@@ -103,23 +133,27 @@
     </template>
 
     <template id="filterContainerTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link
         rel="stylesheet"
         href="/lib/web-component/filter-option/filter-option.css"
       />
       <div class="filter-container toggle-btn">
+        <img class="filter-icon" src="/icons/filter.svg" />
         <div class="title"></div>
-        <div class="checkbox-list" hidden></div>
+        <div class="checkbox-list dropdown-list"></div>
       </div>
     </template>
 
     <template id="filterKeywordTemplate">
+      <link rel="stylesheet" href="/activitylog/colors.css" />
       <link
         rel="stylesheet"
         href="/lib/web-component/filter-keyword/filter-keyword.css"
       />
       <div class="filter-container">
-        <input type="text" name="keyword" />
+        <img class="search-icon" src="/icons/search.svg" />
+        <input type="text" name="keyword" placeholder="Keywords" />
       </div>
     </template>
   </body>
@@ -129,16 +163,19 @@
       rel="stylesheet"
       href="/lib/web-component/filter-timestamp/filter-timestamp.css"
     />
-    <div class="timestamp-filter-container" hidden>
-      <div class="label">
-        Timestamp Filter Applied
-        <div
-          id="clearFilter"
-          class="clear-btn white"
-          title="Clear both filter timestamps"
-        ></div>
+    <div class="timestamp-filter-container">
+      <div
+        class="filter-toggle-bar"
+        title="Apply timestamp filter from context menu inside log view"
+      >
+        <div class="toggle-btn">
+          <img class="filter-icon" src="/icons/filter.svg" />
+          <div class="title">
+            Timestamps
+          </div>
+        </div>
       </div>
-      <div class="timestamp-filter-options">
+      <div class="timestamp-filter-options dropdown-list">
         <div class="start-time-container">
           <div class="title">Start Time:</div>
           <div id="startTimeLabel">From beginning</div>
