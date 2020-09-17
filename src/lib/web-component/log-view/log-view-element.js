@@ -61,23 +61,15 @@ export class LogView extends HTMLElement {
       logTableRowInstance._log = log;
       logTableRowInstance.hidden = !this.isFilterMatched(log);
 
-      logTableRowInstance.querySelector('.id').textContent = log.id;
-
       const timestamp = logTableRowInstance.querySelector('.timestamp');
-
       timestamp.textContent = dateTimeFormat(log.timeStamp, { timeOnly: true });
       timestamp.title = dateTimeFormat(log.timeStamp);
 
+      logTableRowInstance.querySelector('.id').textContent = log.id;
       logTableRowInstance.querySelector('.api-type').textContent = log.type;
-
-      if (log.type === 'content_script') {
-        const contentScriptTD = logTableRowInstance.querySelector('.name');
-        contentScriptTD.textContent = log.name;
-      } else {
-        logTableRowInstance.querySelector('.name').textContent = log.name;
-        logTableRowInstance.querySelector('.view-type').textContent =
-          log.viewType;
-      }
+      logTableRowInstance.querySelector('.api-name').textContent = log.name;
+      logTableRowInstance.querySelector('.view-type').textContent =
+        log.viewType || '';
 
       rowsFragment.appendChild(logTableRowInstance);
     }

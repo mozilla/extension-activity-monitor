@@ -8,9 +8,12 @@ class DropDownController {
   toggleDropDown(elem) {
     if (this.elem === elem) {
       this.hideDropDown();
-      return;
+    } else {
+      this.showDropDown(elem);
     }
+  }
 
+  showDropDown(elem) {
     this.hideDropDown();
     this.elem = elem;
     document.addEventListener('click', this);

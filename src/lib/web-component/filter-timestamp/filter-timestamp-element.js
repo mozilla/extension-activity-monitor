@@ -85,9 +85,7 @@ export class FilterTimestamp extends HTMLElement {
 
   setTimestampStatus() {
     if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
-      if (!this.classList.contains('expanded')) {
-        this.filterToggleBar.dispatchEvent(new Event('click'));
-      }
+      dropDownController.showDropDown(this);
     }
   }
 

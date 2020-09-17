@@ -126,9 +126,10 @@ class View {
     this.filterIdTxt = document.querySelector('.filter-tabid');
     this.pageType = document.querySelector('.page-type');
     this.menuWrapper = document.querySelector('.menu-wrapper');
-    this.logCounter = document.querySelector('.logs-counter');
-    this.visibleRows = this.logCounter.firstElementChild;
-    this.totalLogs = this.logCounter.lastElementChild;
+
+    const logCounter = document.querySelector('.logs-counter');
+    this.visibleRows = logCounter.firstElementChild;
+    this.totalLogs = logCounter.lastElementChild;
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -244,16 +245,6 @@ class View {
   clearTable() {
     this.logView.clearTable();
   }
-
-  updatePageType(heading) {
-    this.pageType.textContent = heading;
-  }
-
-  updateMenus({ pageType }) {
-    if (pageType === 'load-logs') {
-      this.contentWrapper.classList.add('load-logs');
-    }
-  }
 }
 
 class Controller {
@@ -283,8 +274,9 @@ class Controller {
     if (loadedFileName) {
       const loadedLogsTxt = `Loaded Logs - ${loadedFileName}`;
       document.title = loadedLogsTxt;
-      this.view.updatePageType(loadedLogsTxt);
-      this.view.updateMenus({ pageType: 'load-logs' });
+
+      this.view.pageType.textContent = loadedLogsTxt;
+      this.view.contentWrapper.classList.add('load-logs');
 
       const currentTab = await browser.tabs.getCurrent();
       let logs;

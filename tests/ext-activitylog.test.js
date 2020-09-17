@@ -81,25 +81,15 @@ test('show/hide logs associated with extension id that is checked/unchecked from
     '.toggle-btn'
   );
 
-  const extFilterCheckboxList = activityLog.view.extFilter.shadowRoot.querySelector(
-    '.checkbox-list'
-  );
-
   activityLog.handleNewLogs(logs);
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const getTableRows = () => tableBody.querySelectorAll('tr');
   let tableRows = getTableRows();
 
-  // Initially filter Checkbox List is hidden
-  expect(extFilterCheckboxList.hidden).toBeTruthy();
-
-  const extFilterBtnChanged = observeChange(extFilterBtn);
+  const extFilterBtnChanged = observeChange(activityLog.view.extFilter);
   extFilterBtn.click();
   await extFilterBtnChanged;
-
-  // Filter checkbox List is displayed
-  expect(extFilterCheckboxList.hidden).toBeFalsy();
 
   const firstCheckbox = activityLog.view.extFilter.shadowRoot
     .querySelector('.checkbox-list')
