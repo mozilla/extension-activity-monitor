@@ -5,10 +5,9 @@ class DropDownController {
     }
   }
 
-  triggerDropDown(elem) {
+  toggleDropDown(elem) {
     if (this.elem === elem) {
-      this.elem = null;
-      elem.classList.toggle('expanded', false);
+      this.hideDropDown();
       return;
     }
 

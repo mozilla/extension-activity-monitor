@@ -76,7 +76,7 @@ export class FilterOption extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      dropDownController.triggerDropDown(this);
+      dropDownController.toggleDropDown(this);
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList

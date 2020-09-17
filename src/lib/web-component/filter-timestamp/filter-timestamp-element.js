@@ -146,7 +146,7 @@ export class FilterTimestamp extends HTMLElement {
       }
 
       if (event.currentTarget === this.filterToggleBar) {
-        dropDownController.triggerDropDown(this);
+        dropDownController.toggleDropDown(this);
       }
     }
   }

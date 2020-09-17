@@ -161,7 +161,7 @@ class View {
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
         case this.optionsBtn:
-          dropDownController.triggerDropDown(this.optionsBtn);
+          dropDownController.toggleDropDown(this.optionsBtn);
           break;
         case this.saveLogBtn:
           this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
