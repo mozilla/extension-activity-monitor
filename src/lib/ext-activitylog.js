@@ -119,6 +119,7 @@ class View {
     this.logView = document.querySelector('log-view');
     this.optionsBtn = document.querySelector('.options-btn');
     this.clearLogBtn = document.querySelector('.clear-logs-btn');
+    this.closeBtn = document.querySelector('.clear-logs-btn');
     this.optionsDropdown = document.querySelector('.options-dropdown');
     this.saveLogBtn = document.querySelector('.save-log-btn');
     this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
@@ -160,6 +161,7 @@ class View {
       switch (event.target) {
         case this.clearLogBtn:
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
+          this.closeDetailSidebar();
           break;
         case this.optionsBtn:
           dropDownController.toggleDropDown(this.optionsBtn);

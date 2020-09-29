@@ -22,7 +22,6 @@ button {
   background-color: #ffffff;
   border: 1px solid #000000;
   cursor: pointer;
-  border-radius: 40%;
 }
 
 button:disabled,
