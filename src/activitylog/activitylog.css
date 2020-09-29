@@ -1,22 +1,16 @@
+@font-face {
+  font-family: source-sans;
+  src: url(/fonts/SourceSansPro-Regular.ttf);
+}
+
 *,
 *:before,
 *:after {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-}
-
-.activity-log-wrapper {
-  position: relative;
-}
-
-.container {
-  width: 100%;
-  padding: 0 10px;
-}
-
-#saveLogBtn {
-  margin: 20px 0;
+  font-family: source-sans;
+  font-size: 14px;
 }
 
 .failure {
@@ -25,12 +19,193 @@
   color: #ffffff;
 }
 
-.filter-boxes {
-  display: flex;
-  margin: 10px 0;
+.filter-wrapper filter-option:not(:last-child) {
+  margin: 0 5px;
 }
 
-.filter-wrapper filter-option:not(:last-child),
 .filter-wrapper filter-keyword {
-  margin-right: 10px;
+  margin-right: 5px;
+}
+
+.filter-wrapper filter-timestamp {
+  margin-left: 5px;
+}
+
+.menu-wrapper {
+  padding: 5px 10px;
+}
+input[type='file'] {
+  display: none;
+}
+
+.content-wrapper {
+  display: grid;
+}
+
+.separator {
+  border-right: 2px solid #d7d7db;
+  height: 100%;
+  max-height: 40px;
+}
+
+.menu-wrapper {
+  display: grid;
+  grid-template-columns: 25px 2px auto 2px 25px;
+  grid-column-gap: 10px;
+  align-items: center;
+  font-size: 14px;
+}
+
+.options.dropdown-list {
+  background: #fff;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.25), 0 6px 20px 0 rgba(0, 0, 0, 0.25);
+  position: absolute;
+  right: 8px;
+  width: 150px;
+  z-index: 10001;
+  margin-top: 15px;
+}
+
+.options.dropdown-list > *:hover {
+  background-color: #ededf0;
+}
+
+.clear-logs-btn,
+.options-btn,
+.save-log-btn,
+.load-file {
+  cursor: pointer;
+}
+
+.options-btn,
+.clear-logs-btn {
+  height: 24px;
+  width: 24px;
+}
+
+.options-btn {
+  background: url('/icons/settings.svg') no-repeat center center / cover;
+}
+
+.clear-logs-btn {
+  background: url('/icons/clear.svg') no-repeat center center / cover;
+}
+
+.save-log-btn {
+  background: url('/icons/save.svg') no-repeat 5px center / auto;
+}
+
+.load-file-btn {
+  background: url('/icons/upload.svg') no-repeat 5px center / auto;
+}
+
+.options.dropdown-list > * {
+  padding-left: 35px;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.options.dropdown-list img {
+  width: 24px;
+  height: auto;
+  padding-right: 8px;
+}
+
+.options.dropdown-list::after,
+.options.dropdown-list::before {
+  bottom: 100%;
+  right: 5px;
+  border: solid transparent;
+  content: ' ';
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+.options.dropdown-list::after {
+  border-color: rgba(194, 225, 245, 0);
+  border-bottom-color: #fff;
+  border-width: 9px;
+  margin-right: 1px;
+}
+.options.dropdown-list::before {
+  border-color: rgba(194, 225, 245, 0);
+  border-bottom-color: #d7d7db;
+  border-width: 10px;
+  margin-right: 0px;
+}
+
+.filter-wrapper {
+  display: grid;
+  grid-template-columns: 4fr 6fr 4fr 4fr 7fr 8fr;
+  font-size: 14px;
+}
+
+.footer-wrapper {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  height: 30px;
+  align-items: center;
+  padding: 0 15px;
+  color: var(--text-color);
+  border-top: 1px solid var(--table-splitter-color);
+  background: var(--table-header-background-color);
+  box-shadow: 0px 0px 6px 2px rgba(0, 0, 0, 0.1),
+    0 2px 0px 1px rgba(0, 0, 0, 0.12);
+}
+
+.logs-counter {
+  display: flex;
+}
+
+.logs-counter span:last-child {
+  margin-right: 8px;
+}
+
+.logs-counter .slanted-separator {
+  margin: 0 5px;
+}
+
+.page-type {
+  margin-left: auto;
+}
+
+.footer-wrapper .separator {
+  margin: 0 10px;
+  background-color: #ffffff;
+}
+
+.load-logs .save-log-btn,
+.load-logs .clear-logs-btn,
+.load-logs .separator.clear-logs,
+.tabid filter-timestamp,
+.separator.tabId {
+  display: none;
+}
+
+.load-logs .menu-wrapper {
+  grid-template-columns: auto 2px 25px;
+}
+
+.tabid .separator.tabId {
+  display: block;
+}
+
+.dropdown-list {
+  display: none;
+}
+
+.options-btn.expanded ~ .dropdown-list {
+  display: block;
+}
+
+/* when display property is set to flex, it's overriding the rule of hidden attribute */
+[hidden] {
+  display: none !important;
 }

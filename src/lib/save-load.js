@@ -12,47 +12,17 @@ export const load = {
     });
   },
 
-  async loadLogAsText(logFile) {
-    return await this.readFile(logFile);
+  async loadLogAsJSON(logFile) {
+    const logStr = await this.readFile(logFile);
+    return JSON.parse(logStr);
   },
 };
 
 export const save = {
-  async downloadFile(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    let downloadId = null;
-    let listener;
-
-    const downloadDonePromise = new Promise((resolve, reject) => {
-      listener = (result) => {
-        if (result.state.current === 'complete' && result.id === downloadId) {
-          resolve();
-        }
-        if (result.error) {
-          reject(new Error(result.error));
-        }
-      };
-
-      browser.downloads.onChanged.addListener(listener);
+  saveAsJSON() {
+    return browser.runtime.sendMessage({
+      requestTo: 'ext-monitor',
+      requestType: 'saveLogs',
     });
-
-    try {
-      downloadId = await browser.downloads.download({
-        url,
-        filename,
-      });
-      return await downloadDonePromise;
-    } finally {
-      URL.revokeObjectURL(url);
-      browser.downloads.onChanged.removeListener(listener);
-    }
-  },
-
-  saveAsJSON(logs) {
-    const blob = new Blob([JSON.stringify(logs)], {
-      type: 'application/json',
-    });
-
-    return this.downloadFile(blob, 'activitylogs.json');
   },
 };

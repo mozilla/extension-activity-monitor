@@ -33,3 +33,7 @@ $ web-ext run -f /path/to/firefox-nightly/firefox
   - Click on "Load Temporary Add-on" button, then go to `src` directory of your cloned/ downloaded repository and choose `manifest.json` file.
 
 The extension will be loaded temporarily in the browser.
+
+## Get Involved
+
+To get involved with Extension Activity Monitor, you can file bugs or issues, request features and even fix bugs or issues. For more information, check out our [contributing section](https://github.com/mozilla/extension-activity-monitor/blob/master/CONTRIBUTING.md).

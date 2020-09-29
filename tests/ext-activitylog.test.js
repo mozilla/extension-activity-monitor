@@ -5,6 +5,7 @@ import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
+import { FilterTimestamp } from '../src/lib/web-component/filter-timestamp/filter-timestamp-element';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -31,15 +32,16 @@ function observeChange(element) {
 test('show/hide logs associated with extension id that is checked/unchecked from filter option', async () => {
   expect(window.customElements.get('log-view')).toBe(LogView);
   expect(window.customElements.get('filter-option')).toBe(FilterOption);
+  expect(window.customElements.get('filter-timestamp')).toBe(FilterTimestamp);
 
   const logs = [
     {
       /* renders 1st row in table */
       id: 'id1@test',
-      viewType: 'viewType@test',
-      type: 'type@test',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -47,17 +49,24 @@ test('show/hide logs associated with extension id that is checked/unchecked from
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -72,25 +81,23 @@ test('show/hide logs associated with extension id that is checked/unchecked from
     '.toggle-btn'
   );
 
-  const extFilterCheckboxList = activityLog.view.extFilter.shadowRoot.querySelector(
-    '.checkbox-list'
-  );
-
   activityLog.handleNewLogs(logs);
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const getTableRows = () => tableBody.querySelectorAll('tr');
   let tableRows = getTableRows();
 
-  // Initially filter Checkbox List is hidden
-  expect(extFilterCheckboxList.hidden).toBeTruthy();
+  // Initially filter checkbox list is hidden
+  expect(activityLog.view.extFilter.classList.contains('expanded')).toBeFalsy();
 
-  const extFilterBtnChanged = observeChange(extFilterBtn);
+  const extFilterBtnChanged = observeChange(activityLog.view.extFilter);
   extFilterBtn.click();
   await extFilterBtnChanged;
 
-  // Filter checkbox List is displayed
-  expect(extFilterCheckboxList.hidden).toBeFalsy();
+  // the filter checkbox list dropdown is displayed
+  expect(
+    activityLog.view.extFilter.classList.contains('expanded')
+  ).toBeTruthy();
 
   const firstCheckbox = activityLog.view.extFilter.shadowRoot
     .querySelector('.checkbox-list')
@@ -147,14 +154,16 @@ test('show/hide logs associated with extension id that is checked/unchecked from
 test("keyword search show a row when the given keyword is matched in log's data, otherwise hides the row", async () => {
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
 
+  history.replaceState(null, null, document.location.origin);
+
   const logs = [
     {
       /* renders 1st row in table */
       id: 'id1@test',
-      viewType: 'viewType@test',
-      type: 'type@test',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -162,17 +171,24 @@ test("keyword search show a row when the given keyword is matched in log's data,
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'matched@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -209,6 +225,8 @@ test("keyword search show a row when the given keyword is matched in log's data,
 });
 
 test('clearing logs from activitylog page', async () => {
+  history.replaceState(null, null, document.location.origin);
+
   const logs = [
     {
       /* renders 1st row in table */
@@ -216,7 +234,7 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType@test',
       type: 'type@test',
       data: [{ test: 'test1@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
     {
       /* renders 2nd row in table */
@@ -224,17 +242,24 @@ test('clearing logs from activitylog page', async () => {
       viewType: 'viewType2@test',
       type: 'type2@test',
       data: [{ test: 'test2@data' }],
-      timeStamp: new Date(),
+      timeStamp: 1597686226302,
     },
   ];
 
   const addListener = jest.fn();
+  const removeListener = jest.fn();
   const sendMessage = jest.fn();
+  const connect = jest.fn();
 
   window.browser = {
     runtime: {
       onMessage: { addListener },
       sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
     },
   };
 
@@ -262,4 +287,63 @@ test('clearing logs from activitylog page', async () => {
   expect(clearBackgroundLogsFn).toHaveBeenCalled();
   expect(activityLog.model.logs).toMatchObject([]);
   expect(getTableRows().length).toBe(0);
+});
+
+test('timestamp is formatted and rendered correctly', () => {
+  const logs = [
+    {
+      /* renders 1st row in table */
+      id: 'id1@test',
+      viewType: 'viewType@test',
+      type: 'type@test',
+      data: [{ test: 'test1@data' }],
+      timeStamp: 1597686226302,
+    },
+  ];
+
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockImplementation(() => {
+    return Promise.resolve({ existingLogs: [] });
+  });
+
+  document.body.innerHTML = activityLogBody;
+
+  const originalIntlDateTimeFormat = Intl.DateTimeFormat;
+  const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
+
+  // For log timestamp: 1597686226302
+  const expectedTime = '5:43:46 PM';
+  const expectedDateTime = `Aug 17, 2020, 5:43:46 PM`;
+
+  const { activityLog } = new ActivityLog();
+  // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
+  IntlDateTimeFormatFn.mockImplementation((zone, options) => {
+    options = { ...options, timeZone: 'UTC' };
+    return new originalIntlDateTimeFormat('en-US', options);
+  });
+
+  activityLog.handleNewLogs(logs);
+
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const tableRows = tableBody.querySelectorAll('tr');
+  const firstRowTimestamp = tableRows[0].querySelector('.timestamp');
+
+  expect(firstRowTimestamp.textContent).toEqual(expectedTime);
+  expect(firstRowTimestamp.title).toEqual(expectedDateTime);
 });

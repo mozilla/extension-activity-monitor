@@ -1,7 +1,10 @@
+import { dateTimeFormat } from '../../formatters.js';
+
 export class LogView extends HTMLElement {
   constructor() {
     super();
     this.isFilterMatched = () => true;
+    this.highlightedRow = null;
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -19,6 +22,7 @@ export class LogView extends HTMLElement {
     this.closeBtn = logTableInstance.querySelector('.close');
     this.logTableWrapper = logTableInstance.querySelector('.log-table-wrapper');
     this.tableBody = logTableInstance.querySelector('tbody');
+    this.emptyTableLabel = logTableInstance.querySelector('.table-empty-label');
 
     shadow.appendChild(logTableInstance);
   }
@@ -29,6 +33,25 @@ export class LogView extends HTMLElement {
     for (const row of this.tableBody.rows) {
       row.hidden = !this.isFilterMatched(row._log);
     }
+
+    this.triggerLogCountChange();
+  }
+
+  triggerLogCountChange() {
+    let visibleRows = 0;
+    const totalLogs = this.tableBody.rows.length;
+
+    for (const row of this.tableBody.rows) {
+      if (!row.hidden) {
+        visibleRows++;
+      }
+    }
+
+    this.dispatchEvent(
+      new CustomEvent('logcountchange', {
+        detail: { visibleRows, totalLogs },
+      })
+    );
   }
 
   addNewRows(logs) {
@@ -38,26 +61,22 @@ export class LogView extends HTMLElement {
       logTableRowInstance._log = log;
       logTableRowInstance.hidden = !this.isFilterMatched(log);
 
-      logTableRowInstance.querySelector('.id').textContent = log.id;
-      logTableRowInstance.querySelector('.timestamp').textContent =
-        log.timeStamp;
-      logTableRowInstance.querySelector('.api-type').textContent = log.type;
+      const timestamp = logTableRowInstance.querySelector('.timestamp');
+      timestamp.textContent = dateTimeFormat(log.timeStamp, { timeOnly: true });
+      timestamp.title = dateTimeFormat(log.timeStamp);
 
-      if (log.type === 'content_script') {
-        const contentScriptTD = logTableRowInstance.querySelector('.name');
-        contentScriptTD.textContent = log.name;
-        contentScriptTD.colSpan = 2;
-        // view type is undefined for log.type = content_script
-        logTableRowInstance.querySelector('.view-type').hidden = true;
-      } else {
-        logTableRowInstance.querySelector('.name').textContent = log.name;
-        logTableRowInstance.querySelector('.view-type').textContent =
-          log.viewType;
-      }
+      logTableRowInstance.querySelector('.id').textContent = log.id;
+      logTableRowInstance.querySelector('.api-type').textContent = log.type;
+      logTableRowInstance.querySelector('.api-name').textContent = log.name;
+      logTableRowInstance.querySelector('.view-type').textContent =
+        log.viewType || '';
 
       rowsFragment.appendChild(logTableRowInstance);
     }
+
+    this.emptyTableLabel.hidden = true;
     this.tableBody.appendChild(rowsFragment);
+    this.triggerLogCountChange();
   }
 
   handleEvent(event) {
@@ -65,11 +84,15 @@ export class LogView extends HTMLElement {
       const logDetails = event.target.closest('tr')?._log;
 
       if (logDetails) {
+        this.highlightedRow?.classList.remove('row-highlight');
+        this.highlightedRow = event.target.closest('tr');
+        this.highlightedRow?.classList.add('row-highlight');
         this.openDetailSidebar(logDetails);
         return;
       }
 
       if (event.target === this.closeBtn) {
+        this.highlightedRow?.classList.remove('row-highlight');
         this.closeDetailSidebar();
       }
     } else if (event.type === 'contextmenu') {
@@ -81,7 +104,7 @@ export class LogView extends HTMLElement {
   }
 
   openDetailSidebar(logDetails) {
-    const logString = JSON.stringify(logDetails);
+    const logString = JSON.stringify(logDetails, null, 2);
     this.logDetails.textContent = logString;
     this.logTableWrapper.classList.add('width-60');
     this.logDetailWrapper.hidden = false;
@@ -112,12 +135,18 @@ export class LogView extends HTMLElement {
 
   clearTable() {
     this.tableBody.textContent = '';
+    this.emptyTableLabel.hidden = false;
   }
 
   connectedCallback() {
     this.tableBody.addEventListener('click', this);
-    this.tableBody.addEventListener('contextmenu', this);
     this.closeBtn.addEventListener('click', this);
+
+    // context menu doesn't work on devtool_page
+    // see: https://github.com/mozilla/extension-activity-monitor/issues/43
+    if (browser.menus?.overrideContext) {
+      this.tableBody.addEventListener('contextmenu', this);
+    }
   }
 
   disconnectedCallback() {

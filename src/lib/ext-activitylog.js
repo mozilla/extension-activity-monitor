@@ -1,13 +1,16 @@
+import dropDownController from './DropDownController.js';
 import { save } from './save-load.js';
+import { serializeFilters, deSerializeFilters } from './formatters.js';
 
 class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: new Set(),
-      viewType: new Set(),
-      type: new Set(),
-      name: new Set(),
+      id: { exclude: new Set() },
+      viewType: { exclude: new Set() },
+      type: { exclude: new Set() },
+      name: { exclude: new Set() },
+      tabId: null,
       keyword: '',
       timeStamp: null,
     };
@@ -32,6 +35,8 @@ class Model {
    * filter is not applied.
    * @param {number} [updateFilter.timeStamp.start]
    * @param {number} [updateFilter.timeStamp.stop]
+   * @param {null|number} [updateFilter.tabId] - It's null when search paramter
+   * `tabId` is not used.
    */
   setFilter(updateFilter) {
     Object.assign(this.filter, updateFilter);
@@ -44,12 +49,13 @@ class Model {
       this.matchFilterType(log.type) &&
       this.matchFilterApiName(log) &&
       this.matchFilterKeyword(log.data) &&
-      this.matchFilterTimestamp(log.timeStamp)
+      this.matchFilterTimestamp(log.timeStamp) &&
+      this.matchFilterTabId(log.data)
     );
   }
 
   matchFilterId(id) {
-    return this.filter.id.has(id);
+    return !this.filter.id.exclude.has(id);
   }
 
   matchFilterViewType({ type, viewType }) {
@@ -58,11 +64,11 @@ class Model {
       // undefined in viewType Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.viewType.has(viewType);
+    return !this.filter.viewType.exclude.has(viewType);
   }
 
   matchFilterType(type) {
-    return this.filter.type.has(type);
+    return !this.filter.type.exclude.has(type);
   }
 
   matchFilterApiName({ name, type }) {
@@ -71,7 +77,7 @@ class Model {
       // store content script urls in API name Set. Hence, we don't filter here.
       return true;
     }
-    return this.filter.name.has(name);
+    return !this.filter.name.exclude.has(name);
   }
 
   matchFilterKeyword(data) {
@@ -84,15 +90,22 @@ class Model {
       return true;
     }
 
-    const startTime = this.filter.timeStamp.start;
-    const endTime = this.filter.timeStamp.stop;
-    const logTime = Date.parse(logTimestamp);
+    const startTime = this.filter.timeStamp?.start;
+    const stopTime = this.filter.timeStamp?.stop;
 
-    if (logTime < startTime || logTime > endTime) {
+    if (logTimestamp < startTime || logTimestamp > stopTime) {
       return false;
     }
 
     return true;
+  }
+
+  matchFilterTabId({ tabId }) {
+    if (this.filter.tabId == null) {
+      return true;
+    }
+
+    return this.filter.tabId === tabId;
   }
 
   clearLogs() {
@@ -102,10 +115,21 @@ class Model {
 
 class View {
   constructor() {
+    this.contentWrapper = document.querySelector('.content-wrapper');
     this.logView = document.querySelector('log-view');
-    this.clearLogBtn = document.querySelector('#clearLogBtn');
-    this.saveLogBtn = document.querySelector('#saveLogBtn');
+    this.optionsBtn = document.querySelector('.options-btn');
+    this.clearLogBtn = document.querySelector('.clear-logs-btn');
+    this.optionsDropdown = document.querySelector('.options-dropdown');
+    this.saveLogBtn = document.querySelector('.save-log-btn');
+    this.loadLogFile = document.querySelector('input[name="loadLogFile"]');
     this.notice = document.querySelector('.notice');
+    this.filterIdTxt = document.querySelector('.filter-tabid');
+    this.pageType = document.querySelector('.page-type');
+    this.menuWrapper = document.querySelector('.menu-wrapper');
+
+    const logCounter = document.querySelector('.logs-counter');
+    this.visibleRows = logCounter.firstElementChild;
+    this.totalLogs = logCounter.lastElementChild;
 
     this.extFilter = document.querySelector('filter-option[filter-key="id"]');
     this.viewTypeFilter = document.querySelector(
@@ -120,8 +144,11 @@ class View {
     this.keywordFilter = document.querySelector('filter-keyword');
     this.timestampFilter = document.querySelector('filter-timestamp');
 
+    this.optionsBtn.addEventListener('click', this);
     this.clearLogBtn.addEventListener('click', this);
     this.saveLogBtn.addEventListener('click', this);
+    this.loadLogFile.addEventListener('change', this);
+    this.logView.addEventListener('logcountchange', this);
   }
 
   setLogFilter(filterFunc) {
@@ -131,18 +158,32 @@ class View {
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
-        case this.saveLogBtn:
-          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-          break;
         case this.clearLogBtn:
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
           break;
-        default:
-          throw new Error(`wrong event target - ${event.target.tagName}`);
+        case this.optionsBtn:
+          dropDownController.toggleDropDown(this.optionsBtn);
+          break;
+        case this.saveLogBtn:
+          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
       }
+    } else if (event.type === 'change' && event.target === this.loadLogFile) {
+      const logFile = event.target.files[0];
+      this.loadLogFile.value = '';
+      this.loadLogFile.dispatchEvent(
+        new CustomEvent('loadlog', { detail: logFile })
+      );
+    } else if (event.type === 'logcountchange') {
+      this.updateLogCounter(event.detail);
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
+  }
+
+  updateLogCounter({ visibleRows, totalLogs }) {
+    this.visibleRows.textContent = visibleRows;
+    this.totalLogs.textContent = totalLogs;
   }
 
   handleNewLogs(logs) {
@@ -160,6 +201,35 @@ class View {
     this.viewTypeFilter.updateFilterCheckboxes(filteredLogs);
     this.apiTypeFilter.updateFilterCheckboxes(logs);
     this.apiNameFilter.updateFilterCheckboxes(filteredLogs);
+  }
+
+  setInitialFilters(updateFilter) {
+    const {
+      id,
+      viewType,
+      type,
+      name,
+      keyword,
+      timeStamp,
+      tabId,
+    } = updateFilter;
+
+    this.extFilter.setInitialFilter(id.exclude);
+    this.viewTypeFilter.setInitialFilter(viewType.exclude);
+    this.apiTypeFilter.setInitialFilter(type.exclude);
+    this.apiNameFilter.setInitialFilter(name.exclude);
+    this.keywordFilter.setInitialFilter(keyword);
+    this.timestampFilter.setInitialFilter(timeStamp);
+
+    if (tabId) {
+      this.filterIdTxt.textContent = `Filtered By Tab Id: ${tabId}`;
+      this.contentWrapper.classList.add('tabid');
+      const filterDetail = { updateFilter: { tabId } };
+
+      this.filterIdTxt.dispatchEvent(
+        new CustomEvent('filterchange', { detail: filterDetail })
+      );
+    }
   }
 
   setError(errorMessage) {
@@ -186,33 +256,74 @@ class Controller {
   }
 
   async init() {
-    this.view.clearLogBtn.addEventListener('clearlog', this);
-    this.view.saveLogBtn.addEventListener('savelog', this);
     this.view.keywordFilter.addEventListener('filterchange', this);
     this.view.extFilter.addEventListener('filterchange', this);
     this.view.viewTypeFilter.addEventListener('filterchange', this);
     this.view.apiTypeFilter.addEventListener('filterchange', this);
     this.view.apiNameFilter.addEventListener('filterchange', this);
     this.view.timestampFilter.addEventListener('filterchange', this);
+    this.view.filterIdTxt.addEventListener('filterchange', this);
+    this.view.loadLogFile.addEventListener('loadlog', this);
 
-    browser.runtime.onMessage.addListener((message) => {
-      const { requestTo, requestType } = message;
+    const searchParams = new URLSearchParams(
+      document.location.search.substring(1)
+    );
 
-      if (requestTo !== 'activity-log') {
-        return;
+    const loadedFileName = searchParams.get('file');
+
+    if (loadedFileName) {
+      const loadedLogsTxt = `Loaded Logs - ${loadedFileName}`;
+      document.title = loadedLogsTxt;
+
+      this.view.pageType.textContent = loadedLogsTxt;
+      this.view.contentWrapper.classList.add('load-logs');
+
+      const currentTab = await browser.tabs.getCurrent();
+      let logs;
+
+      try {
+        logs = await browser.runtime.sendMessage({
+          requestType: 'getLoadedLogs',
+          requestTo: 'ext-monitor',
+          requestParams: { tabId: currentTab.id },
+        });
+      } catch (error) {
+        this.view.setError(error.message);
       }
 
-      if (requestType === 'appendLogs') {
-        this.handleNewLogs([message.log]);
-      } else {
-        throw new Error(`wrong request type found - ${requestType}`);
+      if (logs?.length) {
+        this.handleNewLogs(logs);
       }
-    });
+    } else {
+      this.view.clearLogBtn.addEventListener('clearlog', this);
+      this.view.saveLogBtn.addEventListener('savelog', this);
 
-    const existingLogs = await this.getExistingLogs();
+      browser.runtime.connect({ name: 'monitor-realtime-logs' });
+      browser.runtime.onMessage.addListener((message) => {
+        const { requestTo, requestType } = message;
 
-    if (existingLogs.length) {
-      this.handleNewLogs(existingLogs);
+        if (requestTo !== 'activity-log') {
+          return;
+        }
+
+        if (requestType === 'appendLogs') {
+          this.handleNewLogs([message.log]);
+        } else {
+          throw new Error(`wrong request type found - ${requestType}`);
+        }
+      });
+
+      if (document.location.search) {
+        const updateFilter = deSerializeFilters(searchParams);
+        this.model.setFilter(updateFilter);
+        this.view.setInitialFilters(updateFilter);
+      }
+
+      const existingLogs = await this.getExistingLogs();
+
+      if (existingLogs.length) {
+        this.handleNewLogs(existingLogs);
+      }
     }
   }
 
@@ -231,6 +342,9 @@ class Controller {
 
   handleEvent(event) {
     switch (event.type) {
+      case 'loadlog':
+        this.loadLogs(event.detail);
+        break;
       case 'savelog':
         this.saveLogs();
         break;
@@ -245,9 +359,21 @@ class Controller {
     }
   }
 
+  async loadLogs(file) {
+    try {
+      await browser.runtime.sendMessage({
+        requestTo: 'ext-monitor',
+        requestType: 'loadLogs',
+        requestParams: { file },
+      });
+    } catch (error) {
+      this.view.setError(error.message);
+    }
+  }
+
   async saveLogs() {
     try {
-      await save.saveAsJSON(this.model.logs);
+      await save.saveAsJSON();
       this.view.setError(null);
     } catch (error) {
       this.view.setError(error.message);
@@ -255,14 +381,25 @@ class Controller {
   }
 
   onFilterChange(filterDetail) {
-    const { updateFilter, isNewFilterAdded } = filterDetail;
-
+    const { updateFilter, newFilterOption } = filterDetail;
     this.model.setFilter(updateFilter);
-    // When new filter checkbox is added, it is in checked condition by default
-    // No need to re-render the rows then.
-    if (!isNewFilterAdded) {
+    this.updateSearchParams(updateFilter);
+
+    if (!newFilterOption) {
       this.view.setLogFilter((log) => this.isFilterMatched(log));
     }
+  }
+
+  updateSearchParams(updateFilter) {
+    const currentURL = new URL(document.location.href);
+    const currentSearchParams = new URLSearchParams(currentURL.search.slice(1));
+
+    const updatedSearchParams = serializeFilters(
+      currentSearchParams,
+      updateFilter
+    );
+
+    history.replaceState(null, null, `?${updatedSearchParams}`);
   }
 
   isFilterMatched(log) {
@@ -273,6 +410,7 @@ class Controller {
     this.clearBackgroundLogs();
     this.model.clearLogs();
     this.view.clearTable();
+    this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
   }
 
   async clearBackgroundLogs() {

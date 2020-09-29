@@ -1,6 +1,6 @@
 {
   "name": "extension-activity-monitor",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Extension Activity Monitor provides more transparency which could help to increase the reliability of abuse reporting and accountability on developers. It is an additional useful tool to aid investigating bugs in the extensions or in the Firefox WebExtensions internals.",
   "scripts": {
     "start": "web-ext run",

@@ -1,3 +1,6 @@
+import dropDownController from '../../DropDownController.js';
+import { dateTimeFormat } from '../../formatters.js';
+
 export class FilterTimestamp extends HTMLElement {
   constructor() {
     super();
@@ -13,38 +16,78 @@ export class FilterTimestamp extends HTMLElement {
       '.timestamp-filter-container'
     );
 
-    this.startTimeLabel = filterWrapper.querySelector('#startTimeLabel');
-    this.stopTimeLabel = filterWrapper.querySelector('#stopTimeLabel');
-    this.clearBtn = filterWrapper.querySelector('#clearBtn');
+    this.filterToggleBar = filterWrapper.querySelector('.filter-toggle-bar');
+
+    this.dropDownList = filterWrapper.querySelector(
+      '.timestamp-filter-options.dropdown-list'
+    );
+
+    this.startTimeLabel = this.dropDownList.querySelector('#startTimeLabel');
+    this.stopTimeLabel = this.dropDownList.querySelector('#stopTimeLabel');
+
+    this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
+    this.clearStartTimeBtn = this.dropDownList.querySelector('#clearStart');
+
+    this.clearStopTimeBtn = this.dropDownList.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
   }
 
   setFilterRange = (info) => {
     const selectedEl = browser.menus.getTargetElement(info.targetElementId);
-    const selectedRow = selectedEl.closest('tr');
+    const selectedRow = selectedEl?.closest('tr');
 
     if (!selectedRow) {
       return;
     }
 
-    // this.timestamp is null when timestamp filter is not applied.
-    if (!this.timeStamp) {
-      this.timeStamp = {};
-    }
+    const timeStamp = this.timeStamp || {};
 
-    const chosenTimestamp = selectedRow.querySelector('.timestamp').textContent;
+    const chosenTimestamp = selectedRow._log.timeStamp;
+
     if (info.menuItemId === 'startTime') {
-      this.timeStamp.start = Date.parse(chosenTimestamp);
-      this.startTimeLabel.textContent = chosenTimestamp;
+      timeStamp.start = chosenTimestamp;
+      this.startTimeLabel.textContent = dateTimeFormat(chosenTimestamp);
+      this.clearStartTimeBtn.hidden = false;
     } else if (info.menuItemId === 'stopTime') {
-      this.timeStamp.stop = Date.parse(chosenTimestamp);
-      this.stopTimeLabel.textContent = chosenTimestamp;
+      timeStamp.stop = chosenTimestamp;
+      this.stopTimeLabel.textContent = dateTimeFormat(chosenTimestamp);
+      this.clearStopTimeBtn.hidden = false;
     }
 
-    this.filterContainer.hidden = false;
+    this.timeStamp = timeStamp;
+
+    this.setTimestampStatus();
     this.dispatchFilterChange();
   };
+
+  setInitialFilter(timestamp) {
+    if (timestamp == null) {
+      return;
+    }
+
+    this.timeStamp = {};
+
+    if (timestamp?.start != null) {
+      this.timeStamp.start = timestamp.start;
+      this.startTimeLabel.textContent = dateTimeFormat(timestamp.start);
+      this.filterContainer.hidden = false;
+      this.clearStartTimeBtn.hidden = false;
+    }
+
+    if (timestamp?.stop != null) {
+      this.timeStamp.stop = timestamp.stop;
+      this.stopTimeLabel.textContent = dateTimeFormat(timestamp.stop);
+      this.filterContainer.hidden = false;
+      this.clearStopTimeBtn.hidden = false;
+    }
+  }
+
+  setTimestampStatus() {
+    if (this.timeStamp != null || Object.keys(this.timeStamp).length !== 0) {
+      dropDownController.showDropDown(this);
+    }
+  }
 
   dispatchFilterChange() {
     const filterDetail = {
@@ -58,29 +101,72 @@ export class FilterTimestamp extends HTMLElement {
     );
   }
 
-  onClearFilter = () => {
-    this.startTimeLabel.textContent = 'From Beginning';
-    this.stopTimeLabel.textContent = 'Up to End';
-    this.filterContainer.hidden = true;
+  onClearFilter(clearStart = true, clearStop = true) {
+    if (clearStart) {
+      this.startTimeLabel.textContent = 'From Beginning';
+      this.clearStartTimeBtn.hidden = true;
+      delete this.timeStamp.start;
+    }
 
-    this.timeStamp = null;
+    if (clearStop) {
+      this.stopTimeLabel.textContent = 'Up to End';
+      this.clearStopTimeBtn.hidden = true;
+      delete this.timeStamp.stop;
+    }
+
+    if (Object.keys(this.timeStamp).length === 0) {
+      this.timeStamp = null;
+    }
+
+    if (!this.timeStamp) {
+      dropDownController.hideDropDown();
+    }
+
     this.dispatchFilterChange();
-  };
+  }
 
   onHiddenListener = () => {
     browser.menus.removeAll();
   };
 
+  handleEvent(event) {
+    if (event.type === 'click') {
+      switch (event.target) {
+        case this.clearFilterBtn:
+          this.onClearFilter();
+          break;
+        case this.clearStartTimeBtn:
+          this.onClearFilter(true, false);
+          break;
+        case this.clearStopTimeBtn:
+          this.onClearFilter(false, true);
+          break;
+      }
+
+      if (event.currentTarget === this.filterToggleBar) {
+        dropDownController.toggleDropDown(this);
+      }
+    }
+  }
+
   connectedCallback() {
+    // context menu doesn't work on devtool_page
+    // see: https://github.com/mozilla/extension-activity-monitor/issues/43
+    if (!browser.menus?.onClicked || !browser.menus?.onHidden) {
+      return;
+    }
+
     browser.menus.onClicked.addListener(this.setFilterRange);
     browser.menus.onHidden.addListener(this.onHiddenListener);
-    this.clearBtn.addEventListener('click', this.onClearFilter);
+    this.filterToggleBar.addEventListener('click', this);
+    this.dropDownList.addEventListener('click', this);
   }
 
   disconnectedCallback() {
     browser.menus.onClicked.removeListener(this.setFilterRange);
     browser.menus.onHidden.removeListener(this.onHiddenListener);
-    this.clearBtn.removeEventListener('click', this.onClearFilter);
+    this.filterToggleBar.removeEventListener('click', this);
+    this.dropDownList.removeEventListener('click', this);
   }
 }
 

@@ -1,10 +1,14 @@
+import dropDownController from '../../DropDownController.js';
+
+// When viewtype is undefined for API calls
+const FILTER_OPTION_UNDEFINED_LABEL = 'other';
+
 export class FilterOption extends HTMLElement {
   constructor() {
     super();
 
     this.viewCheckboxLabels = new Set();
-    // It contains the checked checkboxes
-    this.activeCheckboxLabels = new Set();
+    this.uncheckedCheckboxLabels = new Set();
 
     const shadow = this.attachShadow({ mode: 'open' });
 
@@ -22,7 +26,9 @@ export class FilterOption extends HTMLElement {
     this.filterOptionTitle = filterContainer.querySelector('.title');
     this.filterOptionTitle.textContent = this.textContent;
 
-    this.checkboxList = filterContainer.querySelector('.checkbox-list');
+    this.checkboxList = filterContainer.querySelector(
+      '.checkbox-list.dropdown-list'
+    );
     this.checkboxList.classList.add(this.filterKey);
 
     shadow.appendChild(filterContainer);
@@ -32,25 +38,30 @@ export class FilterOption extends HTMLElement {
     for (const log of logs) {
       const checkboxLabel = log[this.filterKey];
       if (!this.viewCheckboxLabels.has(checkboxLabel)) {
-        this.viewCheckboxLabels.add(checkboxLabel);
         this.addNewCheckbox(checkboxLabel);
-        this.dispatchFilterChangeEvent({ isNewFilterAdded: true });
       }
+    }
+
+    this.dispatchFilterChangeEvent({ newFilterOption: true });
+  }
+
+  setInitialFilter(searchParamLabels) {
+    for (const label of searchParamLabels) {
+      // the checkboxes with these labels will be in unchecked condition
+      this.uncheckedCheckboxLabels.add(label);
     }
   }
 
   addNewCheckbox(checkboxLabel) {
     const newCheckbox = this.checkboxTemplate.cloneNode(true);
     newCheckbox.querySelector('label span').textContent =
-      checkboxLabel || 'undefined';
+      checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
 
     const inputCheckbox = newCheckbox.querySelector('input');
-    inputCheckbox.value = checkboxLabel;
-    inputCheckbox.checked = true;
+    inputCheckbox.value = checkboxLabel || FILTER_OPTION_UNDEFINED_LABEL;
+    inputCheckbox.checked = !this.uncheckedCheckboxLabels.has(checkboxLabel);
 
-    // adding to activeCheckboxLabels list since checkbox is checked
-    this.activeCheckboxLabels.add(checkboxLabel);
-
+    this.viewCheckboxLabels.add(checkboxLabel);
     this.checkboxList.appendChild(newCheckbox);
   }
 
@@ -65,37 +76,38 @@ export class FilterOption extends HTMLElement {
 
   handleEvent(event) {
     if (event.type === 'click' && event.currentTarget === this.toggleBtn) {
-      this.toggleFilterListDisplay(this.checkboxList);
+      dropDownController.toggleDropDown(this);
     } else if (
       event.type === 'change' &&
       event.currentTarget === this.checkboxList
     ) {
+      // when viewType is undefined, we display it as "other" in filter option.
       const checkboxLabel =
-        event.target.value === 'undefined' ? undefined : event.target.value;
+        event.target.value === FILTER_OPTION_UNDEFINED_LABEL
+          ? undefined
+          : event.target.value;
       const isChecked = event.target.checked;
 
       if (isChecked) {
-        this.activeCheckboxLabels.add(checkboxLabel);
+        this.uncheckedCheckboxLabels.delete(checkboxLabel);
       } else {
-        this.activeCheckboxLabels.delete(checkboxLabel);
+        this.uncheckedCheckboxLabels.add(checkboxLabel);
       }
-      this.dispatchFilterChangeEvent({ isNewFilterAdded: false });
+
+      this.dispatchFilterChangeEvent();
     } else {
       throw new Error(`wrong event type - ${event.type}`);
     }
   }
 
-  toggleFilterListDisplay(checkboxList) {
-    checkboxList.hidden = !checkboxList.hidden;
-    this.toggleBtn.classList.toggle('expanded');
-  }
-
-  dispatchFilterChangeEvent({ isNewFilterAdded }) {
+  dispatchFilterChangeEvent(options) {
     const filterDetail = {
       updateFilter: {
-        [this.filterKey]: new Set(this.activeCheckboxLabels),
+        [this.filterKey]: {
+          exclude: new Set(this.uncheckedCheckboxLabels),
+        },
       },
-      isNewFilterAdded,
+      newFilterOption: options?.newFilterOption || false,
     };
 
     this.dispatchEvent(
@@ -104,8 +116,8 @@ export class FilterOption extends HTMLElement {
   }
 
   disconnectedCallback() {
-    this.toggleBtn.addEventListener('click', this);
-    this.checkboxList.addEventListener('change', this);
+    this.toggleBtn.removeEventListener('click', this);
+    this.checkboxList.removeEventListener('change', this);
   }
 }
 

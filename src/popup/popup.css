@@ -1,3 +1,12 @@
+@font-face {
+  font-family: source-sans;
+  src: url(/fonts/SourceSansPro-Regular.ttf);
+}
+
+* {
+  font-family: source-sans;
+}
+
 body {
   width: 250px;
   height: auto;
@@ -11,21 +20,32 @@ button {
   font-size: 14px;
   color: #000000;
   background-color: #ffffff;
-  border: 2px solid #000000;
+  border: 1px solid #000000;
   cursor: pointer;
   border-radius: 40%;
 }
 
 button:disabled,
 button:disabled:hover {
-  background-color: #dadada;
-  color: #747474;
+  background-color: #d7d7db !important;
+  color: #737373 !important;
+  border: 1px solid #000000 !important;
   cursor: default;
 }
 
 button:hover {
-  background-color: #000000;
-  border: 2px solid #000000;
+  background-color: #363959;
+  border: 0;
+  color: #ffffff;
+}
+
+button#startMonitorBtn:hover {
+  background-color: #12bc00;
+  color: #ffffff;
+}
+
+button#stopMonitorBtn:hover {
+  background-color: #d70022;
   color: #ffffff;
 }
 
@@ -41,12 +61,12 @@ button:hover {
 }
 
 .success {
-  background-color: #35a83b;
+  background-color: #12bc00;
   color: #ffffff;
 }
 
 .failure,
 #errorText {
-  background-color: #a52c2c;
+  background-color: #d70022;
   color: #ffffff;
 }
