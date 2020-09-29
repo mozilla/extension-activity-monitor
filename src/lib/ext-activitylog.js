@@ -161,7 +161,7 @@ class View {
       switch (event.target) {
         case this.clearLogBtn:
           this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-          this.closeDetailSidebar();
+          closeDetailSidebr();
           break;
         case this.optionsBtn:
           dropDownController.toggleDropDown(this.optionsBtn);
