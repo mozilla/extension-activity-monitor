@@ -26,6 +26,6 @@
   ],
   "stabilityDays": 7,
   "node": {
-    "supportPolicy": ["lts"]
+    "supportPolicy": ["lts_latest"]
   }
 }
