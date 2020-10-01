@@ -27,8 +27,7 @@ function observeChange(element) {
   });
 }
 
-// This applies for other filter options, such as - view type,
-// api type, api name
+// This applies for other filter options, such as - view type, api type, api name
 test('show/hide logs associated with extension id that is checked/unchecked from filter option', async () => {
   expect(window.customElements.get('log-view')).toBe(LogView);
   expect(window.customElements.get('filter-option')).toBe(FilterOption);
@@ -353,4 +352,339 @@ test('timestamp is formatted and rendered correctly', () => {
 
   expect(firstRowTimestamp.textContent).toEqual(expectedTime);
   expect(firstRowTimestamp.title).toEqual(expectedDateTime);
+});
+
+test('the log detail view is displayed when a log is selected from log view', async () => {
+  const logs = [
+    {
+      /* renders 1st row in table */
+      id: 'id1@test',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
+      data: [{ test: 'test1@data' }],
+      timeStamp: 1597686226302,
+    },
+    {
+      /* renders 2nd row in table */
+      id: 'id2@test',
+      viewType: 'viewType2@test',
+      type: 'type2@test',
+      data: [{ test: 'test2@data' }],
+      timeStamp: 1597686236402,
+    },
+  ];
+
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockImplementation(() => {
+    return Promise.resolve({ existingLogs: logs });
+  });
+
+  document.body.innerHTML = activityLogBody;
+
+  const emptyTableLabel = document
+    .querySelector('log-view')
+    .shadowRoot.querySelector('.table-empty-label');
+
+  const emptyTableLabelHidden = observeChange(emptyTableLabel);
+  const { activityLog } = new ActivityLog();
+  await emptyTableLabelHidden;
+
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const tableRows = tableBody.querySelectorAll('tr');
+
+  // log details section displayed
+  const logDetailWrapper = activityLog.view.logView.shadowRoot.querySelector(
+    '.log-detail-wrapper'
+  );
+
+  // log details is hidden initially
+  expect(logDetailWrapper.hidden).toBeTruthy();
+
+  const logDetailWrapperVisible = observeChange(logDetailWrapper);
+  // Here a single row being clicked
+  // The result is the same if any column of that row is clicked
+  // the click event is triggered on the table body
+  tableRows[0].dispatchEvent(new Event('click', { bubbles: true }));
+  await logDetailWrapperVisible;
+
+  const logDetails = JSON.parse(logDetailWrapper.firstElementChild.textContent);
+
+  expect(logDetailWrapper.hidden).toBeFalsy();
+  expect(logDetails).toMatchObject(tableRows[0]._log);
+
+  // closing the log Detail viewer
+  const logDetailWrapperHidden = observeChange(logDetailWrapper);
+  logDetailWrapper.lastElementChild.click();
+  await logDetailWrapperHidden;
+  expect(logDetailWrapper.hidden).toBeTruthy();
+});
+
+describe('Filtering logs with timestamp', () => {
+  test('context menu gets overrriden inside table body', () => {
+    const logs = [
+      {
+        /* renders 1st row in table */
+        id: 'id1@test',
+        viewType: 'viewType1@test',
+        type: 'type1@test',
+        data: [{ test: 'test1@data' }],
+        timeStamp: 1597686226302,
+      },
+      {
+        /* renders 2nd row in table */
+        id: 'id2@test',
+        viewType: 'viewType2@test',
+        type: 'type2@test',
+        data: [{ test: 'test2@data' }],
+        timeStamp: 1597686236402,
+      },
+      {
+        /* renders 3rd row in table */
+        id: 'id3@test',
+        viewType: 'viewType3@test',
+        type: 'type3@test',
+        data: [{ test: 'test3@data' }],
+        timeStamp: 1597686336402,
+      },
+      {
+        /* renders 4th row in table */
+        id: 'id4@test',
+        viewType: 'viewType4@test',
+        type: 'type4@test',
+        data: [{ test: 'test4@data' }],
+        timeStamp: 1597686436402,
+      },
+    ];
+
+    const commonAddListener = jest.fn();
+    const commonRemoveListener = jest.fn();
+    const sendMessage = jest.fn();
+    const connect = jest.fn();
+    const overrideContext = jest.fn();
+    const createMenu = jest.fn();
+    const refreshMenu = jest.fn();
+    const getTargetElement = jest.fn();
+
+    window.browser = {
+      runtime: {
+        onMessage: { addListener: commonAddListener },
+        sendMessage,
+        connect,
+      },
+      menus: {
+        onClicked: {
+          addListener: commonAddListener,
+          removeListener: commonRemoveListener,
+        },
+        onHidden: {
+          addListener: commonAddListener,
+          removeListener: commonRemoveListener,
+        },
+        create: createMenu,
+        refresh: refreshMenu,
+        overrideContext,
+        getTargetElement,
+      },
+    };
+
+    sendMessage.mockImplementation(() => {
+      return Promise.resolve({ existingLogs: [] });
+    });
+
+    document.body.innerHTML = activityLogBody;
+
+    const { activityLog } = new ActivityLog();
+    activityLog.handleNewLogs(logs);
+
+    const createContextMenuFn = jest.spyOn(
+      activityLog.view.logView,
+      'createContextMenu'
+    );
+
+    const tableBody = activityLog.view.logView.shadowRoot.querySelector(
+      'tbody'
+    );
+    const tableRows = tableBody.querySelectorAll('tr');
+
+    // note: we could even take other columns of the row
+    const timestampColSecondRow = tableRows[1].querySelector('.timestamp');
+    // generate a contextmenu event from timestamp column of the 2nd row of table body
+    timestampColSecondRow.dispatchEvent(
+      new Event('contextmenu', { bubbles: true })
+    );
+
+    expect(overrideContext).toHaveBeenCalled();
+    expect(createContextMenuFn).toHaveBeenCalled();
+    expect(createMenu).toHaveBeenCalled();
+    expect(refreshMenu).toHaveBeenCalled();
+
+    // Two menus have been added in context menu overrriding the existing menus
+    // Those two menus are: "Start from this timestamp" and "Stop at this timestamp"
+  });
+  test('timestamp filter can be applied with the help of context menu', () => {
+    const logs = [
+      {
+        /* renders 1st row in table */
+        id: 'id1@test',
+        viewType: 'viewType1@test',
+        type: 'type1@test',
+        data: [{ test: 'test1@data' }],
+        timeStamp: 1597686226302,
+      },
+      {
+        /* renders 2nd row in table */
+        id: 'id2@test',
+        viewType: 'viewType2@test',
+        type: 'type2@test',
+        data: [{ test: 'test2@data' }],
+        timeStamp: 1597686236402,
+      },
+      {
+        /* renders 3rd row in table */
+        id: 'id3@test',
+        viewType: 'viewType3@test',
+        type: 'type3@test',
+        data: [{ test: 'test3@data' }],
+        timeStamp: 1597686336402,
+      },
+      {
+        /* renders 4th row in table */
+        id: 'id4@test',
+        viewType: 'viewType4@test',
+        type: 'type4@test',
+        data: [{ test: 'test4@data' }],
+        timeStamp: 1597686436402,
+      },
+    ];
+
+    const commonAddListener = jest.fn();
+    const commonRemoveListener = jest.fn();
+    const sendMessage = jest.fn();
+    const connect = jest.fn();
+    const overrideContext = jest.fn();
+    const createMenu = jest.fn();
+    const refreshMenu = jest.fn();
+    const getTargetElement = jest.fn();
+
+    const expectedStartTime = 'Aug 17, 2020, 5:43:56 PM';
+    const expectedStopTime = 'Aug 17, 2020, 5:45:36 PM';
+
+    window.browser = {
+      runtime: {
+        onMessage: { addListener: commonAddListener },
+        sendMessage,
+        connect,
+      },
+      menus: {
+        onClicked: {
+          addListener: commonAddListener,
+          removeListener: commonRemoveListener,
+        },
+        onHidden: {
+          addListener: commonAddListener,
+          removeListener: commonRemoveListener,
+        },
+        create: createMenu,
+        refresh: refreshMenu,
+        overrideContext,
+        getTargetElement,
+      },
+    };
+
+    sendMessage.mockImplementation(() => {
+      return Promise.resolve({ existingLogs: [] });
+    });
+
+    document.body.innerHTML = activityLogBody;
+
+    const { activityLog } = new ActivityLog();
+    activityLog.handleNewLogs(logs);
+
+    const tableBody = activityLog.view.logView.shadowRoot.querySelector(
+      'tbody'
+    );
+    const tableRows = tableBody.querySelectorAll('tr');
+
+    const timestampColSecondRow = tableRows[1].querySelector('.timestamp');
+    const timestampColThirdRow = tableRows[2].querySelector('.timestamp');
+
+    // We have generated the context menu event from second row, let's assume we clicked on the "Start from this timestamp" option from menu. This will trigger "setFilterRange" from filter-timestamp-element.js
+    getTargetElement.mockImplementation((targetElementId) => {
+      if (targetElementId === 123) {
+        return timestampColSecondRow;
+      } else if (targetElementId === 456) {
+        return timestampColThirdRow;
+      } else {
+        return null;
+      }
+    });
+
+    // when targetElementId is invalid, the request doesn't proceed
+    activityLog.view.timestampFilter.setFilterRange({
+      targetElementId: 912,
+      menuItemId: 'startTime',
+    });
+
+    // applying the timestamp filter starting from second row
+    // Thus rows before the second row i.e. first row will be hidden
+    activityLog.view.timestampFilter.setFilterRange({
+      targetElementId: 123,
+      menuItemId: 'startTime',
+    });
+
+    expect(tableRows[0].hidden).toBeTruthy();
+    expect(tableRows[1].hidden).toBeFalsy();
+    expect(tableRows[2].hidden).toBeFalsy();
+    expect(tableRows[3].hidden).toBeFalsy();
+
+    // checking if the start is mentioned in dropdown
+    const getStartTimeLabel = () =>
+      activityLog.view.timestampFilter.startTimeLabel.textContent;
+    expect(getStartTimeLabel()).toStrictEqual(expectedStartTime);
+
+    // Now let's apply the stop timestamp to 3rd row of the table.
+    // Thus it will hide the 4th row
+    activityLog.view.timestampFilter.setFilterRange({
+      targetElementId: 456,
+      menuItemId: 'stopTime',
+    });
+
+    expect(tableRows[0].hidden).toBeTruthy();
+    expect(tableRows[1].hidden).toBeFalsy();
+    expect(tableRows[2].hidden).toBeFalsy();
+    expect(tableRows[3].hidden).toBeTruthy();
+
+    // checking if the stop is mentioned in dropdown
+    const getStopTimeLabel = () =>
+      activityLog.view.timestampFilter.stopTimeLabel.textContent;
+    expect(getStopTimeLabel()).toStrictEqual(expectedStopTime);
+
+    // Clearing timestamp filters
+    activityLog.view.timestampFilter.clearStartTimeBtn.click();
+    expect(getStartTimeLabel()).toStrictEqual('From Beginning');
+    activityLog.view.timestampFilter.clearStopTimeBtn.click();
+    expect(getStopTimeLabel()).toStrictEqual('Up to End');
+
+    // since both the start and stop timestamp is cleared, all rows should be visible
+    expect(tableRows[0].hidden).toBeFalsy();
+    expect(tableRows[1].hidden).toBeFalsy();
+    expect(tableRows[2].hidden).toBeFalsy();
+    expect(tableRows[3].hidden).toBeFalsy();
+  });
 });
