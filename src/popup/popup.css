@@ -18,9 +18,8 @@ button {
   height: 35px;
   width: 100%;
   font-size: 14px;
-  color: #000000;
-  background-color: #ffffff;
-  /* border: 1px solid #000000; */
+  color: var(--grey-90-a30);
+  background-color: var(--selection-color);
   border: none;
   cursor: pointer;
   text-align: center;
@@ -28,26 +27,25 @@ button {
 
 button:disabled,
 button:disabled:hover {
-  background-color: #d7d7db !important;
-  color: #737373 !important;
-  /* border: 1px solid #000000 !important; */
+  background-color: var(--grey-30) !important;
+  color: var(--grey-50) !important;
   cursor: default;
 }
 
 button:hover {
-  background-color: #363959;
+  background-color: var(--purple-60);
   border: 0;
-  color: #ffffff;
+  color: var(--selection-color);
 }
 
 button#startMonitorBtn:hover {
-  background-color: #12bc00;
-  color: #ffffff;
+  background-color: var(--green-60);
+  color: var(--selection-color);
 }
 
 button#stopMonitorBtn:hover {
-  background-color: #d70022;
-  color: #ffffff;
+  background-color: var(--red-60);
+  color: var(--selection-color);
 }
 
 #monitorStatus {
@@ -58,7 +56,6 @@ button#stopMonitorBtn:hover {
 #errorText {
   font-size: 15px;
   padding: 10px 0px;
-
   text-align: center;
 }
 
@@ -67,13 +64,12 @@ button#stopMonitorBtn:hover {
 }
 
 .success {
-  background-color: rgb(9, 92, 9);
-  color: #ffffff;
+  background-color: var(--green-70);
+  color: var(--selection-color);
 }
 
 .failure,
 #errorText {
-  background-color: #d70022;
-
-  color: #ffffff;
+  background-color: var(--red-60);
+  color: var(--selection-color);
 }
