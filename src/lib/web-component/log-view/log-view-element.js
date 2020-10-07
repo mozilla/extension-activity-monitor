@@ -6,7 +6,9 @@ export class LogView extends HTMLElement {
     this.isFilterMatched = () => true;
     this.highlightedRow = null;
 
-    const shadow = this.attachShadow({ mode: 'open' });
+    const shadow = this.attachShadow({
+      mode: 'open',
+    });
 
     this.logTableRow = document.querySelector(
       '#logTableRowTemplate'
@@ -49,7 +51,10 @@ export class LogView extends HTMLElement {
 
     this.dispatchEvent(
       new CustomEvent('logcountchange', {
-        detail: { visibleRows, totalLogs },
+        detail: {
+          visibleRows,
+          totalLogs,
+        },
       })
     );
   }
@@ -62,7 +67,9 @@ export class LogView extends HTMLElement {
       logTableRowInstance.hidden = !this.isFilterMatched(log);
 
       const timestamp = logTableRowInstance.querySelector('.timestamp');
-      timestamp.textContent = dateTimeFormat(log.timeStamp, { timeOnly: true });
+      timestamp.textContent = dateTimeFormat(log.timeStamp, {
+        timeOnly: true,
+      });
       timestamp.title = dateTimeFormat(log.timeStamp);
 
       logTableRowInstance.querySelector('.id').textContent = log.id;

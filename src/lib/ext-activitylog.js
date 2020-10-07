@@ -6,10 +6,18 @@ class Model {
   constructor() {
     this.logs = [];
     this.filter = {
-      id: { exclude: new Set() },
-      viewType: { exclude: new Set() },
-      type: { exclude: new Set() },
-      name: { exclude: new Set() },
+      id: {
+        exclude: new Set(),
+      },
+      viewType: {
+        exclude: new Set(),
+      },
+      type: {
+        exclude: new Set(),
+      },
+      name: {
+        exclude: new Set(),
+      },
       tabId: null,
       keyword: '',
       timeStamp: null,
@@ -111,7 +119,6 @@ class Model {
   clearLogs() {
     this.logs = [];
   }
-  
 }
 
 class View {
@@ -173,7 +180,9 @@ class View {
       const logFile = event.target.files[0];
       this.loadLogFile.value = '';
       this.loadLogFile.dispatchEvent(
-        new CustomEvent('loadlog', { detail: logFile })
+        new CustomEvent('loadlog', {
+          detail: logFile,
+        })
       );
     } else if (event.type === 'logcountchange') {
       this.updateLogCounter(event.detail);
@@ -225,10 +234,16 @@ class View {
     if (tabId) {
       this.filterIdTxt.textContent = `Filtered By Tab Id: ${tabId}`;
       this.contentWrapper.classList.add('tabid');
-      const filterDetail = { updateFilter: { tabId } };
+      const filterDetail = {
+        updateFilter: {
+          tabId,
+        },
+      };
 
       this.filterIdTxt.dispatchEvent(
-        new CustomEvent('filterchange', { detail: filterDetail })
+        new CustomEvent('filterchange', {
+          detail: filterDetail,
+        })
       );
     }
   }
@@ -287,7 +302,9 @@ class Controller {
         logs = await browser.runtime.sendMessage({
           requestType: 'getLoadedLogs',
           requestTo: 'ext-monitor',
-          requestParams: { tabId: currentTab.id },
+          requestParams: {
+            tabId: currentTab.id,
+          },
         });
       } catch (error) {
         this.view.setError(error.message);
@@ -300,7 +317,9 @@ class Controller {
       this.view.clearLogBtn.addEventListener('clearlog', this);
       this.view.saveLogBtn.addEventListener('savelog', this);
 
-      browser.runtime.connect({ name: 'monitor-realtime-logs' });
+      browser.runtime.connect({
+        name: 'monitor-realtime-logs',
+      });
       browser.runtime.onMessage.addListener((message) => {
         const { requestTo, requestType } = message;
 
@@ -366,7 +385,9 @@ class Controller {
       await browser.runtime.sendMessage({
         requestTo: 'ext-monitor',
         requestType: 'loadLogs',
-        requestParams: { file },
+        requestParams: {
+          file,
+        },
       });
     } catch (error) {
       this.view.setError(error.message);
@@ -412,7 +433,10 @@ class Controller {
     this.clearBackgroundLogs();
     this.model.clearLogs();
     this.view.clearTable();
-    this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
+    this.view.updateLogCounter({
+      visibleRows: 0,
+      totalLogs: 0,
+    });
   }
 
   async clearBackgroundLogs() {
