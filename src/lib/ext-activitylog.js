@@ -244,6 +244,7 @@ class View {
 
   clearTable() {
     this.logView.clearTable();
+    this.logView.closeDetailSidebar();
   }
 }
 
