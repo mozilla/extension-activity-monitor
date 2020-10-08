@@ -136,6 +136,7 @@ export class LogView extends HTMLElement {
   clearTable() {
     this.tableBody.textContent = '';
     this.emptyTableLabel.hidden = false;
+    this.closeDetailSidebar();
   }
 
   connectedCallback() {
