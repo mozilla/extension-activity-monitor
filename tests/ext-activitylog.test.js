@@ -282,7 +282,14 @@ test('clearing logs from activitylog page', async () => {
   expect(activityLog.model.logs).toMatchObject(logs);
   expect(getTableRows().length).toBe(2);
 
+  const [row] = getTableRows();
+  const { logDetailWrapper } = activityLog.view.logView;
+  expect(logDetailWrapper.hidden).toBe(true);
+  row.click();
+  expect(logDetailWrapper.hidden).toBe(false);
+
   clearLogBtn.click();
+  expect(logDetailWrapper.hidden).toBe(true);
 
   expect(clearBackgroundLogsFn).toHaveBeenCalled();
   expect(activityLog.model.logs).toMatchObject([]);
