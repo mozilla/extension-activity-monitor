@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-  - 'v14.15.0'
+  - 'v14.15.1'
 
 script:
   - npm run prettier:check
