@@ -10,6 +10,7 @@
 body {
   width: 250px;
   height: auto;
+  background-color: #000000;
 }
 
 button {
@@ -22,6 +23,7 @@ button {
   background-color: #ffffff;
   border: 1px solid #000000;
   cursor: pointer;
+  border-radius: 5px;
 }
 
 button:disabled,
@@ -62,10 +64,12 @@ button#stopMonitorBtn:hover {
 .success {
   background-color: #12bc00;
   color: #ffffff;
+  border-radius: 5px;
 }
 
 .failure,
 #errorText {
   background-color: #d70022;
   color: #ffffff;
+  border-radius: 5px;
 }
