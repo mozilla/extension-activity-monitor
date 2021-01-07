@@ -1,0 +1,67 @@
+# NOTE:
+# - to validate changes to this file locally using the circleci CLI tool:
+#
+#     circleci config process .circleci/config.yml
+#
+# - to try run jobs locally:
+#
+#     circleci config process .circleci/config.yml > tmp/processed.yml
+#     circleci local execute -c tmp/processed.yml --job build-nodejs-current
+#
+version: 2.1
+
+references:
+  nodejs_current: &nodejs_current "14"
+  repo_path: &repo_path ~/extension-activity-monitor
+  defaults: &defaults
+    working_directory: *repo_path
+    parameters:
+      nodejs_current:
+        type: string
+        default: *nodejs_current
+
+commands:
+  restore_build_cache:
+    description: restore npm package cache
+    parameters:
+      suffix:
+        type: string
+        default: default
+    steps:
+      - restore_cache:
+          keys:
+            - npm-packages-{{ checksum "package-lock.json" }}-<< parameters.suffix >>
+
+  save_build_cache:
+    description: save npm package cache
+    parameters:
+      suffix:
+        type: string
+        default: default
+    steps:
+      - save_cache:
+          key: npm-packages-{{ checksum "package-lock.json" }}-<< parameters.suffix >>
+          paths:
+            - ./node_modules
+
+jobs:
+  test:
+    <<: *defaults
+    docker:
+      - image: circleci/node:<< parameters.nodejs_current >>
+    steps:
+      - checkout
+      - restore_build_cache:
+          suffix: << parameters.nodejs_current >>
+      - run: npm ci
+      - run: npm run prettier:check
+      - run: npm run lint:check
+      - run: npm run test:coverage
+      - run: npx codecov
+      - restore_build_cache:
+          suffix: << parameters.nodejs_current >>
+
+workflows:
+  default-workflow:
+    jobs:
+      - test
