@@ -95,8 +95,6 @@ export class FilterOption extends HTMLElement {
       }
 
       this.dispatchFilterChangeEvent();
-    } else {
-      throw new Error(`wrong event type - ${event.type}`);
     }
   }
 

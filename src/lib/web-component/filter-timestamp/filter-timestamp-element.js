@@ -25,9 +25,7 @@ export class FilterTimestamp extends HTMLElement {
     this.startTimeLabel = this.dropDownList.querySelector('#startTimeLabel');
     this.stopTimeLabel = this.dropDownList.querySelector('#stopTimeLabel');
 
-    this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
     this.clearStartTimeBtn = this.dropDownList.querySelector('#clearStart');
-
     this.clearStopTimeBtn = this.dropDownList.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
@@ -132,9 +130,6 @@ export class FilterTimestamp extends HTMLElement {
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
-        case this.clearFilterBtn:
-          this.onClearFilter();
-          break;
         case this.clearStartTimeBtn:
           this.onClearFilter(true, false);
           break;
@@ -163,8 +158,8 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   disconnectedCallback() {
-    browser.menus.onClicked.removeListener(this.setFilterRange);
-    browser.menus.onHidden.removeListener(this.onHiddenListener);
+    browser.menus?.onClicked.removeListener(this.setFilterRange);
+    browser.menus?.onHidden.removeListener(this.onHiddenListener);
     this.filterToggleBar.removeEventListener('click', this);
     this.dropDownList.removeEventListener('click', this);
   }

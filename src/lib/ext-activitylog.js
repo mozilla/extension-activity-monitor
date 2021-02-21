@@ -156,28 +156,32 @@ class View {
   }
 
   handleEvent(event) {
-    if (event.type === 'click') {
-      switch (event.target) {
-        case this.clearLogBtn:
-          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-          break;
-        case this.optionsBtn:
-          dropDownController.toggleDropDown(this.optionsBtn);
-          break;
-        case this.saveLogBtn:
-          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-          break;
+    try {
+      if (event.type === 'click') {
+        switch (event.target) {
+          case this.clearLogBtn:
+            this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
+            break;
+          case this.optionsBtn:
+            dropDownController.toggleDropDown(this.optionsBtn);
+            break;
+          case this.saveLogBtn:
+            this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+            break;
+        }
+      } else if (event.type === 'change' && event.target === this.loadLogFile) {
+        const logFile = event.target.files[0];
+        this.loadLogFile.value = '';
+        this.loadLogFile.dispatchEvent(
+          new CustomEvent('loadlog', { detail: logFile })
+        );
+      } else if (event.type === 'logcountchange') {
+        this.updateLogCounter(event.detail);
+      } else {
+        throw new Error(`wrong event type - ${event.type}`);
       }
-    } else if (event.type === 'change' && event.target === this.loadLogFile) {
-      const logFile = event.target.files[0];
-      this.loadLogFile.value = '';
-      this.loadLogFile.dispatchEvent(
-        new CustomEvent('loadlog', { detail: logFile })
-      );
-    } else if (event.type === 'logcountchange') {
-      this.updateLogCounter(event.detail);
-    } else {
-      throw new Error(`wrong event type - ${event.type}`);
+    } catch (error) {
+      this.setError(error.message);
     }
   }
 
@@ -299,19 +303,7 @@ class Controller {
       this.view.saveLogBtn.addEventListener('savelog', this);
 
       browser.runtime.connect({ name: 'monitor-realtime-logs' });
-      browser.runtime.onMessage.addListener((message) => {
-        const { requestTo, requestType } = message;
-
-        if (requestTo !== 'activity-log') {
-          return;
-        }
-
-        if (requestType === 'appendLogs') {
-          this.handleNewLogs([message.log]);
-        } else {
-          throw new Error(`wrong request type found - ${requestType}`);
-        }
-      });
+      browser.runtime.onMessage.addListener(this.onMessageListener);
 
       if (document.location.search) {
         const updateFilter = deSerializeFilters(searchParams);
@@ -327,6 +319,22 @@ class Controller {
     }
   }
 
+  onMessageListener = (message) => {
+    const { requestTo, requestType } = message;
+
+    if (requestTo !== 'activity-log') {
+      return;
+    }
+
+    if (requestType === 'appendLogs') {
+      this.handleNewLogs([message.log]);
+    } else {
+      return Promise.reject(
+        new Error(`wrong request type found - ${requestType}`)
+      );
+    }
+  };
+
   async getExistingLogs() {
     const { existingLogs } = await browser.runtime.sendMessage({
       requestType: 'sendAllLogs',
@@ -341,21 +349,25 @@ class Controller {
   }
 
   handleEvent(event) {
-    switch (event.type) {
-      case 'loadlog':
-        this.loadLogs(event.detail);
-        break;
-      case 'savelog':
-        this.saveLogs();
-        break;
-      case 'filterchange':
-        this.onFilterChange(event.detail);
-        break;
-      case 'clearlog':
-        this.handleClearLogs();
-        break;
-      default:
-        throw new Error(`wrong event type found - ${event.type}`);
+    try {
+      switch (event.type) {
+        case 'loadlog':
+          this.loadLogs(event.detail);
+          break;
+        case 'savelog':
+          this.saveLogs();
+          break;
+        case 'filterchange':
+          this.onFilterChange(event.detail);
+          break;
+        case 'clearlog':
+          this.handleClearLogs();
+          break;
+        default:
+          throw new Error(`wrong event type found - ${event.type}`);
+      }
+    } catch (error) {
+      this.view.setError(error.message);
     }
   }
 
