@@ -8,8 +8,6 @@ import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-ke
 import { FilterTimestamp } from '../src/lib/web-component/filter-timestamp/filter-timestamp-element';
 import { save } from '../src/lib/save-load';
 
-import { getJSONParseVal } from '../src/lib/formatters';
-
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
   'utf-8'
