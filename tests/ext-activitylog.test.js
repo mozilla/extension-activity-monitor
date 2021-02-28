@@ -157,42 +157,6 @@ describe('Filtering logs with filter-option component', () => {
     expect(tableRows[1].hidden).toBeFalsy();
   });
 
-  test('filter option labels should be added from URL params initially', () => {
-    // Todo: pass a Set of Strings (filter labels) as an argument to setInitialFilter method and test if the labels are added to "uncheckedCheckboxLabels".
-    const addListener = jest.fn();
-    const removeListener = jest.fn();
-    const sendMessage = jest.fn();
-    const connect = jest.fn();
-
-    window.browser = {
-      runtime: {
-        onMessage: { addListener },
-        sendMessage,
-        connect,
-      },
-      menus: {
-        onClicked: { addListener, removeListener },
-        onHidden: { addListener, removeListener },
-      },
-    };
-
-    sendMessage.mockImplementation(() => {
-      return Promise.resolve({ existingLogs: [] });
-    });
-
-    document.body.innerHTML = activityLogBody;
-
-    const { activityLog } = new ActivityLog();
-
-    const filterCheckboxLabels = new Set(['label1', 'label2']);
-
-    activityLog.view.extFilter.setInitialFilter(filterCheckboxLabels);
-
-    expect(activityLog.view.extFilter.uncheckedCheckboxLabels).toStrictEqual(
-      filterCheckboxLabels
-    );
-  });
-
   test('unchecking the "other" filter option should hide the logs with undefined viewType', async () => {
     const logs = [
       {
@@ -443,7 +407,7 @@ test('timestamp is formatted and rendered correctly', () => {
       id: 'id1@test',
       viewType: 'viewType@test',
       type: 'type@test',
-      data: [{ test: 'test1@data' }],
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
   ];
@@ -502,7 +466,7 @@ test('the log detail view is displayed when a log is selected from log view', as
       id: 'id1@test',
       viewType: 'viewType1@test',
       type: 'type1@test',
-      data: [{ test: 'test1@data' }],
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
     {
@@ -510,7 +474,7 @@ test('the log detail view is displayed when a log is selected from log view', as
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: [{ test: 'test2@data' }],
+      data: { test: 'test2@data' },
       timeStamp: 1597686236402,
     },
   ];
@@ -828,16 +792,7 @@ describe('Filtering logs with timestamp', () => {
     expect(tableRows[3].hidden).toBeFalsy();
   });
 
-  test('timestamp filter should be applied from URL params initially', () => {
-    // when there is no valid url params for timestamp filter, the "setInitialFilter" method recevies "null" as an argument.
-    // Todo: Pass null as argument in setInitialFilter method & test
-    // If the timestamp URL param is valid, setInitialFilter recevies an object as argument with "startTime" and "stopTime" property.
-    // Todo: pass an object as argument in setInitialFilter method & test if the timestamp filter dropdown layout is updated accordingly.
-    /* Should be handled from caller in ext-activitylog.js */
-  });
-
   test('remove context menu items on hidding the menu', () => {
-    // Todo: Mock the api: browser.menus.removeAll() and test if it has been called.
     const removeAllFn = jest.fn();
 
     window.browser = {
@@ -936,7 +891,6 @@ describe('Filtering logs with timestamp', () => {
 });
 
 test('viewtype data cell should display empty value when viewtype of a log is undefined', async () => {
-  // Todo: add a row with a log which has undefined viewType and test if the view type data cell is empty.
   const logs = [
     {
       /* renders 1st row in table */
@@ -995,9 +949,7 @@ test('viewtype data cell should display empty value when viewtype of a log is un
   );
 });
 
-test('log detail is shown when a table row is clicked and it is hidden when the close button is clicked', async () => {
-  // Todo: click a row to open the log details view
-  // then click the closeBtn and test if the logDetailWrapper is hidden
+test('log detail is toggled when a table row is clicked', async () => {
   const logs = [
     {
       /* renders 1st row in table */
@@ -1114,34 +1066,7 @@ test('loadLogs method is being called when a log file is loaded', async () => {
   expect(loadLogsFn).toHaveBeenCalled();
 });
 
-// ext-activitylog.js
-test('wrong event should throw an error', () => {
-  // Todo: pass a wrong event as an argument in handleEvent method and test if throws an error.
-});
-
-// test('Filters should be applied from valid URL search params while loading the activitylog page', () => {
-//   // Todo: pass an valid object as argument to setInitialFilters method and test if setInitialFilter method from the web components are called. Also test if tab id is given.
-//   const params = new URLSearchParams(location.search);
-//   params.set('version', 2.0);
-
-//   history.replaceState(
-//     null,
-//     null,
-//     `${
-//       location.href.split('?')[0]
-//     }?id=["test1@addon","test2@addon"]&viewType=[null,"popup"]&type=["content_script","api_event"]&name=["tabs.executeScript"]&timeStamp={"start":123123,"stop":456456}&keyword=undefined&tabId=982`
-//   );
-// });
-
-/*
-location.href = `${
-      location.href.split('?')[0]
-    }?id=["test1@addon","test2@addon"]&viewType=[null,"popup"]&type=["content_script","api_event"]&name=["tabs.executeScript"]&timeStamp={"start":123123,"stop":456456}&keyword=undefined`;
-*/
-
 test('setError method should display error message', () => {
-  // Todo: pass a error mesage as argument to setError method and test if it is shown. Pass empty argument to setError method and test if the existing message is removed.
-
   document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
@@ -1434,7 +1359,68 @@ test('invalid event in handleEvent Method should render an error message', () =>
   expect(activityLog.view.notice.textContent).toBe(expectedErrorMsg);
 });
 
-test('tabId search param should set filter logs by tab id', () => {
+test('filter option should set from URL params initially', () => {
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockImplementation(() => {
+    return Promise.resolve({ existingLogs: [] });
+  });
+
+  document.body.innerHTML = activityLogBody;
+
+  history.replaceState(null, null, `${location.href.split('?')[0]}?id=["addon1@test","addon2@test"]&viewType=[null,"popup","tab"]&type=["content_script","api_event", "api_call"]&name=["tabs.executeScript", "webNavigation.onCompleted"]&timeStamp={"start": 1614520117000,"stop":1614520168000}&keyword=dummy&tabId=682`);
+
+  const expectedExtIds = new Set(['addon1@test', 'addon2@test']);
+  const expectedViewTypes = new Set([undefined, 'popup', 'tab']);
+  const expectedApiTypes = new Set(['content_script', 'api_event', 'api_call']);
+  const expectedApiNames = new Set(['tabs.executeScript', 'webNavigation.onCompleted']);
+  const expectedTabId = 682;
+  const expectedTabInfoText = `Filtered By Tab Id: ${expectedTabId}`;
+  const expectedKeyword = 'dummy';
+  const expectedTimestamp = { start: 1614520117000, stop: 1614520168000 };
+
+  const expectedFilterObject = {
+    id: { exclude: expectedExtIds },
+    viewType: { exclude: expectedViewTypes },
+    type: { exclude: expectedApiTypes },
+    name: { exclude: expectedApiNames },
+    tabId: expectedTabId,
+    keyword: expectedKeyword,
+    timeStamp: expectedTimestamp,
+  };
+
+  const { activityLog: {model, view} } = new ActivityLog();
+
+  // check if the filters are set in model
+  expect(model.filter).toMatchObject(expectedFilterObject);
+
+  // check if the filters are set in view
+  expect(view.extFilter.uncheckedCheckboxLabels).toMatchObject(expectedExtIds);
+  expect(view.viewTypeFilter.uncheckedCheckboxLabels).toMatchObject(expectedViewTypes);
+  expect(view.apiTypeFilter.uncheckedCheckboxLabels).toMatchObject(expectedApiTypes);
+  expect(view.apiNameFilter.uncheckedCheckboxLabels).toMatchObject(expectedApiNames);
+  expect(view.filterIdTxt.textContent).toBe(expectedTabInfoText);
+  expect(view.keywordFilter.inputBox.value).toBe(expectedKeyword);
+  expect(view.timestampFilter.timeStamp).toMatchObject(expectedTimestamp);
+});
+
+
+test('tabId in search param should filter logs by the given tab id', () => {
   const logs = [
     {
       id: 'logWithoutTabId@test',
@@ -1523,6 +1509,7 @@ test('activity log page shows error when sendMessage API with requestType loadLo
     if (req.requestType === 'sendAllLogs') {
       return Promise.resolve({ existingLogs: [] });
     } else if (req.requestType === 'loadLogs') {
+      // throwing the error intentionally
       throw new Error(errorMsg);
     }
   });
