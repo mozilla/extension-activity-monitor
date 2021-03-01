@@ -1383,12 +1383,21 @@ test('filter option should set from URL params initially', () => {
 
   document.body.innerHTML = activityLogBody;
 
-  history.replaceState(null, null, `${location.href.split('?')[0]}?id=["addon1@test","addon2@test"]&viewType=[null,"popup","tab"]&type=["content_script","api_event", "api_call"]&name=["tabs.executeScript", "webNavigation.onCompleted"]&timeStamp={"start": 1614520117000,"stop":1614520168000}&keyword=dummy&tabId=682`);
+  history.replaceState(
+    null,
+    null,
+    `${
+      location.href.split('?')[0]
+    }?id=["addon1@test","addon2@test"]&viewType=[null,"popup","tab"]&type=["content_script","api_event", "api_call"]&name=["tabs.executeScript", "webNavigation.onCompleted"]&timeStamp={"start": 1614520117000,"stop":1614520168000}&keyword=dummy&tabId=682`
+  );
 
   const expectedExtIds = new Set(['addon1@test', 'addon2@test']);
   const expectedViewTypes = new Set([undefined, 'popup', 'tab']);
   const expectedApiTypes = new Set(['content_script', 'api_event', 'api_call']);
-  const expectedApiNames = new Set(['tabs.executeScript', 'webNavigation.onCompleted']);
+  const expectedApiNames = new Set([
+    'tabs.executeScript',
+    'webNavigation.onCompleted',
+  ]);
   const expectedTabId = 682;
   const expectedTabInfoText = `Filtered By Tab Id: ${expectedTabId}`;
   const expectedKeyword = 'dummy';
@@ -1404,21 +1413,28 @@ test('filter option should set from URL params initially', () => {
     timeStamp: expectedTimestamp,
   };
 
-  const { activityLog: {model, view} } = new ActivityLog();
+  const {
+    activityLog: { model, view },
+  } = new ActivityLog();
 
   // check if the filters are set in model
   expect(model.filter).toMatchObject(expectedFilterObject);
 
   // check if the filters are set in view
   expect(view.extFilter.uncheckedCheckboxLabels).toMatchObject(expectedExtIds);
-  expect(view.viewTypeFilter.uncheckedCheckboxLabels).toMatchObject(expectedViewTypes);
-  expect(view.apiTypeFilter.uncheckedCheckboxLabels).toMatchObject(expectedApiTypes);
-  expect(view.apiNameFilter.uncheckedCheckboxLabels).toMatchObject(expectedApiNames);
+  expect(view.viewTypeFilter.uncheckedCheckboxLabels).toMatchObject(
+    expectedViewTypes
+  );
+  expect(view.apiTypeFilter.uncheckedCheckboxLabels).toMatchObject(
+    expectedApiTypes
+  );
+  expect(view.apiNameFilter.uncheckedCheckboxLabels).toMatchObject(
+    expectedApiNames
+  );
   expect(view.filterIdTxt.textContent).toBe(expectedTabInfoText);
   expect(view.keywordFilter.inputBox.value).toBe(expectedKeyword);
   expect(view.timestampFilter.timeStamp).toMatchObject(expectedTimestamp);
 });
-
 
 test('tabId in search param should filter logs by the given tab id', () => {
   const logs = [
