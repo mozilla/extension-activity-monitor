@@ -37,7 +37,7 @@ describe('Filtering logs with filter-option component', () => {
 
     const logs = [
       {
-        /* renders 1st row in the table */
+        /* renders the 1st row in the table */
         id: 'id1@test',
         viewType: 'viewType1@test',
         type: 'type1@test',
@@ -45,7 +45,7 @@ describe('Filtering logs with filter-option component', () => {
         timeStamp: 1597686226302,
       },
       {
-        /* renders 2nd row in the table */
+        /* renders the 2nd row in the table */
         id: 'id2@test',
         viewType: 'viewType2@test',
         type: 'type2@test',
@@ -160,7 +160,7 @@ describe('Filtering logs with filter-option component', () => {
   test('unchecking the "other" filter option should hide the logs with undefined viewType', async () => {
     const logs = [
       {
-        /* renders 1st row in the table */
+        /* renders the 1st row in the table */
         id: 'id1@test',
         viewType: 'viewType1@test',
         type: 'type1@test',
@@ -168,7 +168,7 @@ describe('Filtering logs with filter-option component', () => {
         timeStamp: 1597686226302,
       },
       {
-        /* renders 2nd row in the table */
+        /* renders the 2nd row in the table */
         id: 'id2@test',
         viewType: 'viewType2@test',
         type: 'type2@test',
@@ -176,7 +176,7 @@ describe('Filtering logs with filter-option component', () => {
         timeStamp: 1597686226302,
       },
       {
-        /* renders 3nd row in the table */
+        /* renders the 3nd row in the table */
         id: 'id3@test',
         viewType: undefined,
         type: 'api_event',
@@ -263,7 +263,7 @@ test('Searching by keyword should check the data object of the log to filter out
 
   const logs = [
     {
-      /* renders 1st row in the table */
+      /* renders the 1st row in the table */
       id: 'id1@test',
       viewType: 'viewType1@test',
       type: 'type1@test',
@@ -271,7 +271,7 @@ test('Searching by keyword should check the data object of the log to filter out
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in the table */
+      /* renders the 2nd row in the table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
@@ -333,7 +333,7 @@ test('clearing logs from activitylog page', async () => {
 
   const logs = [
     {
-      /* renders 1st row in the table */
+      /* renders the 1st row in the table */
       id: 'id1@test',
       viewType: 'viewType@test',
       type: 'type@test',
@@ -341,7 +341,7 @@ test('clearing logs from activitylog page', async () => {
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in the table */
+      /* renders the 2nd row in the table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
@@ -403,7 +403,7 @@ test('clearing logs from activitylog page', async () => {
 test('timestamp is formatted and rendered correctly', () => {
   const logs = [
     {
-      /* renders 1st row in table */
+      /* renders the 1st row in table */
       id: 'id1@test',
       viewType: 'viewType@test',
       type: 'type@test',
@@ -462,7 +462,7 @@ test('timestamp is formatted and rendered correctly', () => {
 test('the log detail view is displayed when a log is selected from log view', async () => {
   const logs = [
     {
-      /* renders 1st row in table */
+      /* renders the 1st row in table */
       id: 'id1@test',
       viewType: 'viewType1@test',
       type: 'type1@test',
@@ -470,7 +470,7 @@ test('the log detail view is displayed when a log is selected from log view', as
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in table */
+      /* renders the 2nd row in table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
@@ -543,35 +543,35 @@ describe('Filtering logs with timestamp', () => {
   test('context menu gets overrriden inside table body', () => {
     const logs = [
       {
-        /* renders 1st row in table */
+        /* renders the 1st row in table */
         id: 'id1@test',
         viewType: 'viewType1@test',
         type: 'type1@test',
-        data: [{ test: 'test1@data' }],
+        data: { test: 'test1@data' },
         timeStamp: 1597686226302,
       },
       {
-        /* renders 2nd row in table */
+        /* renders the 2nd row in table */
         id: 'id2@test',
         viewType: 'viewType2@test',
         type: 'type2@test',
-        data: [{ test: 'test2@data' }],
+        data: { test: 'test2@data' },
         timeStamp: 1597686236402,
       },
       {
-        /* renders 3rd row in table */
+        /* renders the 3rd row in table */
         id: 'id3@test',
         viewType: 'viewType3@test',
         type: 'type3@test',
-        data: [{ test: 'test3@data' }],
+        data: { test: 'test3@data' },
         timeStamp: 1597686336402,
       },
       {
-        /* renders 4th row in table */
+        /* renders the 4th row in table */
         id: 'id4@test',
         viewType: 'viewType4@test',
         type: 'type4@test',
-        data: [{ test: 'test4@data' }],
+        data: { test: 'test4@data' },
         timeStamp: 1597686436402,
       },
     ];
@@ -644,35 +644,35 @@ describe('Filtering logs with timestamp', () => {
   test('timestamp filter can be applied with the help of context menu', () => {
     const logs = [
       {
-        /* renders 1st row in the table */
+        /* renders the 1st row in the table */
         id: 'id1@test',
         viewType: 'viewType1@test',
         type: 'type1@test',
-        data: [{ test: 'test1@data' }],
+        data: { test: 'test1@data' },
         timeStamp: 1597686226302,
       },
       {
-        /* renders 2nd row in the table */
+        /* renders the 2nd row in the table */
         id: 'id2@test',
         viewType: 'viewType2@test',
         type: 'type2@test',
-        data: [{ test: 'test2@data' }],
+        data: { test: 'test2@data' },
         timeStamp: 1597686236402,
       },
       {
-        /* renders 3rd row in the table */
+        /* renders the 3rd row in the table */
         id: 'id3@test',
         viewType: 'viewType3@test',
         type: 'type3@test',
-        data: [{ test: 'test3@data' }],
+        data: { test: 'test3@data' },
         timeStamp: 1597686336402,
       },
       {
-        /* renders 4th row in the table */
+        /* renders the 4th row in the table */
         id: 'id4@test',
         viewType: 'viewType4@test',
         type: 'type4@test',
-        data: [{ test: 'test4@data' }],
+        data: { test: 'test4@data' },
         timeStamp: 1597686436402,
       },
     ];
@@ -871,8 +871,6 @@ describe('Filtering logs with timestamp', () => {
   // menu APIs aren't available in Devtools
   // see: https://github.com/mozilla/extension-activity-monitor/issues/43
   test('context menu should not work on Devtools', () => {
-    // Todo: Don't mock the menu APIs and test the menu api listeners aren't registered.
-
     window.browser = {
       runtime: {
         onMessage: { addListener: jest.fn() },
@@ -893,19 +891,19 @@ describe('Filtering logs with timestamp', () => {
 test('viewtype data cell should display empty value when viewtype of a log is undefined', async () => {
   const logs = [
     {
-      /* renders 1st row in table */
+      /* renders the 1st row in table */
       id: 'id1@test',
       viewType: undefined,
       type: 'content_script',
-      data: [{ test: 'test1@data' }],
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in table */
+      /* renders the 2nd row in table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: [{ test: 'test2@data' }],
+      data: { test: 'test2@data' },
       timeStamp: 1597686236402,
     },
   ];
@@ -952,19 +950,19 @@ test('viewtype data cell should display empty value when viewtype of a log is un
 test('log detail is toggled when a table row is clicked', async () => {
   const logs = [
     {
-      /* renders 1st row in table */
+      /* renders the 1st row in table */
       id: 'id1@test',
       viewType: undefined,
       type: 'content_script',
-      data: [{ test: 'test1@data' }],
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in table */
+      /* renders the 2nd row in table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: [{ test: 'test2@data' }],
+      data: { test: 'test2@data' },
       timeStamp: 1597686236402,
     },
   ];
@@ -1084,19 +1082,19 @@ test('setError method should display error message', () => {
 test('activitylog page - load log page mode is initialized when "file" search param is present', async () => {
   const logs = [
     {
-      /* renders 1st row in table */
+      /* renders the 1st row in table */
       id: 'id1@test',
       viewType: 'viewType1@test',
       type: 'type1@test',
-      data: [{ test: 'test1@data' }],
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
     {
-      /* renders 2nd row in table */
+      /* renders the 2nd row in table */
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: [{ test: 'check@data' }],
+      data: { test: 'check@data' },
       timeStamp: 1597686226302,
     },
   ];
