@@ -1,5 +1,9 @@
 import * as ExtListen from '../src/lib/ext-listen';
 
+function getExpectedMessage(msgProps) {
+  return { requestTo: 'ext-monitor', ...msgProps };
+}
+
 test('getMonitorStatus should have requestType "getMonitorStatus" and resolves with current extension monitoring status', async () => {
   const sendMessage = jest.fn();
 
@@ -16,10 +20,11 @@ test('getMonitorStatus should have requestType "getMonitorStatus" and resolves w
   const getMonitorStatusFn = ExtListen.getMonitorStatus();
   await expect(getMonitorStatusFn).resolves.toBeTruthy();
 
-  expect(sendMessage.mock.calls[0][0]).toMatchObject({
-    requestType: 'getMonitorStatus',
-    requestTo: 'ext-monitor',
-  });
+  expect(sendMessage.mock.calls[0][0]).toMatchObject(
+    getExpectedMessage({
+      requestType: 'getMonitorStatus',
+    })
+  );
   expect(sendMessage).toHaveBeenCalled();
 });
 
@@ -37,18 +42,20 @@ test('startMonitor and stopMonitor should have their respective requestType', as
   });
 
   await ExtListen.startMonitor();
-  expect(sendMessage.mock.calls[0][0]).toMatchObject({
-    requestType: 'startMonitor',
-    requestTo: 'ext-monitor',
-  });
+  expect(sendMessage.mock.calls[0][0]).toMatchObject(
+    getExpectedMessage({
+      requestType: 'startMonitor',
+    })
+  );
 
   sendMessage.mockClear();
 
   await ExtListen.stopMonitor();
-  expect(sendMessage.mock.calls[0][0]).toMatchObject({
-    requestType: 'stopMonitor',
-    requestTo: 'ext-monitor',
-  });
+  expect(sendMessage.mock.calls[0][0]).toMatchObject(
+    getExpectedMessage({
+      requestType: 'stopMonitor',
+    })
+  );
 });
 
 test('openActivityLogPage should create tab with ActivityLogPageURL and apply search params if it is passed as argument', async () => {
