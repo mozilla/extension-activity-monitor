@@ -412,7 +412,7 @@ test('clicking the clear logs button should remove all logs from activitylog pag
   expect(getTableRows().length).toBe(0);
 });
 
-test('timestamp is formatted and rendered correctly', () => {
+test('timestamp should be correctly formatted', () => {
   const logs = [
     {
       /* renders the 1st row in table */
@@ -471,7 +471,7 @@ test('timestamp is formatted and rendered correctly', () => {
   expect(firstRowTimestamp.title).toEqual(expectedDateTime);
 });
 
-test('the log detail view is displayed when a log is selected from log view', async () => {
+test('log details should be displayed when a log is clicked from logs table', async () => {
   const logs = [
     {
       /* renders the 1st row in table */
@@ -524,8 +524,6 @@ test('the log detail view is displayed when a log is selected from log view', as
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');
-
-  // log details section displayed
   const logDetailWrapper = activityLog.view.logView.shadowRoot.querySelector(
     '.log-detail-wrapper'
   );
@@ -534,15 +532,17 @@ test('the log detail view is displayed when a log is selected from log view', as
   expect(logDetailWrapper.hidden).toBeTruthy();
 
   const logDetailWrapperVisible = observeChange(logDetailWrapper);
-  // The result is the same if any column of that row is clicked
-  // the click event is triggered on the table body
+  // The result is the same if any column (including "id") of that row is clicked
   tableRows[0].querySelector('.id').click();
   await logDetailWrapperVisible;
 
-  const logDetails = JSON.parse(logDetailWrapper.firstElementChild.textContent);
+  const logDetailsJSON = JSON.parse(
+    logDetailWrapper.firstElementChild.textContent
+  );
+  const expectedLogDetails = tableRows[0]._log;
 
   expect(logDetailWrapper.hidden).toBeFalsy();
-  expect(logDetails).toMatchObject(tableRows[0]._log);
+  expect(logDetailsJSON).toMatchObject(expectedLogDetails);
 
   // closing the log Detail viewer
   const logDetailWrapperHidden = observeChange(logDetailWrapper);
