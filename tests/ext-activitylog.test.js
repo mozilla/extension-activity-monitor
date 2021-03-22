@@ -176,7 +176,7 @@ describe('Filtering logs with filter-option component', () => {
         timeStamp: 1597686226302,
       },
       {
-        /* renders the 3nd row in the table */
+        /* renders the 3rd row in the table */
         id: 'id3@test',
         viewType: undefined,
         type: 'api_event',
@@ -251,12 +251,12 @@ describe('Filtering logs with filter-option component', () => {
 
     expect(tableRows[0].hidden).toBeFalsy();
     expect(tableRows[1].hidden).toBeFalsy();
-    // 3rd row contain the log with undefined viewType
+    // 3rd row contains the log with undefined viewType
     expect(tableRows[2].hidden).toBeTruthy();
   });
 });
 
-test('Searching by keyword should check the data object of the log to filter out the unmatched logs', async () => {
+test('Searching by keyword should search in the data object of the log to filter out the unmatched logs', async () => {
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
 
   history.replaceState(null, null, document.location.origin);
@@ -323,7 +323,7 @@ test('Searching by keyword should check the data object of the log to filter out
   activityLog.view.keywordFilter.dispatchEvent(new Event('input'));
   await tableRowPropChanged;
 
-  // only 2nd row should be visible since the keyword is found in the data object of the 2nd row .
+  // only 2nd row should be visible since the keyword is found in the stringify version of data object of the 2nd row .
   expect(tableRows[0].hidden).toBeTruthy();
   expect(tableRows[1].hidden).toBeFalsy();
 });
@@ -335,9 +335,9 @@ test('clearing logs from activitylog page', async () => {
     {
       /* renders the 1st row in the table */
       id: 'id1@test',
-      viewType: 'viewType@test',
-      type: 'type@test',
-      data: [{ test: 'test1@data' }],
+      viewType: 'viewType1@test',
+      type: 'type1@test',
+      data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
     {
@@ -345,7 +345,7 @@ test('clearing logs from activitylog page', async () => {
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: [{ test: 'test2@data' }],
+      data: { test: 'test2@data' },
       timeStamp: 1597686226302,
     },
   ];
