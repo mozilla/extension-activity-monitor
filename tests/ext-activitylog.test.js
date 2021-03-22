@@ -177,6 +177,7 @@ describe('Filtering logs with filter-option component', () => {
       },
       {
         /* renders the 3rd row in the table */
+        /* viewType is undefined */
         id: 'id3@test',
         viewType: undefined,
         type: 'api_event',
@@ -226,9 +227,11 @@ describe('Filtering logs with filter-option component', () => {
       activityLog.view.extFilter.classList.contains('expanded')
     ).toBeFalsy();
 
-    const extFilterBtnChanged = observeChange(activityLog.view.viewTypeFilter);
+    const viewTypeFilterBtnChanged = observeChange(
+      activityLog.view.viewTypeFilter
+    );
     viewTypesFilterBtn.click();
-    await extFilterBtnChanged;
+    await viewTypeFilterBtnChanged;
 
     // the filter checkbox list dropdown is displayed
     expect(
@@ -236,7 +239,7 @@ describe('Filtering logs with filter-option component', () => {
     ).toBeTruthy();
 
     const otherLabledCheckbox = activityLog.view.viewTypeFilter.shadowRoot.querySelector(
-      '.checkbox-list .filter-checkbox input[value="other"]'
+      '.filter-checkbox input[value="other"]'
     );
 
     expect(otherLabledCheckbox.checked).toBeTruthy();
@@ -256,7 +259,7 @@ describe('Filtering logs with filter-option component', () => {
   });
 });
 
-test('Searching by keyword should search in the data object of the log to filter out the unmatched logs', async () => {
+test('Searching by keyword should search in the data object of the log to filter out the logs', async () => {
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
 
   history.replaceState(null, null, document.location.origin);
@@ -275,7 +278,7 @@ test('Searching by keyword should search in the data object of the log to filter
       id: 'id2@test',
       viewType: 'viewType2@test',
       type: 'type2@test',
-      data: { test: 'check@data' },
+      data: { test: 'test2@data' },
       timeStamp: 1597686226302,
     },
   ];
@@ -317,7 +320,7 @@ test('Searching by keyword should search in the data object of the log to filter
   const searchInput = activityLog.view.keywordFilter.shadowRoot.querySelector(
     'input[name="keyword"]'
   );
-  searchInput.value = 'check@data';
+  searchInput.value = 'test2@data';
 
   const tableRowPropChanged = observeChange(tableRows[0]);
   activityLog.view.keywordFilter.dispatchEvent(new Event('input'));
@@ -328,7 +331,7 @@ test('Searching by keyword should search in the data object of the log to filter
   expect(tableRows[1].hidden).toBeFalsy();
 });
 
-test('clearing logs from activitylog page', async () => {
+test('clicking the clear logs button should remove all logs from activitylog page', async () => {
   history.replaceState(null, null, document.location.origin);
 
   const logs = [
@@ -367,32 +370,41 @@ test('clearing logs from activitylog page', async () => {
     },
   };
 
-  // sendMessage is called by getExistingLogs method for first 2 times
-  // and it is called by clearBackgroundLogs() method on third time.
-  sendMessage.mockResolvedValueOnce({ existingLogs: logs });
+  // sendMessage is called by getExistingLogs method on the 1st time.
+  // sendMessage is called by clearBackgroundLogs() method on the 2nd time.
   sendMessage.mockResolvedValueOnce({ existingLogs: logs });
   sendMessage.mockResolvedValueOnce();
 
   document.body.innerHTML = activityLogBody;
 
+  const emptyTableLabel = document
+    .querySelector('log-view')
+    .shadowRoot.querySelector('.table-empty-label');
+
+  const emptyTableLabelHidden = observeChange(emptyTableLabel);
   const { activityLog } = new ActivityLog();
+  await emptyTableLabelHidden;
+
   const clearBackgroundLogsFn = jest.spyOn(activityLog, 'clearBackgroundLogs');
 
   const clearLogBtn = activityLog.view.clearLogBtn;
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const getTableRows = () => tableBody.querySelectorAll('tr');
 
-  await expect(activityLog.getExistingLogs()).resolves.toMatchObject(logs);
-  expect(activityLog.model.logs).toMatchObject(logs);
+  // expecting 2 rows appended in the table
   expect(getTableRows().length).toBe(2);
 
   const [row] = getTableRows();
+
   const { logDetailWrapper } = activityLog.view.logView;
+  // Initially the log details is hidden (when no table is clicked)
   expect(logDetailWrapper.hidden).toBe(true);
+  // clicking a row in the table to show logs details
   row.click();
   expect(logDetailWrapper.hidden).toBe(false);
 
   clearLogBtn.click();
+  // the log details should be hidden after clearing all the logs.
   expect(logDetailWrapper.hidden).toBe(true);
 
   expect(clearBackgroundLogsFn).toHaveBeenCalled();
