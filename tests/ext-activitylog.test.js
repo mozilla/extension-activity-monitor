@@ -1066,13 +1066,34 @@ test('loadLogs method should be called when a log file is loaded', async () => {
   expect(loadLogsFn).toHaveBeenCalled();
 });
 
-test('setError method should display error message', () => {
+test('setError method should display error message in activity log page', () => {
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockResolvedValue({ existingLogs: [] });
+
   document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
 
-  activityLog.view.setError('This is an error message');
-  expect(activityLog.view.notice.textContent).toBe('This is an error message');
+  const errorMessage = 'This is an error message';
+
+  activityLog.view.setError(errorMessage);
+  expect(activityLog.view.notice.textContent).toBe(errorMessage);
   expect(activityLog.view.notice.classList.contains('failure')).toBeTruthy();
 
   // error message should be empty string and failure class should be removed upon passing null as argument to setError method
