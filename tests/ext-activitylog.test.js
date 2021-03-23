@@ -951,13 +951,13 @@ test('In the table, the viewtype cell should be empty when viewtype of a log is 
   );
 });
 
-test('log detail is toggled when a table row is clicked', async () => {
+test('log detail should be toggled when a table row is clicked', async () => {
   const logs = [
     {
       /* renders the 1st row in table */
       id: 'id1@test',
-      viewType: undefined,
-      type: 'content_script',
+      viewType: 'viewType1@test',
+      type: 'type1@test',
       data: { test: 'test1@data' },
       timeStamp: 1597686226302,
     },
@@ -988,9 +988,7 @@ test('log detail is toggled when a table row is clicked', async () => {
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: logs });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: logs });
 
   document.body.innerHTML = activityLogBody;
   const emptyTableLabel = document
@@ -1006,23 +1004,24 @@ test('log detail is toggled when a table row is clicked', async () => {
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');
 
-  // when no row is selected
+  // Initially, when no row is clicked
   expect(tableRows[0].classList.contains('row-highlight')).toBeFalsy();
   expect(tableRows[1].classList.contains('row-highlight')).toBeFalsy();
   expect(logTableWrapper.classList.contains('width-60')).toBeFalsy();
   expect(logDetailWrapper.hidden).toBeTruthy();
 
+  // Clicking the 1st row of the table
   const logTableWrapperChange = observeChange(logTableWrapper);
   tableRows[0].click();
   await logTableWrapperChange;
 
-  // when a row is selected
+  // when a row has been clicked
   expect(tableRows[0].classList.contains('row-highlight')).toBeTruthy();
   expect(tableRows[1].classList.contains('row-highlight')).toBeFalsy();
   expect(logTableWrapper.classList.contains('width-60')).toBeTruthy();
   expect(logDetailWrapper.hidden).toBeFalsy();
 
-  // the detail sidebar is hidden when the close button is clicked
+  // the log detail is hidden when the close button is clicked
   const closeBtn = logDetailWrapper.querySelector('.close');
   closeBtn.click();
   await logTableWrapperChange;
