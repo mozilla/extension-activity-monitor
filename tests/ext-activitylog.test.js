@@ -1483,9 +1483,7 @@ test('tabId in search param should filter logs by the given tab id', () => {
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   document.body.innerHTML = activityLogBody;
 
@@ -1495,12 +1493,10 @@ test('tabId in search param should filter logs by the given tab id', () => {
 
   activityLog.handleNewLogs(logs);
 
-  const tableBody = activityLog.view.logView.tableBody;
-  const getTableRows = () => tableBody.rows;
-  let tableRows = getTableRows();
+  const tableRows = activityLog.view.logView.tableBody.rows;
 
   expect(tableRows[0].hidden).toBeTruthy();
-  // since the log of the 2nd row contains the searched tabId
+  // since the log in the 2nd row contains the searched tabId i.e. 982
   expect(tableRows[1].hidden).toBeFalsy();
 });
 
