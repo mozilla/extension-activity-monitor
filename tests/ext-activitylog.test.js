@@ -1197,6 +1197,8 @@ test('activity log page should show error if sendMessage API with requestType ge
   await noticeChangePromise;
 
   expect(activityLog.view.notice.textContent).toBe(errorMsg);
+
+  history.replaceState(null, null, `${location.origin}`);
 });
 
 test('onMessageListener should listen for new logs in activitylog page', async () => {
@@ -1207,6 +1209,25 @@ test('onMessageListener should listen for new logs in activitylog page', async (
     data: [{ test: 'test1@data' }],
     timeStamp: 1597686226302,
   };
+
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   const invalidRqstType = 'wrong-request-type';
 
