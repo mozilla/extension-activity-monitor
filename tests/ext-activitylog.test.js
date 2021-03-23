@@ -1271,18 +1271,6 @@ test('onMessageListener should listen for new logs in activitylog page', async (
 });
 
 test('clicking on options icon should toggle the options dropdown list', () => {
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-  const optionsBtn = activityLog.view.optionsBtn;
-
-  expect(optionsBtn.classList.contains('expanded')).toBeFalsy();
-  optionsBtn.click();
-  // dropdown list shows when the optionsBtn element contains `expanded` class
-  expect(optionsBtn.classList.contains('expanded')).toBeTruthy();
-});
-
-test('clicking on Save Logs button should call the saveLogs method in controller', async () => {
   const addListener = jest.fn();
   const removeListener = jest.fn();
   const sendMessage = jest.fn();
@@ -1300,24 +1288,51 @@ test('clicking on Save Logs button should call the saveLogs method in controller
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   document.body.innerHTML = activityLogBody;
 
-  history.replaceState(null, null, `${location.href.split('?')[0]}`);
+  const { activityLog } = new ActivityLog();
+  const optionsBtn = activityLog.view.optionsBtn;
+
+  expect(optionsBtn.classList.contains('expanded')).toBeFalsy();
+  optionsBtn.click();
+  // dropdown list shows when the optionsBtn element contains `expanded` class
+  expect(optionsBtn.classList.contains('expanded')).toBeTruthy();
+});
+
+test('clicking on "Save Logs" button should call the saveAsJSON method', async () => {
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockResolvedValue({ existingLogs: [] });
+
+  document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
 
-  const saveLogsFn = jest.spyOn(activityLog, 'saveLogs');
+  const saveAsJSONFn = jest.spyOn(save, 'saveAsJSON');
   const optionsBtn = activityLog.view.optionsBtn;
   const saveLogBtn = activityLog.view.saveLogBtn;
 
   optionsBtn.click();
   saveLogBtn.click();
 
-  expect(saveLogsFn).toBeCalled();
+  expect(saveAsJSONFn).toBeCalled();
 });
 
 // activity log page controller
