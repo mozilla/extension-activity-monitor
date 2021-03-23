@@ -1102,7 +1102,7 @@ test('setError method should display error message in activity log page', () => 
   expect(activityLog.view.notice.classList.contains('failure')).toBeFalsy();
 });
 
-test('activitylog page - load log page mode is initialized when "file" search param is present', async () => {
+test('activitylog page - load log page mode should be initialized when "file" search param is present', async () => {
   const logs = [
     {
       /* renders the 1st row in table */
@@ -1135,16 +1135,12 @@ test('activitylog page - load log page mode is initialized when "file" search pa
     tabs: { getCurrent },
   };
 
-  getCurrent.mockImplementation(() => {
-    return Promise.resolve({ id: 11 });
-  });
+  getCurrent.mockResolvedValue({ id: 11 });
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve(logs);
-  });
+  sendMessage.mockResolvedValue(logs);
 
   const fileName = 'activitylogs.json';
-  const expectedPageMode = 'Loaded Logs - activitylogs.json';
+  const expectedPageMode = `Loaded Logs - ${fileName}`;
 
   history.replaceState(
     null,
@@ -1156,13 +1152,11 @@ test('activitylog page - load log page mode is initialized when "file" search pa
 
   const { activityLog } = new ActivityLog();
 
-  await activityLog.init();
-
   expect(activityLog.view.pageType.textContent).toBe(expectedPageMode);
   expect(document.title).toBe(expectedPageMode);
 });
 
-test('activity log page shows error when sendMessage API with requestType getLoadedLogs is failed', async () => {
+test('activity log page should show error if sendMessage API with requestType getLoadedLogs is failed', async () => {
   const getCurrent = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
@@ -1182,6 +1176,7 @@ test('activity log page shows error when sendMessage API with requestType getLoa
 
   const errorMsg = 'logs not found';
 
+  // throwing error intentionally
   sendMessage.mockImplementationOnce(() => {
     throw new Error(errorMsg);
   });
@@ -1204,7 +1199,7 @@ test('activity log page shows error when sendMessage API with requestType getLoa
   expect(activityLog.view.notice.textContent).toBe(errorMsg);
 });
 
-test('onMessageListener is listening for new logs in activitylog page', async () => {
+test('onMessageListener should listen for new logs in activitylog page', async () => {
   const log = {
     id: 'id1@test',
     viewType: 'viewType1@test',
@@ -1236,13 +1231,16 @@ test('onMessageListener is listening for new logs in activitylog page', async ()
   document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
-  const handleNewLogsFn = jest.spyOn(activityLog, 'handleNewLogs');
+
+  const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
+  const getTableRows = () => tableBody.querySelectorAll('tr');
 
   activityLog.onMessageListener(invalidMsgObj);
-  expect(handleNewLogsFn).not.toHaveBeenCalled();
+  expect(getTableRows().length).toBe(0);
 
   activityLog.onMessageListener(validMsgObj);
-  expect(handleNewLogsFn).toHaveBeenCalled();
+  // a log has been appended in the table.
+  expect(getTableRows().length).toBe(1);
 
   const errorPromise = activityLog.onMessageListener(invalidRqstTypeInMsgObj);
 
