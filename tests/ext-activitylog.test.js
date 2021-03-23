@@ -1389,9 +1389,7 @@ test('filter option should set from URL params initially', () => {
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   document.body.innerHTML = activityLogBody;
 
@@ -1446,6 +1444,8 @@ test('filter option should set from URL params initially', () => {
   expect(view.filterIdTxt.textContent).toBe(expectedTabInfoText);
   expect(view.keywordFilter.inputBox.value).toBe(expectedKeyword);
   expect(view.timestampFilter.timeStamp).toMatchObject(expectedTimestamp);
+
+  history.replaceState(null, null, `${location.origin}`);
 });
 
 test('tabId in search param should filter logs by the given tab id', () => {
