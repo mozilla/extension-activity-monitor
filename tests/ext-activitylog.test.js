@@ -441,26 +441,24 @@ test('timestamp should be correctly formatted', () => {
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
-
-  document.body.innerHTML = activityLogBody;
-
   const originalIntlDateTimeFormat = Intl.DateTimeFormat;
   const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
 
-  // For log timestamp: 1597686226302
-  const expectedTime = '5:43:46 PM';
-  const expectedDateTime = 'Aug 17, 2020, 5:43:46 PM';
-
-  const { activityLog } = new ActivityLog();
   // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
   IntlDateTimeFormatFn.mockImplementation((zone, options) => {
     options = { ...options, timeZone: 'UTC' };
     return new originalIntlDateTimeFormat('en-US', options);
   });
 
+  sendMessage.mockResolvedValue({ existingLogs: [] });
+
+  document.body.innerHTML = activityLogBody;
+
+  // For log timestamp: 1597686226302
+  const expectedTime = '5:43:46 PM';
+  const expectedDateTime = 'Aug 17, 2020, 5:43:46 PM';
+
+  const { activityLog } = new ActivityLog();
   activityLog.handleNewLogs(logs);
 
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
@@ -469,6 +467,10 @@ test('timestamp should be correctly formatted', () => {
 
   expect(firstRowTimestamp.textContent).toEqual(expectedTime);
   expect(firstRowTimestamp.title).toEqual(expectedDateTime);
+
+  // Clearing Intl mocks
+  IntlDateTimeFormatFn.mockClear();
+  Intl.DateTimeFormat = originalIntlDateTimeFormat;
 });
 
 test('log details should be displayed when a log is clicked from logs table', async () => {
@@ -570,22 +572,6 @@ describe('Filtering logs with timestamp', () => {
         data: { test: 'test2@data' },
         timeStamp: 1597686236402,
       },
-      {
-        /* renders the 3rd row in table */
-        id: 'id3@test',
-        viewType: 'viewType3@test',
-        type: 'type3@test',
-        data: { test: 'test3@data' },
-        timeStamp: 1597686336402,
-      },
-      {
-        /* renders the 4th row in table */
-        id: 'id4@test',
-        viewType: 'viewType4@test',
-        type: 'type4@test',
-        data: { test: 'test4@data' },
-        timeStamp: 1597686436402,
-      },
     ];
 
     const commonAddListener = jest.fn();
@@ -619,9 +605,7 @@ describe('Filtering logs with timestamp', () => {
       },
     };
 
-    sendMessage.mockImplementation(() => {
-      return Promise.resolve({ existingLogs: [] });
-    });
+    sendMessage.mockResolvedValue({ existingLogs: [] });
 
     document.body.innerHTML = activityLogBody;
 
@@ -638,21 +622,20 @@ describe('Filtering logs with timestamp', () => {
     );
     const tableRows = tableBody.querySelectorAll('tr');
 
-    // note: we could even take other columns of the row
-    const timestampColSecondRow = tableRows[1].querySelector('.timestamp');
+    // Selecting any other columns of the row would give us the same result.
+    const timestampCol = tableRows[1].querySelector('.timestamp');
     // generate a contextmenu event from timestamp column of the 2nd row of table body
-    timestampColSecondRow.dispatchEvent(
-      new Event('contextmenu', { bubbles: true })
-    );
+    timestampCol.dispatchEvent(new Event('contextmenu', { bubbles: true }));
+
+    // Two menus have been added in the context menu overrriding the existing menus with the help of Menus API
+    // Those two menus are: "Start from this timestamp" and "Stop at this timestamp", which helps in filtering the logs from a certain timestamp.
 
     expect(overrideContext).toHaveBeenCalled();
     expect(createContextMenuFn).toHaveBeenCalled();
     expect(createMenu).toHaveBeenCalled();
     expect(refreshMenu).toHaveBeenCalled();
-
-    // Two menus have been added in context menu overrriding the existing menus
-    // Those two menus are: "Start from this timestamp" and "Stop at this timestamp"
   });
+
   test('timestamp filter can be applied with the help of context menu', () => {
     const logs = [
       {
@@ -723,9 +706,16 @@ describe('Filtering logs with timestamp', () => {
       },
     };
 
-    sendMessage.mockImplementation(() => {
-      return Promise.resolve({ existingLogs: [] });
+    const originalIntlDateTimeFormat = Intl.DateTimeFormat;
+    const IntlDateTimeFormatFn = jest.spyOn(Intl, 'DateTimeFormat');
+
+    // To have consistant date time format, we choose "en-US" date time formatting and UTC timezone.
+    IntlDateTimeFormatFn.mockImplementation((zone, options) => {
+      options = { ...options, timeZone: 'UTC' };
+      return new originalIntlDateTimeFormat('en-US', options);
     });
+
+    sendMessage.mockResolvedValue({ existingLogs: [] });
 
     document.body.innerHTML = activityLogBody;
 
@@ -737,28 +727,29 @@ describe('Filtering logs with timestamp', () => {
     );
     const tableRows = tableBody.querySelectorAll('tr');
 
-    const timestampColSecondRow = tableRows[1].querySelector('.timestamp');
-    const timestampColThirdRow = tableRows[2].querySelector('.timestamp');
+    const timestampCol2ndRow = tableRows[1].querySelector('.timestamp');
+    const timestampCol3rdRow = tableRows[2].querySelector('.timestamp');
 
-    // We have generated the context menu event from second row, let's assume we clicked on the "Start from this timestamp" option from menu. This will trigger "setFilterRange" from filter-timestamp-element.js
+    // Context menu event is fired from the 2nd row, let's assume we clicked on the "Start from this timestamp" option from menu. This will trigger the "setFilterRange" method from filter-timestamp-element.js
     getTargetElement.mockImplementation((targetElementId) => {
       if (targetElementId === 123) {
-        return timestampColSecondRow;
+        return timestampCol2ndRow;
       } else if (targetElementId === 456) {
-        return timestampColThirdRow;
+        return timestampCol3rdRow;
       } else {
         return null;
       }
     });
 
-    // when targetElementId is invalid, the request doesn't proceed
+    // The valid targetElementId are 123 and 456 as mentioned above
+    // When targetElementId is invalid, the request doesn't proceed
     activityLog.view.timestampFilter.setFilterRange({
       targetElementId: 912,
       menuItemId: 'startTime',
     });
 
-    // applying the timestamp filter starting from second row
-    // Thus rows before the second row i.e. first row will be hidden
+    // Applying the timestamp filter starting from 2nd row
+    // Thus rows before the second row i.e. the 1st row will be hidden
     activityLog.view.timestampFilter.setFilterRange({
       targetElementId: 123,
       menuItemId: 'startTime',
@@ -769,13 +760,13 @@ describe('Filtering logs with timestamp', () => {
     expect(tableRows[2].hidden).toBeFalsy();
     expect(tableRows[3].hidden).toBeFalsy();
 
-    // checking if the start is mentioned in dropdown
+    // Checking if the start time is displayed correctly in timestamp filter dropdown
     const getStartTimeLabel = () =>
       activityLog.view.timestampFilter.startTimeLabel.textContent;
     expect(getStartTimeLabel()).toStrictEqual(expectedStartTime);
 
-    // Now let's apply the stop timestamp to 3rd row of the table.
-    // Thus it will hide the 4th row
+    // Now let's apply the stop timestamp to the 3rd row of the table.
+    // Thus it will hide the rows below the 3rd row, i.e. the 4th row
     activityLog.view.timestampFilter.setFilterRange({
       targetElementId: 456,
       menuItemId: 'stopTime',
@@ -786,7 +777,7 @@ describe('Filtering logs with timestamp', () => {
     expect(tableRows[2].hidden).toBeFalsy();
     expect(tableRows[3].hidden).toBeTruthy();
 
-    // checking if the stop is mentioned in dropdown
+    // checking if the stop time is displayed correctly in timestamp filter dropdown
     const getStopTimeLabel = () =>
       activityLog.view.timestampFilter.stopTimeLabel.textContent;
     expect(getStopTimeLabel()).toStrictEqual(expectedStopTime);
@@ -836,12 +827,11 @@ describe('Filtering logs with timestamp', () => {
 
     activityLog.view.timestampFilter.onHiddenListener();
 
+    // removeAll() from the Menus API should be called.
     expect(removeAllFn).toHaveBeenCalled();
   });
 
-  test('dropdown is toggled on clicking Timestamp Filter option', async () => {
-    // Click on the filter option and test if the dropdown is shown.
-    // Click again to hide the dropdown and test if the dropdown is hidden.
+  test('Clicking the timestamp filter component should toggle the dropdown', async () => {
     window.browser = {
       runtime: {
         onMessage: { addListener: jest.fn() },
@@ -869,7 +859,7 @@ describe('Filtering logs with timestamp', () => {
     const { activityLog } = new ActivityLog();
     const timestampFilter = activityLog.view.timestampFilter;
 
-    // the dropdown is hidden
+    // the dropdown is hidden initially
     expect(timestampFilter.classList.contains('expanded')).toBeFalsy();
 
     const timestampFilterPromise = observeChange(timestampFilter);
