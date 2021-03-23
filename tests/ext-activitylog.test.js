@@ -1032,7 +1032,7 @@ test('log detail should be toggled when a table row is clicked', async () => {
   expect(logDetailWrapper.hidden).toBeTruthy();
 });
 
-test('loadLogs method is being called when a log file is loaded', async () => {
+test('loadLogs method should be called when a log file is loaded', async () => {
   const addListener = jest.fn();
   const removeListener = jest.fn();
   const sendMessage = jest.fn();
@@ -1050,9 +1050,7 @@ test('loadLogs method is being called when a log file is loaded', async () => {
     },
   };
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   document.body.innerHTML = activityLogBody;
 
@@ -1061,6 +1059,7 @@ test('loadLogs method is being called when a log file is loaded', async () => {
   const { loadLogFile } = activityLog.view;
   const loadLogsFn = jest.spyOn(activityLog, 'loadLogs');
 
+  // when a file is loaded, the change event is fired from loadLogFile input element.
   loadLogFile.dispatchEvent(new Event('change'));
 
   expect(loadLogFile.value).toBe('');
