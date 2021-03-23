@@ -890,10 +890,11 @@ describe('Filtering logs with timestamp', () => {
   });
 });
 
-test('viewtype data cell should display empty value when viewtype of a log is undefined', async () => {
+test('In the table, the viewtype cell should be empty when viewtype of a log is undefined', async () => {
   const logs = [
     {
       /* renders the 1st row in table */
+      /* viewType = undefined */
       id: 'id1@test',
       viewType: undefined,
       type: 'content_script',
@@ -943,6 +944,7 @@ test('viewtype data cell should display empty value when viewtype of a log is un
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
   const tableRows = tableBody.querySelectorAll('tr');
 
+  // viewType of the 1st log is undefined
   expect(tableRows[0].querySelector('.view-type').textContent).toBe('');
   expect(tableRows[1].querySelector('.view-type').textContent).toBe(
     'viewType2@test'
