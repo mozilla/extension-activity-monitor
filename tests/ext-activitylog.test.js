@@ -1249,68 +1249,6 @@ test('onMessageListener should listen for new logs in activitylog page', async (
   );
 });
 
-test('matchFilterViewType should return true if log type is content_script', () => {
-  const log = {
-    id: 'id1@test',
-    viewType: 'viewType1@test',
-    type: 'content_script',
-    data: [{ test: 'test1@data' }],
-    timeStamp: 1597686226302,
-  };
-
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-
-  expect(activityLog.model.matchFilterViewType(log)).toBeTruthy();
-});
-
-test('matchFilterApiName should return true if log type is content_script', () => {
-  const log = {
-    id: 'id1@test',
-    viewType: 'viewType1@test',
-    type: 'content_script',
-    data: [{ test: 'test1@data' }],
-    timeStamp: 1597686226302,
-  };
-
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-
-  expect(activityLog.model.matchFilterApiName(log)).toBeTruthy();
-});
-
-test('matchFilterTabId should return true if tabId is absent in filter object', () => {
-  const logWithoutTabId = {
-    id: 'id1@test',
-    viewType: 'viewType1@test',
-    type: 'content_script',
-    data: { test: 'test1@data' },
-    timeStamp: 1597686226302,
-  };
-
-  const logWithTabId = {
-    id: 'id1@test',
-    viewType: 'viewType1@test',
-    type: 'content_script',
-    data: { test: 'test1@data', tabId: 12 },
-    timeStamp: 1597686226302,
-  };
-
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-
-  expect(activityLog.model.matchFilterTabId(logWithoutTabId.data)).toBeTruthy();
-
-  // assigning tabId in the filter object to check whether it matches with the log's tabId.
-  activityLog.model.filter.tabId = 5;
-
-  // logWithTabId.data.tabId = 12 and activityLog.model.filter.tabId = 5
-  expect(activityLog.model.matchFilterTabId(logWithTabId.data)).toBeFalsy();
-});
-
 test('clicking on options icon should toggle the options dropdown list', () => {
   document.body.innerHTML = activityLogBody;
 

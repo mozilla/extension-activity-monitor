@@ -78,13 +78,3 @@ test('openActivityLogPage should create tab with ActivityLogPageURL and apply se
     '/activitylog/activitylog.html?test=123'
   );
 });
-
-test('ActivityLogPageURL method should return url with search params if search params are available', () => {
-  const getURL = jest.fn();
-  const create = jest.fn();
-
-  window.browser = {
-    runtime: { getURL },
-    tabs: { create },
-  };
-});
