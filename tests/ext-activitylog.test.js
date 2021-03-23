@@ -1337,6 +1337,25 @@ test('clicking on "Save Logs" button should call the saveAsJSON method', async (
 
 // activity log page controller
 test('invalid event in handleEvent Method should render an error message', () => {
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockResolvedValue({ existingLogs: [] });
+
   document.body.innerHTML = activityLogBody;
   const { activityLog } = new ActivityLog();
 
