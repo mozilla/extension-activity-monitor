@@ -1565,7 +1565,7 @@ test('activity log page should show error when sendMessage API with requestType 
   expect(activityLog.view.notice.textContent).toBe(errorMsg);
 });
 
-test('activity log page shows error when sendMessage API with requestType saveLogs is failed', async () => {
+test('activity log page should show error when sendMessage API with requestType saveLogs is failed', async () => {
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1579,17 +1579,14 @@ test('activity log page shows error when sendMessage API with requestType saveLo
 
   const errorMsg = 'could not save logs';
 
-  sendMessage.mockImplementation(() => {
-    return Promise.resolve({ existingLogs: [] });
-  });
+  sendMessage.mockResolvedValue({ existingLogs: [] });
 
   const saveLogsFn = jest.spyOn(save, 'saveAsJSON');
 
   saveLogsFn.mockImplementation(() => {
+    // throwing error intentionally
     throw new Error(errorMsg);
   });
-
-  history.replaceState(null, null, `${document.location.origin}`);
 
   document.body.innerHTML = activityLogBody;
 
