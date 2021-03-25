@@ -55,7 +55,6 @@ describe('Filtering logs with filter-option component', () => {
     ];
 
     const addListener = jest.fn();
-    const removeListener = jest.fn();
     const sendMessage = jest.fn();
     const connect = jest.fn();
 
@@ -64,10 +63,6 @@ describe('Filtering logs with filter-option component', () => {
         onMessage: { addListener },
         sendMessage,
         connect,
-      },
-      menus: {
-        onClicked: { addListener, removeListener },
-        onHidden: { addListener, removeListener },
       },
     };
 
@@ -187,7 +182,6 @@ describe('Filtering logs with filter-option component', () => {
     ];
 
     const addListener = jest.fn();
-    const removeListener = jest.fn();
     const sendMessage = jest.fn();
     const connect = jest.fn();
 
@@ -196,10 +190,6 @@ describe('Filtering logs with filter-option component', () => {
         onMessage: { addListener },
         sendMessage,
         connect,
-      },
-      menus: {
-        onClicked: { addListener, removeListener },
-        onHidden: { addListener, removeListener },
       },
     };
 
@@ -261,7 +251,6 @@ describe('Filtering logs with filter-option component', () => {
 
 test('Searching by keyword should search in the data object of the log to filter out the logs', async () => {
   expect(window.customElements.get('filter-keyword')).toBe(FilterKeyword);
-
   history.replaceState(null, null, document.location.origin);
 
   const logs = [
@@ -425,7 +414,6 @@ test('timestamp should be correctly formatted', () => {
   ];
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -434,10 +422,6 @@ test('timestamp should be correctly formatted', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -494,7 +478,6 @@ test('log details should be displayed when a log is clicked from logs table', as
   ];
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -503,10 +486,6 @@ test('log details should be displayed when a log is clicked from logs table', as
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -912,7 +891,6 @@ test('In the table, the viewtype cell should be empty when viewtype of a log is 
   ];
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -921,10 +899,6 @@ test('In the table, the viewtype cell should be empty when viewtype of a log is 
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -972,7 +946,6 @@ test('log detail should be toggled when a table row is clicked', async () => {
   ];
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -981,10 +954,6 @@ test('log detail should be toggled when a table row is clicked', async () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1034,7 +1003,6 @@ test('log detail should be toggled when a table row is clicked', async () => {
 
 test('loadLogs method should be called when a log file is loaded', async () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1043,10 +1011,6 @@ test('loadLogs method should be called when a log file is loaded', async () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1068,7 +1032,6 @@ test('loadLogs method should be called when a log file is loaded', async () => {
 
 test('setError method should display error message in activity log page', () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1077,10 +1040,6 @@ test('setError method should display error message in activity log page', () => 
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1211,7 +1170,6 @@ test('onMessageListener should listen for new logs in activitylog page', async (
   };
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1220,10 +1178,6 @@ test('onMessageListener should listen for new logs in activitylog page', async (
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1272,7 +1226,6 @@ test('onMessageListener should listen for new logs in activitylog page', async (
 
 test('clicking on options icon should toggle the options dropdown list', () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1281,10 +1234,6 @@ test('clicking on options icon should toggle the options dropdown list', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1303,7 +1252,6 @@ test('clicking on options icon should toggle the options dropdown list', () => {
 
 test('clicking on "Save Logs" button should call the saveAsJSON method', async () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1312,10 +1260,6 @@ test('clicking on "Save Logs" button should call the saveAsJSON method', async (
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1338,7 +1282,6 @@ test('clicking on "Save Logs" button should call the saveAsJSON method', async (
 // activity log page controller
 test('invalid event in handleEvent Method should render an error message', () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1347,10 +1290,6 @@ test('invalid event in handleEvent Method should render an error message', () =>
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1373,7 +1312,6 @@ test('invalid event in handleEvent Method should render an error message', () =>
 
 test('filter option should set from URL params initially', () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1382,10 +1320,6 @@ test('filter option should set from URL params initially', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1468,7 +1402,6 @@ test('tabId in search param should filter logs by the given tab id', () => {
   ];
 
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1477,10 +1410,6 @@ test('tabId in search param should filter logs by the given tab id', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
@@ -1503,7 +1432,6 @@ test('tabId in search param should filter logs by the given tab id', () => {
 
 test('handleEvent should display error message if wrong event is found', () => {
   const addListener = jest.fn();
-  const removeListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1512,10 +1440,6 @@ test('handleEvent should display error message if wrong event is found', () => {
       onMessage: { addListener },
       sendMessage,
       connect,
-    },
-    menus: {
-      onClicked: { addListener, removeListener },
-      onHidden: { addListener, removeListener },
     },
   };
 
