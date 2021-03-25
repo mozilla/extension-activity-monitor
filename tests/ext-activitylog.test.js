@@ -1533,7 +1533,7 @@ test('handleEvent should display error message if wrong event is found', () => {
   expect(activityLog.view.notice.textContent).toBe(expectedErrorMsg);
 });
 
-test('activity log page shows error when sendMessage API with requestType loadLogs is failed', async () => {
+test('activity log page should show error when sendMessage API with requestType loadLogs is failed', async () => {
   const sendMessage = jest.fn();
   const connect = jest.fn();
 
@@ -1556,8 +1556,6 @@ test('activity log page shows error when sendMessage API with requestType loadLo
       throw new Error(errorMsg);
     }
   });
-
-  history.replaceState(null, null, `${location.origin}`);
 
   document.body.innerHTML = activityLogBody;
 
