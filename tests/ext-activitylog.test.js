@@ -1310,7 +1310,7 @@ test('invalid event in handleEvent Method should render an error message', () =>
   expect(activityLog.view.notice.textContent).toBe(expectedErrorMsg);
 });
 
-test('filter option should set from URL params initially', () => {
+test('filter options should set from URL params initially', () => {
   const addListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
