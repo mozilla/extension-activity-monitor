@@ -1445,6 +1445,7 @@ test('filter option should set from URL params initially', () => {
   expect(view.keywordFilter.inputBox.value).toBe(expectedKeyword);
   expect(view.timestampFilter.timeStamp).toMatchObject(expectedTimestamp);
 
+  // reset the window url
   history.replaceState(null, null, `${location.origin}`);
 });
 
@@ -1501,7 +1502,25 @@ test('tabId in search param should filter logs by the given tab id', () => {
 });
 
 test('handleEvent should display error message if wrong event is found', () => {
-  history.replaceState(null, null, `${location.origin}`);
+  const addListener = jest.fn();
+  const removeListener = jest.fn();
+  const sendMessage = jest.fn();
+  const connect = jest.fn();
+
+  window.browser = {
+    runtime: {
+      onMessage: { addListener },
+      sendMessage,
+      connect,
+    },
+    menus: {
+      onClicked: { addListener, removeListener },
+      onHidden: { addListener, removeListener },
+    },
+  };
+
+  sendMessage.mockResolvedValue({ existingLogs: [] });
+
   document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
