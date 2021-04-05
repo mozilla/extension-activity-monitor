@@ -6,7 +6,6 @@ import { FilterOption } from '../src/lib/web-component/filter-option/filter-opti
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
 import { FilterKeyword } from '../src/lib/web-component/filter-keyword/filter-keyword-element';
 import { FilterTimestamp } from '../src/lib/web-component/filter-timestamp/filter-timestamp-element';
-import { save } from '../src/lib/save-load';
 
 const activityLogHtml = fs.readFileSync(
   path.resolve(__dirname, '../src/activitylog/activitylog.html'),
@@ -759,7 +758,7 @@ test('clicking the clear logs button should remove all logs from logs table', as
   };
 
   // sendMessage is called by getExistingLogs method on the 1st time.
-  // sendMessage is called by clearBackgroundLogs() method on the 2nd time.
+  // sendMessage is called for the 2nd time to clear logs from the background.
   sendMessage.mockResolvedValueOnce({ existingLogs: logs });
   sendMessage.mockResolvedValueOnce();
 
@@ -772,8 +771,6 @@ test('clicking the clear logs button should remove all logs from logs table', as
   const emptyTableLabelHidden = observeChange(emptyTableLabel);
   const { activityLog } = new ActivityLog();
   await emptyTableLabelHidden;
-
-  const clearBackgroundLogsFn = jest.spyOn(activityLog, 'clearBackgroundLogs');
 
   const clearLogBtn = activityLog.view.clearLogBtn;
   const tableBody = activityLog.view.logView.shadowRoot.querySelector('tbody');
@@ -792,10 +789,10 @@ test('clicking the clear logs button should remove all logs from logs table', as
   expect(logDetailWrapper.hidden).toBe(false);
 
   clearLogBtn.click();
-  // the log details should be hidden after clearing all the logs.
+  await observeChange(logDetailWrapper);
+  // the log details should be hidden after clearing all the logs
   expect(logDetailWrapper.hidden).toBe(true);
 
-  expect(clearBackgroundLogsFn).toHaveBeenCalled();
   expect(activityLog.model.logs).toMatchObject([]);
   expect(getTableRows().length).toBe(0);
 });
@@ -1279,7 +1276,7 @@ test('clicking on options icon should toggle the options dropdown list', () => {
   expect(optionsBtn.classList.contains('expanded')).toBeTruthy();
 });
 
-test('clicking on "Save Logs" button should call the saveAsJSON method', async () => {
+test('clicking on "Save Logs" button should send request to the backgound to save logs', async () => {
   const addListener = jest.fn();
   const sendMessage = jest.fn();
   const connect = jest.fn();
@@ -1298,14 +1295,16 @@ test('clicking on "Save Logs" button should call the saveAsJSON method', async (
 
   const { activityLog } = new ActivityLog();
 
-  const saveAsJSONFn = jest.spyOn(save, 'saveAsJSON');
+  const sendMsgToBackgroundFn = jest.spyOn(activityLog, 'sendMsgToBackground');
   const optionsBtn = activityLog.view.optionsBtn;
   const saveLogBtn = activityLog.view.saveLogBtn;
 
   optionsBtn.click();
   saveLogBtn.click();
 
-  expect(saveAsJSONFn).toBeCalled();
+  expect(sendMsgToBackgroundFn).toBeCalledWith({
+    requestType: 'saveLogs',
+  });
 });
 
 test('handleEvent method of View class should display error message if wrong event is found', () => {
@@ -1433,69 +1432,4 @@ test('handleEvent method of Controller class should display error message if wro
 
   activityLog.handleEvent(invalidEvt);
   expect(activityLog.view.notice.textContent).toBe(expectedErrorMsg);
-});
-
-test('activity log page should show error when sendMessage API with requestType "loadLogs" is failed', async () => {
-  const sendMessage = jest.fn();
-  const connect = jest.fn();
-
-  window.browser = {
-    runtime: {
-      onMessage: { addListener: jest.fn() },
-      sendMessage,
-      connect,
-    },
-  };
-
-  const errorMsg = 'could not load logs';
-  const file = 'activitylogs.json';
-
-  sendMessage.mockImplementation((req) => {
-    if (req.requestType === 'sendAllLogs') {
-      return Promise.resolve({ existingLogs: [] });
-    } else if (req.requestType === 'loadLogs') {
-      // throwing the error intentionally
-      throw new Error(errorMsg);
-    }
-  });
-
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-  await activityLog.loadLogs(file);
-
-  expect(activityLog.view.notice.textContent).toBe(errorMsg);
-});
-
-test('activity log page should show error when sendMessage API with requestType "saveLogs" is failed', async () => {
-  const sendMessage = jest.fn();
-  const connect = jest.fn();
-
-  window.browser = {
-    runtime: {
-      onMessage: { addListener: jest.fn() },
-      sendMessage,
-      connect,
-    },
-  };
-
-  const errorMsg = 'could not save logs';
-
-  sendMessage.mockResolvedValue({ existingLogs: [] });
-
-  const saveLogsFn = jest.spyOn(save, 'saveAsJSON');
-
-  saveLogsFn.mockImplementation(() => {
-    // throwing error intentionally
-    throw new Error(errorMsg);
-  });
-
-  document.body.innerHTML = activityLogBody;
-
-  const { activityLog } = new ActivityLog();
-  await activityLog.saveLogs();
-
-  expect(saveLogsFn).toBeCalled();
-
-  expect(activityLog.view.notice.textContent).toBe(errorMsg);
 });

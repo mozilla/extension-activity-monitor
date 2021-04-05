@@ -1,5 +1,4 @@
 import dropDownController from './DropDownController.js';
-import { save } from './save-load.js';
 import { serializeFilters, deSerializeFilters } from './formatters.js';
 
 class Model {
@@ -156,32 +155,28 @@ class View {
   }
 
   handleEvent(event) {
-    try {
-      if (event.type === 'click') {
-        switch (event.target) {
-          case this.clearLogBtn:
-            this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
-            break;
-          case this.optionsBtn:
-            dropDownController.toggleDropDown(this.optionsBtn);
-            break;
-          case this.saveLogBtn:
-            this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
-            break;
-        }
-      } else if (event.type === 'change' && event.target === this.loadLogFile) {
-        const logFile = event.target.files[0];
-        this.loadLogFile.value = '';
-        this.loadLogFile.dispatchEvent(
-          new CustomEvent('loadlog', { detail: logFile })
-        );
-      } else if (event.type === 'logcountchange') {
-        this.updateLogCounter(event.detail);
-      } else {
-        throw new Error(`wrong event type - ${event.type}`);
+    if (event.type === 'click') {
+      switch (event.target) {
+        case this.clearLogBtn:
+          this.clearLogBtn.dispatchEvent(new CustomEvent('clearlog'));
+          break;
+        case this.optionsBtn:
+          dropDownController.toggleDropDown(this.optionsBtn);
+          break;
+        case this.saveLogBtn:
+          this.saveLogBtn.dispatchEvent(new CustomEvent('savelog'));
+          break;
       }
-    } catch (error) {
-      this.setError(error.message);
+    } else if (event.type === 'change' && event.target === this.loadLogFile) {
+      const logFile = event.target.files[0];
+      this.loadLogFile.value = '';
+      this.loadLogFile.dispatchEvent(
+        new CustomEvent('loadlog', { detail: logFile })
+      );
+    } else if (event.type === 'logcountchange') {
+      this.updateLogCounter(event.detail);
+    } else {
+      this.setError(`wrong event type - ${event.type}`);
     }
   }
 
@@ -283,17 +278,11 @@ class Controller {
       this.view.contentWrapper.classList.add('load-logs');
 
       const currentTab = await browser.tabs.getCurrent();
-      let logs;
 
-      try {
-        logs = await browser.runtime.sendMessage({
-          requestType: 'getLoadedLogs',
-          requestTo: 'ext-monitor',
-          requestParams: { tabId: currentTab.id },
-        });
-      } catch (error) {
-        this.view.setError(error.message);
-      }
+      const logs = await this.sendMsgToBackground({
+        requestType: 'getLoadedLogs',
+        requestParams: { tabId: currentTab.id },
+      });
 
       if (logs?.length) {
         this.handleNewLogs(logs);
@@ -336,10 +325,10 @@ class Controller {
   };
 
   async getExistingLogs() {
-    const { existingLogs } = await browser.runtime.sendMessage({
+    const { existingLogs } = await this.sendMsgToBackground({
       requestType: 'sendAllLogs',
-      requestTo: 'ext-monitor',
     });
+
     return existingLogs;
   }
 
@@ -349,47 +338,34 @@ class Controller {
   }
 
   handleEvent(event) {
-    try {
-      switch (event.type) {
-        case 'loadlog':
-          this.loadLogs(event.detail);
-          break;
-        case 'savelog':
-          this.saveLogs();
-          break;
-        case 'filterchange':
-          this.onFilterChange(event.detail);
-          break;
-        case 'clearlog':
-          this.handleClearLogs();
-          break;
-        default:
-          throw new Error(`wrong event type found - ${event.type}`);
-      }
-    } catch (error) {
-      this.view.setError(error.message);
+    switch (event.type) {
+      case 'loadlog':
+        this.loadLogs(event.detail);
+        break;
+      case 'savelog':
+        this.saveLogs();
+        break;
+      case 'filterchange':
+        this.onFilterChange(event.detail);
+        break;
+      case 'clearlog':
+        this.handleClearLogs();
+        break;
+      default:
+        this.view.setError(`wrong event type found - ${event.type}`);
     }
   }
 
   async loadLogs(file) {
-    try {
-      await browser.runtime.sendMessage({
-        requestTo: 'ext-monitor',
-        requestType: 'loadLogs',
-        requestParams: { file },
-      });
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await this.sendMsgToBackground({
+      requestType: 'loadLogs',
+      requestParams: { file },
+    });
   }
 
   async saveLogs() {
-    try {
-      await save.saveAsJSON();
-      this.view.setError(null);
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await this.sendMsgToBackground({ requestType: 'saveLogs' });
+    this.view.setError(null);
   }
 
   onFilterChange(filterDetail) {
@@ -418,18 +394,23 @@ class Controller {
     return this.model.matchLogWithFilterObj(log);
   }
 
-  handleClearLogs() {
-    this.clearBackgroundLogs();
+  async handleClearLogs() {
+    await this.sendMsgToBackground({ requestType: 'clearLogs' });
     this.model.clearLogs();
     this.view.clearTable();
     this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
   }
 
-  async clearBackgroundLogs() {
-    await browser.runtime.sendMessage({
-      requestType: 'clearLogs',
-      requestTo: 'ext-monitor',
-    });
+  async sendMsgToBackground({ requestType, requestParams }) {
+    try {
+      return await browser.runtime.sendMessage({
+        requestTo: 'ext-monitor',
+        requestType,
+        requestParams,
+      });
+    } catch (error) {
+      this.view.setError(error.message);
+    }
   }
 }
 
