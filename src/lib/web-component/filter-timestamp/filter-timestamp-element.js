@@ -158,8 +158,14 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   disconnectedCallback() {
-    browser.menus?.onClicked.removeListener(this.setFilterRange);
-    browser.menus?.onHidden.removeListener(this.onHiddenListener);
+    // context menu doesn't work on devtool_page
+    // see: https://github.com/mozilla/extension-activity-monitor/issues/43
+    if (!browser.menus?.onClicked || !browser.menus?.onHidden) {
+      return;
+    }
+
+    browser.menus.onClicked.removeListener(this.setFilterRange);
+    browser.menus.onHidden.removeListener(this.onHiddenListener);
     this.filterToggleBar.removeEventListener('click', this);
     this.dropDownList.removeEventListener('click', this);
   }
