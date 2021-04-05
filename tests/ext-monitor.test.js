@@ -1,6 +1,10 @@
 import ExtensionMonitor from '../src/lib/ext-monitor';
 import * as ExtListen from '../src/lib/ext-listen.js';
 
+function getExpectedMessage(msgProps) {
+  return { requestTo: 'ext-monitor', ...msgProps };
+}
+
 test('getAllExtensions should return all extensions but themes and self', async () => {
   const selfExt = { id: 'ext4', type: 'extension' };
   const themeExt = { id: 'ext3', type: 'theme' };
@@ -31,8 +35,8 @@ test('getAllExtensions should return all extensions but themes and self', async 
   await expect(extensionsPromise).resolves.toMatchObject(expectedExts);
 });
 
-describe('start extension monitoring and register event listeners', () => {
-  test('while no extensions are being monitoring', async () => {
+describe('registering event listeners on start monitoring extensions', () => {
+  test('onExtensionActivity listener should be registered on start monitoring extensions', async () => {
     const onExtActivityAddListener = jest.fn();
     const onInstalledAddListener = jest.fn();
     const onUninstalledAddListener = jest.fn();
@@ -63,10 +67,12 @@ describe('start extension monitoring and register event listeners', () => {
       return extensions;
     });
 
-    const startMonitor = extMonitor.messageListener({
-      requestType: 'startMonitor',
-      requestTo: 'ext-monitor',
-    });
+    const startMonitor = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'startMonitor',
+      })
+    );
+
     await expect(startMonitor).resolves.toBeUndefined();
 
     expect(extMonitor.extensionMapList.size).toBe(2);
@@ -79,28 +85,28 @@ describe('start extension monitoring and register event listeners', () => {
     expect(onUninstalledAddListener).toHaveBeenCalledWith(onUninstalledExtFn);
   });
 
-  test('throws error while extensions are already being monitored', async () => {
+  test('trying to start monitoring extensions should throw error while some extensions are already being monitored', async () => {
     const extensions = [{ id: 'ext1' }];
+    const expectedRejMsg = 'EAM is already running';
 
     const extMonitor = new ExtensionMonitor();
 
-    // Having non-empty extensionMapList verfies that
-    // there are extensions being monitored
+    // Having non-empty extensionMapList verifies that somes extensions are being monitored
     extMonitor.extensionMapList.set(
       extensions[0].id,
       extMonitor.createLogListener()
     );
 
-    const initMonitorFail = extMonitor.messageListener({
-      requestType: 'startMonitor',
-      requestTo: 'ext-monitor',
-    });
-    await expect(initMonitorFail).rejects.toThrowError(
-      'EAM is already running'
+    const initMonitor = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'startMonitor',
+      })
     );
+
+    await expect(initMonitor).rejects.toThrowError(expectedRejMsg);
   });
 
-  test('start monitoring newly installed extensions automatically', async () => {
+  test('newly installed extensions should be monitored instantly', async () => {
     const onExtActivityAddListener = jest.fn();
     const onInstalledAddListener = jest.fn();
     const onUninstalledAddListener = jest.fn();
@@ -131,7 +137,6 @@ describe('start extension monitoring and register event listeners', () => {
     getAllExtensionsFn.mockResolvedValue(initialMonitoringExts);
 
     expect(extMonitor.extensionMapList.size).toBe(0);
-
     await extMonitor.startMonitor();
     expect(extMonitor.extensionMapList.size).toBe(2);
 
@@ -142,10 +147,7 @@ describe('start extension monitoring and register event listeners', () => {
     // Since this is a theme, it should not be monitored.
     extMonitor.onInstalledExtension(newTheme);
 
-    let monitoringExtIds = [];
-    for (const extId of extMonitor.extensionMapList.keys()) {
-      monitoringExtIds.push(extId);
-    }
+    const monitoringExtIds = [...extMonitor.extensionMapList.keys()];
 
     expect(extMonitor.extensionMapList.size).toBe(3);
     expect(monitoringExtIds).toMatchObject(expectMonitorExtIds);
@@ -177,6 +179,7 @@ test('stop monitoring all extensions should make extensionMapList empty and unre
   const onInstalledExtFn = jest.spyOn(extMonitor, 'onInstalledExtension');
   const onUninstalledExtFn = jest.spyOn(extMonitor, 'onUninstalledExtension');
 
+  // Having non-empty extensionMapList verifies that somes extensions are being monitored
   extMonitor.extensionMapList.set(
     extensions[0].id,
     extMonitor.createLogListener()
@@ -186,10 +189,11 @@ test('stop monitoring all extensions should make extensionMapList empty and unre
     extMonitor.createLogListener()
   );
 
-  const stopMonitor = extMonitor.messageListener({
-    requestType: 'stopMonitor',
-    requestTo: 'ext-monitor',
-  });
+  const stopMonitor = extMonitor.messageListener(
+    getExpectedMessage({
+      requestType: 'stopMonitor',
+    })
+  );
 
   await expect(stopMonitor).resolves.toBeUndefined();
 
@@ -198,12 +202,12 @@ test('stop monitoring all extensions should make extensionMapList empty and unre
     [listeners[1], 'ext2'],
   ]);
   expect(extMonitor.extensionMapList.size).toBe(0);
-
+  // listeners are removed
   expect(onInstalledRemoveListener).toHaveBeenCalledWith(onInstalledExtFn);
   expect(onUninstalledRemoveListener).toHaveBeenCalledWith(onUninstalledExtFn);
 });
 
-test("stop monitoring uninstalled extension if it's already being monitored", async () => {
+test('uninstalling a monitored extension should be stopped from being monitored', async () => {
   const removeListener = jest.fn();
   const fakeListener = () => jest.fn();
 
@@ -214,7 +218,7 @@ test("stop monitoring uninstalled extension if it's already being monitored", as
   ];
 
   const uninstalledExt = { id: 'ext3', type: 'extension' };
-  const expectMonitorExtIds = ['ext1', 'ext2'];
+  const expectedMonitoringExtIds = ['ext1', 'ext2'];
 
   window.browser = {
     activityLog: {
@@ -228,26 +232,22 @@ test("stop monitoring uninstalled extension if it's already being monitored", as
   // affact the extension monitoring status.
   extMonitor.onUninstalledExtension(uninstalledExt);
 
-  // set extensions to monitor
+  // Having non-empty extensionMapList verifies that somes extensions are being monitored
   for (const ext of monitoringExts) {
     extMonitor.extensionMapList.set(ext.id, fakeListener());
   }
 
   expect(extMonitor.extensionMapList.size).toBe(3);
-  // When an existing monitoring extension is uninstalled,
-  // `onUninstalledExtension` method is being called with the extension's info.
+  // When an existing monitoring extension is uninstalled `onUninstalledExtension` method is being called with the extension's info.
   extMonitor.onUninstalledExtension(uninstalledExt);
 
-  let monitoringExtIds = [];
-  for (const extId of extMonitor.extensionMapList.keys()) {
-    monitoringExtIds.push(extId);
-  }
+  const monitoringExtIds = [...extMonitor.extensionMapList.keys()];
 
   expect(extMonitor.extensionMapList.size).toBe(2);
-  expect(monitoringExtIds).toMatchObject(expectMonitorExtIds);
+  expect(monitoringExtIds).toMatchObject(expectedMonitoringExtIds);
 });
 
-test('send logs to extension page if it is opened, as well as storing logs in background', async () => {
+test('new logs should be stored in background and send to the activitylog page if it is opened', async () => {
   const log1 = { log: 'log1' };
   const log2 = { log: 'log2' };
   const getURL = jest.fn();
@@ -264,22 +264,21 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
   query.mockResolvedValueOnce({ length: 1 });
 
   // extension page is not open
-  let listener = extMonitor.createLogListener();
-  await listener(log1);
+  const logListener = extMonitor.createLogListener();
+  await logListener(log1);
 
   expect(extMonitor.logs).toMatchObject([log1]);
+  // since the activitylog page is not opened, it's not sending the newly listened log
   expect(sendMessage).not.toHaveBeenCalled();
 
-  // extension page exist when activityLogPorts is not empty
-  // activityLogPorts contains port objects from runtime.onConnect
+  // activitylog page is opened when activityLogPorts contains port objects from runtime.onConnect API
   const port = { port: 'extension-page-open' };
   extMonitor.activityLogPorts.add(port);
 
-  listener = extMonitor.createLogListener();
-  await listener(log2);
+  await logListener(log2);
 
+  // logs stored in the background
   expect(extMonitor.logs).toMatchObject([log1, log2]);
-
   expect(sendMessage).toHaveBeenCalled();
   expect(sendMessage.mock.calls[0][0]).toMatchObject({
     requestType: 'appendLogs',
@@ -287,128 +286,144 @@ test('send logs to extension page if it is opened, as well as storing logs in ba
   });
 });
 
-describe('messageListeners functionalities test', () => {
-  test('getMonitorStatus should return the current monitoring status', async () => {
+describe('messageListeners functionalities tests', () => {
+  test('getMonitorStatus method should return the current monitoring status', async () => {
     const extMonitor = new ExtensionMonitor();
 
     // while no extensions being monitored
-    const statusPromiseNeg = extMonitor.messageListener({
-      requestType: 'getMonitorStatus',
-      requestTo: 'ext-monitor',
-    });
+    const statusPromiseNeg = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'getMonitorStatus',
+      })
+    );
+
     await expect(statusPromiseNeg).resolves.toMatchObject({ active: false });
 
     extMonitor.extensionMapList.set('ext1', extMonitor.createLogListener());
 
     // while extensions are being monitored
-    const statusPromisePos = extMonitor.messageListener({
-      requestType: 'getMonitorStatus',
-      requestTo: 'ext-monitor',
-    });
+    const statusPromisePos = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'getMonitorStatus',
+      })
+    );
+
     await expect(statusPromisePos).resolves.toMatchObject({ active: true });
   });
 
-  test('sendAllLogs should return existing logs collected in background', async () => {
+  test('sendAllLogs method should return all existing logs collected in the background', async () => {
     const extMonitor = new ExtensionMonitor();
     extMonitor.logs = { log: 'ex1' };
 
-    const existingLogsPromise = extMonitor.messageListener({
-      requestType: 'sendAllLogs',
-      requestTo: 'ext-monitor',
-    });
+    const existingLogsPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'sendAllLogs',
+      })
+    );
+
     await expect(existingLogsPromise).resolves.toMatchObject({
       existingLogs: extMonitor.logs,
     });
   });
 
-  test('throws error when wrong requestType is passed to messageHandlers', async () => {
+  test('messageListener method should throw error when a wrong requestType is found', async () => {
     const extMonitor = new ExtensionMonitor();
-    const requestType = 'wrong-request';
+    const wrongReqType = 'wrong-request';
 
-    const error = extMonitor.messageListener({
-      requestType,
-      requestTo: 'ext-monitor',
-    });
+    const errorPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: wrongReqType,
+      })
+    );
 
-    await expect(error).rejects.toThrowError(
-      'requestType ' + requestType + ' is not found'
+    await expect(errorPromise).rejects.toThrowError(
+      `requestType ${wrongReqType} is not found`
     );
   });
 
-  test('throws error when promise rejects at startMonitor method', async () => {
+  test('startMonitor method should throw error when any proimse rejects', async () => {
     const extMonitor = new ExtensionMonitor();
+    const monitorError = 'start-monitor-error';
     const startMonitorRejectsFn = jest.spyOn(extMonitor, 'startMonitor');
 
     startMonitorRejectsFn.mockImplementation(() => {
-      throw new Error('start-monitor-error');
+      // throwing an error intentionally
+      throw new Error(monitorError);
     });
 
-    const error = extMonitor.messageListener({
-      requestType: 'startMonitor',
-      requestTo: 'ext-monitor',
-    });
+    const errorPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'startMonitor',
+      })
+    );
 
-    await expect(error).rejects.toThrowError('start-monitor-error');
+    await expect(errorPromise).rejects.toThrowError(monitorError);
   });
 
-  test('messageListener return void if requestTo is not "ext-monitor"', () => {
+  test('messageListener method should return undefined if requestTo arg is not "ext-monitor"', () => {
     const extMonitor = new ExtensionMonitor();
     const messageListenerFn = jest.spyOn(extMonitor, 'messageListener');
 
-    extMonitor.messageListener({
-      requestType: 'startMonitor',
-      requestTo: 'invalid-request',
-    });
+    extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'startMonitor',
+        requestTo: 'abc-monitor',
+      })
+    );
 
     expect(messageListenerFn).toHaveReturnedWith(undefined);
   });
 
-  test("loadLogs method should store the logs by newly opend tab's id", async () => {
+  test("loadLogs method should store the logs by newly opened tab's id", async () => {
     const logs = [{ prop: 'log' }];
     const logsFile = JSON.stringify(logs);
+    const tabId = 1098;
     const blob = new Blob([logsFile], {
       type: 'application/json',
     });
     Object.assign(blob, { name: 'activitylogs-test.json' });
-    const tabId = 1098;
 
     const openActivityLogPageFn = jest.spyOn(ExtListen, 'openActivityLogPage');
     const extMonitor = new ExtensionMonitor();
 
     openActivityLogPageFn.mockResolvedValue({ id: tabId });
 
-    const loadLogsPromise = extMonitor.messageListener({
-      requestType: 'loadLogs',
-      requestTo: 'ext-monitor',
-      requestParams: { file: blob },
-    });
+    const loadLogsPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'loadLogs',
+        requestParams: { file: blob },
+      })
+    );
 
     await expect(loadLogsPromise).resolves.toBeUndefined();
     expect(extMonitor.loadedLogsByTabId.get(tabId)).toMatchObject(logs);
   });
 
-  test('getLoadedLogs method should return logs if logs are found with given tab id otherwise throw error', async () => {
+  test('getLoadedLogs method should return logs if logs are found with given tab id otherwise throws error', async () => {
     const loadedLogs = [{ prop: 'log' }];
-    const tabId = 1099;
+    const validTabId = 1099;
 
     const extMonitor = new ExtensionMonitor();
 
-    extMonitor.loadedLogsByTabId.set(tabId, loadedLogs);
+    // Logs available for tabId: 1099
+    extMonitor.loadedLogsByTabId.set(validTabId, loadedLogs);
 
-    const getLoadedLogsPromise = extMonitor.messageListener({
-      requestType: 'getLoadedLogs',
-      requestTo: 'ext-monitor',
-      requestParams: { tabId },
-    });
+    const getLoadedLogsPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'getLoadedLogs',
+        requestParams: { tabId: validTabId },
+      })
+    );
 
     await expect(getLoadedLogsPromise).resolves.toMatchObject(loadedLogs);
 
     const wrongTabId = 212;
-    const getLogsWithWrongTabIdPromise = extMonitor.messageListener({
-      requestType: 'getLoadedLogs',
-      requestTo: 'ext-monitor',
-      requestParams: { tabId: wrongTabId },
-    });
+    const getLogsWithWrongTabIdPromise = extMonitor.messageListener(
+      getExpectedMessage({
+        requestType: 'getLoadedLogs',
+        requestParams: { tabId: wrongTabId },
+      })
+    );
 
     await expect(getLogsWithWrongTabIdPromise).rejects.toThrowError(
       `No loaded logs found for tab id: ${wrongTabId}`
@@ -416,7 +431,7 @@ describe('messageListeners functionalities test', () => {
   });
 });
 
-test('listeners are registered at initialization', () => {
+test('WebExtension API event listeners should be registered at initialization', () => {
   const runtimeMessageAddListener = jest.fn();
   const tabsRemovedAddListener = jest.fn();
   const onConnectAddListener = jest.fn();
@@ -440,21 +455,23 @@ test('listeners are registered at initialization', () => {
   expect(tabsRemovedAddListener).toHaveBeenCalledWith(onRemovedListenerFn);
 });
 
-test('empty log array is found after clearing logs', async () => {
+test('request for clearing logs should make the logs empty', async () => {
   const extMonitor = new ExtensionMonitor();
 
   extMonitor.logs = [{ log: 'test' }];
-  expect(extMonitor.logs).toEqual([{ log: 'test' }]);
 
-  await extMonitor.messageListener({
-    requestType: 'clearLogs',
-    requestTo: 'ext-monitor',
-  });
+  expect(extMonitor.logs).not.toEqual([]);
+
+  await extMonitor.messageListener(
+    getExpectedMessage({
+      requestType: 'clearLogs',
+    })
+  );
 
   expect(extMonitor.logs).toEqual([]);
 });
 
-test('saveLogs function should call download API to save logs', async () => {
+test('saveLogs method should call the download API to save logs', async () => {
   const createObjectURL = jest.fn();
   const revokeObjectURL = jest.fn();
   window.URL = { createObjectURL, revokeObjectURL };
@@ -495,36 +512,28 @@ test('saveLogs function should call download API to save logs', async () => {
   const extMonitor = new ExtensionMonitor();
   const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
 
-  const saveLogPromise = extMonitor.messageListener({
-    requestTo: 'ext-monitor',
-    requestType: 'saveLogs',
-  });
+  const saveLogPromise = extMonitor.messageListener(
+    getExpectedMessage({
+      requestType: 'saveLogs',
+    })
+  );
 
   await expect(saveLogPromise).resolves.toBeUndefined();
 
-  expect(saveLogsFn).toHaveBeenCalledTimes(1);
-  expect(download).toHaveBeenCalledTimes(1);
+  expect(saveLogsFn).toHaveBeenCalled();
   expect(download).toHaveBeenCalledWith({
     url: 'fake-blob-url',
     filename: 'activitylogs.json',
   });
 
-  expect(addListener).toHaveBeenCalledTimes(1);
-  expect(addListener).toHaveBeenCalledWith(listener);
-
-  expect(removeListener).toHaveBeenCalledTimes(1);
-  expect(removeListener).toHaveBeenCalledWith(listener);
-
-  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalled();
+  expect(removeListener).toHaveBeenCalled();
   expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
 
-  saveLogsFn.mockRestore();
+  saveLogsFn.mockClear();
 });
 
-test('saveLogs function should return error message if error is encountered', async () => {
-  const extMonitor = new ExtensionMonitor();
-  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
-
+test('saveLogs method should return error message if error is encountered', async () => {
   const createObjectURL = jest.fn();
   const revokeObjectURL = jest.fn();
   window.URL = { createObjectURL, revokeObjectURL };
@@ -532,6 +541,7 @@ test('saveLogs function should return error message if error is encountered', as
   const download = jest.fn();
   const addListener = jest.fn();
   const removeListener = jest.fn();
+
   window.browser = {
     downloads: {
       download,
@@ -556,33 +566,30 @@ test('saveLogs function should return error message if error is encountered', as
     return Promise.resolve(1);
   });
 
-  const saveLogPromise = extMonitor.messageListener({
-    requestTo: 'ext-monitor',
-    requestType: 'saveLogs',
-  });
+  const extMonitor = new ExtensionMonitor();
+  const saveLogsFn = jest.spyOn(extMonitor, 'saveLogs');
+
+  const saveLogPromise = extMonitor.messageListener(
+    getExpectedMessage({
+      requestType: 'saveLogs',
+    })
+  );
 
   await expect(saveLogPromise).rejects.toThrowError('save-error');
 
-  expect(saveLogsFn).toHaveBeenCalledTimes(1);
-  expect(download).toHaveBeenCalledTimes(1);
+  expect(saveLogsFn).toHaveBeenCalled();
   expect(download).toHaveBeenCalledWith({
     url: 'fake-blob-url',
     filename: 'activitylogs.json',
   });
-
-  expect(addListener).toHaveBeenCalledTimes(1);
-  expect(addListener).toHaveBeenCalledWith(listener);
-
-  expect(removeListener).toHaveBeenCalledTimes(1);
-  expect(removeListener).toHaveBeenCalledWith(listener);
-
-  expect(revokeObjectURL).toHaveBeenCalledTimes(1);
+  expect(addListener).toHaveBeenCalled();
+  expect(removeListener).toHaveBeenCalled();
   expect(revokeObjectURL).toHaveBeenCalledWith('fake-blob-url');
 
-  saveLogsFn.mockRestore();
+  saveLogsFn.mockClear();
 });
 
-test('onConnectListener should save the port of activityLog page', () => {
+test('onConnectListener should store the port objects of activityLog pages', () => {
   const addListener = jest.fn();
   const wrongNamedPort = {
     portProp: 'test@port',
@@ -602,17 +609,17 @@ test('onConnectListener should save the port of activityLog page', () => {
   });
 
   extMonitor.onConnectListener(wrongNamedPort);
-  // with wrong port name, it will not be saved
+  // with wrong port name, it will not be stored
   expect(extMonitor.activityLogPorts.size).toBe(0);
 
   extMonitor.onConnectListener(dummyPort);
   expect(extMonitor.activityLogPorts.size).toBe(1);
-  // When the activity log page is closed, the port is removed
+  // When the activitylog page is closed, the port will be removed
   onDisconnectedCallback(dummyPort);
   expect(extMonitor.activityLogPorts.size).toBe(0);
 });
 
-test('onRemovedListener should remove loaded logs along with tabId when tab is closed', () => {
+test('onRemovedListener should remove loaded logs along with tabId when that tab is closed', () => {
   const loadedLogs = [{ prop: 'test@log' }];
   const tabId = 20;
   const extMonitor = new ExtensionMonitor();
