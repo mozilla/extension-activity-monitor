@@ -788,8 +788,9 @@ test('clicking the clear logs button should remove all logs from logs table', as
   row.click();
   expect(logDetailWrapper.hidden).toBe(false);
 
+  const logDetailClosePromise = observeChange(logDetailWrapper);
   clearLogBtn.click();
-  await observeChange(logDetailWrapper);
+  await logDetailClosePromise;
   // the log details should be hidden after clearing all the logs
   expect(logDetailWrapper.hidden).toBe(true);
 
