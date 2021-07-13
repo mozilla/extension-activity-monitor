@@ -1,5 +1,4 @@
 import dropDownController from './DropDownController.js';
-import { save } from './save-load.js';
 import { serializeFilters, deSerializeFilters } from './formatters.js';
 
 class Model {
@@ -177,7 +176,7 @@ class View {
     } else if (event.type === 'logcountchange') {
       this.updateLogCounter(event.detail);
     } else {
-      throw new Error(`wrong event type - ${event.type}`);
+      this.setError(`wrong event type - ${event.type}`);
     }
   }
 
@@ -279,17 +278,11 @@ class Controller {
       this.view.contentWrapper.classList.add('load-logs');
 
       const currentTab = await browser.tabs.getCurrent();
-      let logs;
 
-      try {
-        logs = await browser.runtime.sendMessage({
-          requestType: 'getLoadedLogs',
-          requestTo: 'ext-monitor',
-          requestParams: { tabId: currentTab.id },
-        });
-      } catch (error) {
-        this.view.setError(error.message);
-      }
+      const logs = await this.sendMsgToBackground({
+        requestType: 'getLoadedLogs',
+        requestParams: { tabId: currentTab.id },
+      });
 
       if (logs?.length) {
         this.handleNewLogs(logs);
@@ -299,19 +292,7 @@ class Controller {
       this.view.saveLogBtn.addEventListener('savelog', this);
 
       browser.runtime.connect({ name: 'monitor-realtime-logs' });
-      browser.runtime.onMessage.addListener((message) => {
-        const { requestTo, requestType } = message;
-
-        if (requestTo !== 'activity-log') {
-          return;
-        }
-
-        if (requestType === 'appendLogs') {
-          this.handleNewLogs([message.log]);
-        } else {
-          throw new Error(`wrong request type found - ${requestType}`);
-        }
-      });
+      browser.runtime.onMessage.addListener(this.onMessageListener);
 
       if (document.location.search) {
         const updateFilter = deSerializeFilters(searchParams);
@@ -327,11 +308,27 @@ class Controller {
     }
   }
 
+  onMessageListener = (message) => {
+    const { requestTo, requestType } = message;
+
+    if (requestTo !== 'activity-log') {
+      return;
+    }
+
+    if (requestType === 'appendLogs') {
+      this.handleNewLogs([message.log]);
+    } else {
+      return Promise.reject(
+        new Error(`wrong request type found - ${requestType}`)
+      );
+    }
+  };
+
   async getExistingLogs() {
-    const { existingLogs } = await browser.runtime.sendMessage({
+    const { existingLogs } = await this.sendMsgToBackground({
       requestType: 'sendAllLogs',
-      requestTo: 'ext-monitor',
     });
+
     return existingLogs;
   }
 
@@ -355,29 +352,20 @@ class Controller {
         this.handleClearLogs();
         break;
       default:
-        throw new Error(`wrong event type found - ${event.type}`);
+        this.view.setError(`wrong event type found - ${event.type}`);
     }
   }
 
   async loadLogs(file) {
-    try {
-      await browser.runtime.sendMessage({
-        requestTo: 'ext-monitor',
-        requestType: 'loadLogs',
-        requestParams: { file },
-      });
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await this.sendMsgToBackground({
+      requestType: 'loadLogs',
+      requestParams: { file },
+    });
   }
 
   async saveLogs() {
-    try {
-      await save.saveAsJSON();
-      this.view.setError(null);
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await this.sendMsgToBackground({ requestType: 'saveLogs' });
+    this.view.setError(null);
   }
 
   onFilterChange(filterDetail) {
@@ -406,18 +394,23 @@ class Controller {
     return this.model.matchLogWithFilterObj(log);
   }
 
-  handleClearLogs() {
-    this.clearBackgroundLogs();
+  async handleClearLogs() {
+    await this.sendMsgToBackground({ requestType: 'clearLogs' });
     this.model.clearLogs();
     this.view.clearTable();
     this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });
   }
 
-  async clearBackgroundLogs() {
-    await browser.runtime.sendMessage({
-      requestType: 'clearLogs',
-      requestTo: 'ext-monitor',
-    });
+  async sendMsgToBackground({ requestType, requestParams }) {
+    try {
+      return await browser.runtime.sendMessage({
+        requestTo: 'ext-monitor',
+        requestType,
+        requestParams,
+      });
+    } catch (error) {
+      this.view.setError(error.message);
+    }
   }
 }
 

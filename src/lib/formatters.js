@@ -33,7 +33,7 @@ export function serializeFilters(searchParams, updateFilter) {
   return searchParams;
 }
 
-function getJSONParseVal(str, options) {
+export function getJSONParseVal(str, options) {
   if (typeof str !== 'string') {
     return null;
   }

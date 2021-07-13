@@ -25,9 +25,7 @@ export class FilterTimestamp extends HTMLElement {
     this.startTimeLabel = this.dropDownList.querySelector('#startTimeLabel');
     this.stopTimeLabel = this.dropDownList.querySelector('#stopTimeLabel');
 
-    this.clearFilterBtn = filterWrapper.querySelector('#clearFilter');
     this.clearStartTimeBtn = this.dropDownList.querySelector('#clearStart');
-
     this.clearStopTimeBtn = this.dropDownList.querySelector('#clearStop');
 
     shadow.appendChild(filterWrapper);
@@ -132,9 +130,6 @@ export class FilterTimestamp extends HTMLElement {
   handleEvent(event) {
     if (event.type === 'click') {
       switch (event.target) {
-        case this.clearFilterBtn:
-          this.onClearFilter();
-          break;
         case this.clearStartTimeBtn:
           this.onClearFilter(true, false);
           break;
@@ -150,21 +145,17 @@ export class FilterTimestamp extends HTMLElement {
   }
 
   connectedCallback() {
-    // context menu doesn't work on devtool_page
+    // NOTE: context menu doesn't work on devtool_page
     // see: https://github.com/mozilla/extension-activity-monitor/issues/43
-    if (!browser.menus?.onClicked || !browser.menus?.onHidden) {
-      return;
-    }
-
-    browser.menus.onClicked.addListener(this.setFilterRange);
-    browser.menus.onHidden.addListener(this.onHiddenListener);
+    browser.menus?.onClicked.addListener(this.setFilterRange);
+    browser.menus?.onHidden.addListener(this.onHiddenListener);
     this.filterToggleBar.addEventListener('click', this);
     this.dropDownList.addEventListener('click', this);
   }
 
   disconnectedCallback() {
-    browser.menus.onClicked.removeListener(this.setFilterRange);
-    browser.menus.onHidden.removeListener(this.onHiddenListener);
+    browser.menus?.onClicked.removeListener(this.setFilterRange);
+    browser.menus?.onHidden.removeListener(this.onHiddenListener);
     this.filterToggleBar.removeEventListener('click', this);
     this.dropDownList.removeEventListener('click', this);
   }

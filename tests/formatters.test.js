@@ -86,3 +86,51 @@ test('deSerializeFilters method should return the filter object with valid filte
 
   expect(filterObject).toMatchObject(expectedFilterObject);
 });
+
+test('getJSONParseVal method should return the JSON parsed value in the requested way', () => {
+  const idsArr = '["https-everywhere@eff.org", "acbd@def.com"]';
+  const expectedIdsArr = ['https-everywhere@eff.org', 'acbd@def.com'];
+
+  const timestampObj =
+    '{"startTime": 1613902764000, "stopTime": 1613906764000}';
+
+  const expectedTimestampObj = {
+    startTime: 1613902764000,
+    stopTime: 1613906764000,
+  };
+
+  const JSONParsedArr = formatters.getJSONParseVal(idsArr, {
+    returnArray: true,
+  });
+
+  const JSONParsedObj = formatters.getJSONParseVal(timestampObj, {
+    returnObject: true,
+  });
+
+  const invalidStr = 'just another test string';
+
+  // when the requested return type is not valid for the 1st argument's value
+  const JSONParseInvalidObj = formatters.getJSONParseVal(invalidStr, {
+    returnObject: true,
+  });
+  const JSONParseInvalidBoolean = formatters.getJSONParseVal('true', {
+    returnObject: true,
+  });
+
+  // When an object is passed as the first argument and requested for an array to be returned. It will return an empty array instead.
+  const JSONParseInvalidArr = formatters.getJSONParseVal(timestampObj, {
+    returnArray: true,
+  });
+
+  // when the 2nd argument is not given, it should return the JSON parsed value if the data in the 1st argument is parsed successfully or it should return NULL.
+  const JSONParseValidDefault = formatters.getJSONParseVal(idsArr);
+  const JSONParseInvalidDefault = formatters.getJSONParseVal(invalidStr);
+
+  expect(JSONParsedArr).toStrictEqual(expectedIdsArr);
+  expect(JSONParsedObj).toMatchObject(expectedTimestampObj);
+  expect(JSONParseInvalidObj).toBeNull();
+  expect(JSONParseInvalidBoolean).toBeNull();
+  expect(JSONParseInvalidArr).toStrictEqual([]);
+  expect(JSONParseValidDefault).toStrictEqual(expectedIdsArr);
+  expect(JSONParseInvalidDefault).toBeNull();
+});
