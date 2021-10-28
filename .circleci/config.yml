@@ -10,6 +10,9 @@
 #
 version: 2.1
 
+orbs:
+  codecov: codecov/codecov@3.2.0
+
 references:
   nodejs_current: &nodejs_current "14"
   repo_path: &repo_path ~/extension-activity-monitor
@@ -57,7 +60,7 @@ jobs:
       - run: npm run prettier:check
       - run: npm run lint:check
       - run: npm run test:coverage
-      - run: npx codecov
+      - codecov/upload
       - restore_build_cache:
           suffix: << parameters.nodejs_current >>
 
