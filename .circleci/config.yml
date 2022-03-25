@@ -14,7 +14,7 @@ orbs:
   codecov: codecov/codecov@3.2.2
 
 references:
-  nodejs_current: &nodejs_current "14"
+  nodejs_current: &nodejs_current "14.19"
   repo_path: &repo_path ~/extension-activity-monitor
   defaults: &defaults
     working_directory: *repo_path
@@ -51,7 +51,7 @@ jobs:
   test:
     <<: *defaults
     docker:
-      - image: circleci/node:<< parameters.nodejs_current >>
+      - image: cimg/node:<< parameters.nodejs_current >>
     steps:
       - checkout
       - restore_build_cache:
