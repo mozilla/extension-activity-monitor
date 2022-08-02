@@ -77,9 +77,8 @@ test('show/hide logs associated with extension id that is checked/unchecked from
   document.body.innerHTML = activityLogBody;
 
   const { activityLog } = new ActivityLog();
-  const extFilterBtn = activityLog.view.extFilter.shadowRoot.querySelector(
-    '.toggle-btn'
-  );
+  const extFilterBtn =
+    activityLog.view.extFilter.shadowRoot.querySelector('.toggle-btn');
 
   activityLog.handleNewLogs(logs);
 

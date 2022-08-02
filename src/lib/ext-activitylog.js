@@ -204,15 +204,8 @@ class View {
   }
 
   setInitialFilters(updateFilter) {
-    const {
-      id,
-      viewType,
-      type,
-      name,
-      keyword,
-      timeStamp,
-      tabId,
-    } = updateFilter;
+    const { id, viewType, type, name, keyword, timeStamp, tabId } =
+      updateFilter;
 
     this.extFilter.setInitialFilter(id.exclude);
     this.viewTypeFilter.setInitialFilter(viewType.exclude);
