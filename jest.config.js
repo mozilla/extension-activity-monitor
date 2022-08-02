@@ -1,5 +1,5 @@
 module.exports = async () => {
-    return {
-        "testEnvironment": "jsdom",
-    };
+  return {
+    testEnvironment: 'jsdom',
   };
+};
