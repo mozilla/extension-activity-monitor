@@ -195,13 +195,15 @@ test('clicking on "view activity logs page" button should open the activitylog p
 
   getMonitorStatusFn.mockResolvedValue(false);
   openActivityLogPageFn.mockResolvedValue();
+  // Prevent window.close to trigger a failure due
+  // to jest teardown not expecting the jsdom window
+  // to be gone.
+  window.close = jest.fn(() => {});
 
   const popup = new Popup();
   await popup.init();
-
-  const openActivityLogBtn = popup.openActivityLogBtn;
-
-  await popup.init();
-  openActivityLogBtn.click();
+  popup.openActivityLogBtn.click();
   expect(openActivityLogPageFn).toHaveBeenCalled();
+  // Expect the browserAction popup to autoclose itself.
+  expect(window.close).toHaveBeenCalled();
 });
