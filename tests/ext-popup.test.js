@@ -188,20 +188,11 @@ test('Error is shown in popup UI while wrong parameter is passed to handleEvent'
 });
 
 test('clicking on "view activity logs page" button should open the activitylog page', async () => {
-  document.body.innerHTML = popupBody;
-
-  const getMonitorStatusFn = jest.spyOn(ExtListen, 'getMonitorStatus');
   const openActivityLogPageFn = jest.spyOn(ExtListen, 'openActivityLogPage');
-
-  getMonitorStatusFn.mockResolvedValue(false);
-  openActivityLogPageFn.mockResolvedValue();
 
   const popup = new Popup();
   await popup.init();
+  popup.openActivityLogBtn.click();
 
-  const openActivityLogBtn = popup.openActivityLogBtn;
-
-  await popup.init();
-  openActivityLogBtn.click();
   expect(openActivityLogPageFn).toHaveBeenCalled();
 });
