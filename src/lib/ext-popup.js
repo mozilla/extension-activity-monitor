@@ -1,3 +1,4 @@
+import { MONITOR_DISABLED_MSG, MONITOR_ENABLED_MSG } from './constant.js';
 import {
   getMonitorStatus,
   startMonitor,
@@ -23,7 +24,7 @@ export default class Popup {
     this.startMonitorAllBtn.setAttribute('disabled', true);
     this.stopMonitorAllBtn.removeAttribute('disabled');
 
-    this.monitorStatusText.textContent = 'Extensions are being monitored';
+    this.monitorStatusText.textContent = MONITOR_ENABLED_MSG;
     this.monitorStatusText.classList.add('success');
     this.monitorStatusText.classList.remove('failure');
   }
@@ -32,7 +33,7 @@ export default class Popup {
     this.startMonitorAllBtn.removeAttribute('disabled');
     this.stopMonitorAllBtn.setAttribute('disabled', true);
 
-    this.monitorStatusText.textContent = 'No extensions are being monitored';
+    this.monitorStatusText.textContent = MONITOR_DISABLED_MSG;
     this.monitorStatusText.classList.add('failure');
     this.monitorStatusText.classList.remove('success');
   }
@@ -44,33 +45,25 @@ export default class Popup {
       : this.renderMonitorStoppedUI();
   }
 
-  handleViewActivityLog() {
-    openActivityLogPage();
+  async handleViewActivityLog() {
+    await openActivityLogPage();
     window.close();
   }
 
   async handleEvent(event) {
     try {
-      if (event.type === 'click') {
-        switch (event.target) {
-          case this.startMonitorAllBtn:
-            await this.handleMonitor(startMonitor);
-            break;
-          case this.stopMonitorAllBtn:
-            await this.handleMonitor(stopMonitor);
-            break;
-          case this.openActivityLogBtn:
-            this.handleViewActivityLog();
-            break;
-          default:
-            throw new Error(
-              'wrong event target id found: ' + JSON.stringify(event.target.id)
-            );
-        }
-      } else {
-        throw new Error(
-          'wrong event type found: ' + JSON.stringify(event.type)
-        );
+      switch (event.target) {
+        case this.startMonitorAllBtn:
+          await this.handleMonitor(startMonitor);
+          break;
+        case this.stopMonitorAllBtn:
+          await this.handleMonitor(stopMonitor);
+          break;
+        case this.openActivityLogBtn:
+          await this.handleViewActivityLog();
+          break;
+        default:
+          break;
       }
     } catch (error) {
       this.renderErrorMsg(error.message);
@@ -78,12 +71,8 @@ export default class Popup {
   }
 
   async handleMonitor(monitorFunc) {
-    try {
-      await monitorFunc();
-      this.render();
-    } catch (error) {
-      this.renderErrorMsg(error.message);
-    }
+    await monitorFunc();
+    this.render();
   }
 
   async init() {
