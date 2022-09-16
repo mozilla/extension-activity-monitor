@@ -36,7 +36,7 @@ afterEach(() => {
   stopMonitorSpyFn.mockReset();
 });
 
-test('clicking on start monitoring button should notify that the extensions are being monitored', async () => {
+test('clicking on start monitoring button should display that the extensions are being monitored', async () => {
   document.body.innerHTML = popupBody;
 
   // no extensions are being monitored initially
@@ -68,7 +68,7 @@ test('clicking on start monitoring button should notify that the extensions are 
   expect(errorText.textContent).toBe('');
 });
 
-test('clicking on stop monitoring button should notify that the extensions are not being monitored', async () => {
+test('clicking on stop monitoring button should display that the extensions are not being monitored', async () => {
   document.body.innerHTML = popupBody;
 
   // assume, extensions are being monitored
@@ -98,7 +98,7 @@ test('clicking on stop monitoring button should notify that the extensions are n
   expect(errorText.textContent).toBe('');
 });
 
-test('clicking on "view activity logs page" button should open a new tab with extension page', async () => {
+test('clicking on "view activity logs page" button should open a new tab with activity logs page', async () => {
   document.body.innerHTML = popupBody;
 
   const EXTENSION_PAGE_URL =
