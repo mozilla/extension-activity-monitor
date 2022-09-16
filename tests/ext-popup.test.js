@@ -129,7 +129,7 @@ test('clicking on "view activity logs page" button should open a new tab with ac
   });
 });
 
-test('errors at start monitoring extensions should be displayed', async () => {
+test('error at start monitoring extensions should be displayed', async () => {
   document.body.innerHTML = popupBody;
 
   const START_MONITOR_ERROR = 'start-monitor-error';
@@ -153,7 +153,7 @@ test('errors at start monitoring extensions should be displayed', async () => {
   expect(errorText.textContent).toBe(START_MONITOR_ERROR);
 });
 
-test('errors at stop monitoring extensions should be displayed', async () => {
+test('error at stop monitoring extensions should be displayed', async () => {
   document.body.innerHTML = popupBody;
 
   const STOP_MONITOR_ERROR = 'stop-monitor-error';
@@ -177,7 +177,7 @@ test('errors at stop monitoring extensions should be displayed', async () => {
   expect(errorText.textContent).toBe(STOP_MONITOR_ERROR);
 });
 
-test('errors at the opening of activity log page should be displayed', async () => {
+test('error at the opening of activity log page should be displayed', async () => {
   document.body.innerHTML = popupBody;
 
   // assume, extensions are being monitored
