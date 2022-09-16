@@ -63,7 +63,9 @@ export default class Popup {
           await this.handleViewActivityLog();
           break;
         default:
-          break;
+          throw new Error(
+            'wrong event target id found: ' + JSON.stringify(event.target.id)
+          );
       }
     } catch (error) {
       this.renderErrorMsg(error.message);
