@@ -208,3 +208,23 @@ test('errors at the opening of activity log page should be displayed', async () 
     expect(errorText.textContent).toBe(ERROR_AT_TAB_CREATION);
   });
 });
+
+test('display error for firing event from wrong elements', async () => {
+  document.body.innerHTML = popupBody;
+
+  getMonitorStatusSpyFn.mockResolvedValue(false);
+
+  const popup = new Popup();
+  await popup.init();
+
+  const invalidEvent = {
+    type: 'click',
+    target: { id: 'invalid' },
+  };
+
+  await popup.handleEvent(invalidEvent);
+
+  expect(popup.errorMsgText.textContent).toContain(
+    JSON.stringify(invalidEvent.target.id)
+  );
+});
