@@ -101,10 +101,10 @@ test('clicking on stop monitoring button should display that the extensions are 
 test('clicking on "view activity logs page" button should open a new tab with activity logs page', async () => {
   document.body.innerHTML = popupBody;
 
-  const EXTENSION_PAGE_URL =
+  const ACTIVITY_LOG_PAGE_URL =
     'moz-extension://extension-page/activitylog/activitylog.html';
 
-  const getURL = jest.fn().mockReturnValue(EXTENSION_PAGE_URL);
+  const getURL = jest.fn().mockReturnValue(ACTIVITY_LOG_PAGE_URL);
   const create = jest.fn();
 
   window.browser = {
@@ -121,7 +121,7 @@ test('clicking on "view activity logs page" button should open a new tab with ac
   popup.openActivityLogBtn.click();
 
   expect(getURL).toHaveBeenCalled();
-  expect(create).toHaveBeenCalledWith({ url: EXTENSION_PAGE_URL });
+  expect(create).toHaveBeenCalledWith({ url: ACTIVITY_LOG_PAGE_URL });
 
   setImmediate(() => {
     // expect the browserAction popup to autoclose itself.
