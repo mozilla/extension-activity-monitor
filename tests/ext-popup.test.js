@@ -176,3 +176,35 @@ test('errors at stop monitoring extensions should be displayed', async () => {
 
   expect(errorText.textContent).toBe(STOP_MONITOR_ERROR);
 });
+
+test('errors at the opening of activity log page should be displayed', async () => {
+  document.body.innerHTML = popupBody;
+
+  // assume, extensions are being monitored
+  getMonitorStatusSpyFn.mockResolvedValueOnce(true);
+
+  const ACTIVITY_LOG_PAGE_URL =
+    'moz-extension://extension-page/activitylog/activitylog.html';
+  const ERROR_AT_TAB_CREATION = 'error-at-tab-creation';
+
+  const getURL = jest.fn().mockReturnValue(ACTIVITY_LOG_PAGE_URL);
+  const create = jest.fn().mockRejectedValue(new Error(ERROR_AT_TAB_CREATION));
+
+  window.browser = {
+    runtime: { getURL },
+    tabs: { create },
+  };
+  // prevent window.close to trigger a failure due to jest teardown not expecting the jsdom window to be gone
+  window.close = jest.fn(() => {});
+
+  const popup = new Popup();
+  await popup.init();
+
+  const errorText = popup.errorMsgText;
+
+  popup.openActivityLogBtn.click();
+
+  setImmediate(() => {
+    expect(errorText.textContent).toBe(ERROR_AT_TAB_CREATION);
+  });
+});
