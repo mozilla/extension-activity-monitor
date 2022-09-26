@@ -32,21 +32,20 @@ export default class Controller {
       this.view.pageType.textContent = loadedLogsTxt;
       this.view.contentWrapper.classList.add('load-logs');
 
-      const currentTab = await browser.tabs.getCurrent();
-      let logs;
-
       try {
-        logs = await browser.runtime.sendMessage({
+        const currentTab = await browser.tabs.getCurrent();
+
+        const logs = await browser.runtime.sendMessage({
           requestType: 'getLoadedLogs',
           requestTo: 'ext-monitor',
           requestParams: { tabId: currentTab.id },
         });
+
+        if (logs?.length) {
+          this.handleNewLogs(logs);
+        }
       } catch (error) {
         this.view.setError(error.message);
-      }
-
-      if (logs?.length) {
-        this.handleNewLogs(logs);
       }
     } else {
       this.view.clearLogBtn.addEventListener('clearlog', this);
@@ -63,7 +62,7 @@ export default class Controller {
         if (requestType === 'appendLogs') {
           this.handleNewLogs([message.log]);
         } else {
-          throw new Error(`wrong request type found - ${requestType}`);
+          this.view.setError(`wrong request type found - ${requestType}`);
         }
       });
 
@@ -73,10 +72,14 @@ export default class Controller {
         this.view.setInitialFilters(updateFilter);
       }
 
-      const existingLogs = await this.getExistingLogs();
+      try {
+        const existingLogs = await this.getExistingLogs();
 
-      if (existingLogs.length) {
-        this.handleNewLogs(existingLogs);
+        if (existingLogs.length) {
+          this.handleNewLogs(existingLogs);
+        }
+      } catch (error) {
+        this.view.setError(error.message);
       }
     }
   }
@@ -94,44 +97,41 @@ export default class Controller {
     this.view.handleNewLogs(logs);
   }
 
-  handleEvent(event) {
-    switch (event.type) {
-      case 'loadlog':
-        this.loadLogs(event.detail);
-        break;
-      case 'savelog':
-        this.saveLogs();
-        break;
-      case 'filterchange':
-        this.onFilterChange(event.detail);
-        break;
-      case 'clearlog':
-        this.handleClearLogs();
-        break;
-      default:
-        throw new Error(`wrong event type found - ${event.type}`);
+  async handleEvent(event) {
+    this.view.setError(null);
+
+    try {
+      switch (event.type) {
+        case 'loadlog':
+          await this.loadLogs(event.detail);
+          break;
+        case 'savelog':
+          await this.saveLogs();
+          break;
+        case 'filterchange':
+          this.onFilterChange(event.detail);
+          break;
+        case 'clearlog':
+          await this.handleClearLogs();
+          break;
+        default:
+          throw new Error(`wrong event type found - ${event.type}`);
+      }
+    } catch (error) {
+      this.view.setError(error.message);
     }
   }
 
   async loadLogs(file) {
-    try {
-      await browser.runtime.sendMessage({
-        requestTo: 'ext-monitor',
-        requestType: 'loadLogs',
-        requestParams: { file },
-      });
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await browser.runtime.sendMessage({
+      requestTo: 'ext-monitor',
+      requestType: 'loadLogs',
+      requestParams: { file },
+    });
   }
 
   async saveLogs() {
-    try {
-      await save.saveAsJSON();
-      this.view.setError(null);
-    } catch (error) {
-      this.view.setError(error.message);
-    }
+    await save.saveAsJSON();
   }
 
   onFilterChange(filterDetail) {
@@ -160,8 +160,8 @@ export default class Controller {
     return this.model.matchLogWithFilterObj(log);
   }
 
-  handleClearLogs() {
-    this.clearBackgroundLogs();
+  async handleClearLogs() {
+    await this.clearBackgroundLogs();
     this.model.clearLogs();
     this.view.clearTable();
     this.view.updateLogCounter({ visibleRows: 0, totalLogs: 0 });

@@ -1,6 +1,8 @@
 /* eslint no-unsanitized/property: "off" */
 import fs from 'fs';
 import path from 'path';
+import { setImmediate } from 'timers';
+
 import ActivityLog from '../src/lib/ext-activitylog';
 import { FilterOption } from '../src/lib/web-component/filter-option/filter-option-element';
 import { LogView } from '../src/lib/web-component/log-view/log-view-element';
@@ -288,11 +290,13 @@ test('clearing logs from activitylog page', async () => {
   expect(logDetailWrapper.hidden).toBe(false);
 
   clearLogBtn.click();
-  expect(logDetailWrapper.hidden).toBe(true);
 
+  setImmediate(() => {
+    expect(logDetailWrapper.hidden).toBe(true);
+    expect(activityLog.model.logs).toMatchObject([]);
+    expect(getTableRows().length).toBe(0);
+  });
   expect(clearBackgroundLogsFn).toHaveBeenCalled();
-  expect(activityLog.model.logs).toMatchObject([]);
-  expect(getTableRows().length).toBe(0);
 });
 
 test('timestamp is formatted and rendered correctly', () => {
