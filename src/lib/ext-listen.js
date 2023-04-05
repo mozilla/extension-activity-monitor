@@ -1,9 +1,3 @@
-export function getActivityLogPageURL(searchParams) {
-  return browser.runtime.getURL(
-    `/activitylog/activitylog.html${searchParams ? `?${searchParams}` : ''}`
-  );
-}
-
 export async function getMonitorStatus() {
   const { active } = await browser.runtime.sendMessage({
     requestType: 'getMonitorStatus',
@@ -26,8 +20,12 @@ export function stopMonitor() {
   });
 }
 
-export function openActivityLogPage() {
-  browser.tabs.create({
-    url: getActivityLogPageURL(),
-  });
+export async function openActivityLogPage(searchParams) {
+  const url = browser.runtime.getURL(
+    `/activitylog/activitylog.html${searchParams ? `?${searchParams}` : ''}`
+  );
+
+  const tab = await browser.tabs.create({ url });
+
+  return tab;
 }

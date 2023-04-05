@@ -47,17 +47,3 @@ test('startMonitor and stopMonitor should have their respective requestType', as
     requestType: 'stopMonitor',
   });
 });
-
-test('openActivityLogPage should create tab with ActivityLogPageURL', async () => {
-  const getURL = jest.fn();
-  const create = jest.fn();
-
-  window.browser = {
-    runtime: { getURL },
-    tabs: { create },
-  };
-
-  ExtListen.openActivityLogPage();
-  expect(create).toHaveBeenCalled();
-  expect(getURL).toHaveBeenCalled();
-});
